@@ -29,7 +29,7 @@ class StockTransferOrder(models.Model):
     _check_company_auto = True
 
     def _get_default_stage_id(self):
-        return self.env['stock.transfer.order.stage'].search([('transfer_order_type_ids','=',self.transfer_order_type_id.id)], order='sequence', limit=1)
+        return self.env['stock.transfer.order.stage'].search([('transfer_order_type_ids','=',self.transfer_order_type_id.id),('stage_category','=','draft')], order='sequence', limit=1)
     
     def _get_type_id(self):
         return self.env['stock.transfer.order.type'].search([], limit=1)
@@ -47,10 +47,6 @@ class StockTransferOrder(models.Model):
     code = fields.Char(related='transfer_order_type_id.code')
     sequence_code = fields.Char(string="Sequence Code")
     
-    @api.onchange('transfer_order_type_id')
-    def _check_code(self):
-        self.sequence_code = self.code    
-    
     transfer_order_category_id = fields.Many2one('stock.transfer.order.category', string='Transfer Category', index=True, readonly=True, copy=False, domain="[('transfer_order_type_id','=',transfer_order_type_id)]",default=_get_default_category_id)
     order_stage_ids = fields.One2many('stock.transfer.order.stage.line', 'stock_order_transfer_id', string='Stage', copy=True)
         
@@ -61,8 +57,8 @@ class StockTransferOrder(models.Model):
     
     partner_id = fields.Many2one('res.partner', 'Contractor',check_company=True, readonly=True, )
     
-    #stage_id = fields.Many2one('stock.transfer.order.stage', string='Stage', compute='_compute_stage_id', store=True, readonly=False, ondelete='restrict', tracking=True, index=True, default=_get_default_stage_id, copy=False)
-    stage_id = fields.Many2one('stock.transfer.order.stage', string='Stage', store=True, readonly=False, ondelete='restrict', tracking=True, index=True, copy=False, default=_get_default_stage_id)
+    stage_id = fields.Many2one('stock.transfer.order.stage', string='Stage', compute='_compute_stage_id', store=True, readonly=False, ondelete='restrict', tracking=True, index=True, default=_get_default_stage_id, copy=False)
+    #stage_id = fields.Many2one('stock.transfer.order.stage', string='Stage', store=True, readonly=False, ondelete='restrict', tracking=True, index=True, copy=False, default=_get_default_stage_id)
     picking_state = fields.Char(string='Picking State', compute='_compute_picking_state',
         store=True, copy=False, readonly=True,)
     
@@ -74,7 +70,7 @@ class StockTransferOrder(models.Model):
     stage_code = fields.Char(related='stage_id.stage_code')
     
     #exceptions or transactions
-    transfer_exception_type_id = fields.Many2one("stock.transfer.exception.type", string="Exception Type", domain="[('transfer_order_type_id','=',transfer_order_type_id)]")
+    transfer_exception_type_id = fields.Many2one("stock.transfer.exception.type", string="Exception Type")
     transaction_code = fields.Char(related='transfer_exception_type_id.code', string='T Code')
     txn_stage_id = fields.Many2one('stock.transfer.order.stage', related='transfer_exception_type_id.stage_id', string='TXN Stage')
     
@@ -209,11 +205,13 @@ class StockTransferOrder(models.Model):
                 if not line.location_src_id:
                     line.location_src_id = order.location_dest_id.id
                     
-                
-        
-    @api.onchange('transfer_order_category_id')
+    @api.onchange('transfer_order_type_id')
+    def _onchange_transfer_type_id(self):
+        self.stage_id = self.env['stock.transfer.order.stage'].search([('transfer_order_type_ids','=',self.transfer_order_type_id.id),('stage_category','=','draft')], order='sequence',limit=1).id
+        self.sequence_code = self.code
+   
+    #@api.onchange('transfer_order_category_id')
     def _onchange_transfer_order_category_id(self):
-        self.stage_id = self.env['stock.transfer.order.stage'].search([('transfer_order_category_ids','=',self.transfer_order_category_id.id)], limit=1).id
         lines_data = []
         txn_ids = self.env['stock.transfer.exception.type'].search([('transfer_order_type_id','=',self.transfer_order_type_id.id),('transfer_order_category_id','=',self.transfer_order_category_id.id),('stage_auto_apply','=',True)])
         
@@ -231,6 +229,31 @@ class StockTransferOrder(models.Model):
         self.write({
             'stock_transfer_txn_line':lines_data,
         })
+        
+    @api.model
+    def create(self, vals):            
+        vals['name'] = (
+        vals.get('code') or
+        self.env.context.get('default_code') or
+        self.env['ir.sequence'].with_company(vals.get('company_id')).next_by_code('stock.transfer.order') or
+         'New'
+        )
+        sequence = self.env['ir.sequence'].search([('prefix','=', vals['sequence_code'])
+        ], limit=1)
+        vals['sequence_id'] = sequence.id
+        vals['name'] = sequence.next_by_id()
+        transfer_order = super(StockTransferOrder, self).create(vals)        
+        return transfer_order
+
+
+    def unlink(self):
+        if any(order.stage_category not in ('draft', 'cancel') for order in self):
+            raise UserError(_('You can only delete draft requisitions.'))
+        # Draft requisitions could have some requisition lines.
+        self.mapped('stock.transfer.order.line').unlink()
+        self.mapped('stock.transfer.return.line').unlink()
+        self.mapped('stock.transfer.txn.line').unlink()
+        return super(StockTransferOrder, self).unlink()
     
     def write(self,vals):
         stage_id = self.env['stock.transfer.order.stage'].browse(vals.get('stage_id'))
@@ -674,60 +697,6 @@ class StockTransferOrder(models.Model):
                 days = order.transfer_order_category_id.default_return_validity
                 dt = fields.Date.to_string(order.date_delivered + timedelta(days))
         self.return_deadline = dt
-        
-    @api.model
-    def create(self, vals):            
-        vals['name'] = (
-        vals.get('code') or
-        self.env.context.get('default_code') or
-        self.env['ir.sequence'].with_company(vals.get('company_id')).next_by_code('stock.transfer.order') or
-         'New'
-        )
-        sequence = self.env['ir.sequence'].search([('prefix','=', vals['sequence_code'])
-        ], limit=1)
-        vals['sequence_id'] = sequence.id
-        vals['name'] = sequence.next_by_id()
-        transfer_order = super(StockTransferOrder, self).create(vals)
-        
-        
-        return transfer_order
-
-
-    def unlink(self):
-        if any(order.stage_category not in ('draft', 'cancel') for order in self):
-            raise UserError(_('You can only delete draft requisitions.'))
-        # Draft requisitions could have some requisition lines.
-        self.mapped('stock.transfer.order.line').unlink()
-        self.mapped('stock.transfer.return.line').unlink()
-        self.mapped('stock.transfer.txn.line').unlink()
-        return super(StockTransferOrder, self).unlink()
-    
-        
-    """
-    @api.model
-    def create(self, vals):
-        vals['code'] = (
-            vals.get('code') or
-            self.env.context.get('default_code') or
-            self.env['ir.sequence'].with_company(vals.get('company_id')).next_by_code('stock.transfer.order') or
-            'New'
-        )
-        result = super(StockTransferOrder, self).create(vals)       
-        return result
-        
-    @api.model
-    def create1(self, vals):
-        if 'company_id' in vals:
-            self = self.with_company(vals['company_id'])
-        if vals.get('name', _('New')) == _('New'):
-            seq_date = None
-            if 'refill_date' in vals:
-                seq_date = fields.Datetime.context_timestamp(self, fields.Datetime.to_datetime(vals['date_order']))
-            vals['name'] = self.env['ir.sequence'].next_by_code('stock.transfer.order', sequence_date=seq_date) or _('New')
-        result = super(StockTransferOrder, self).create(vals)       
-        return result
-        
-        """ 
     
     def action_draft(self):
         for order in self.sudo():
@@ -797,7 +766,8 @@ class StockTransferOrder(models.Model):
                     raise UserError(_("You are not authorize to submit requisition in category '%s'.", self.transfer_order_category_id.name))
             if not order.stock_transfer_order_line:
                 raise UserError(_("You cannot submit requisition '%s' because there is no product line.", self.name))
-        self.sudo().process_txn_stage()
+        #self.sudo().process_txn_stage()
+        self._compute_order_stages()
         self.update({
             'stage_id' : self.next_stage_id.id,
         })
@@ -1261,7 +1231,7 @@ class StockTransferTXNLine(models.Model):
     stage_id = fields.Many2one('stock.transfer.order.stage',related='stock_transfer_order_id.stage_id')
     transfer_order_type_id = fields.Many2one(related='stock_transfer_order_id.transfer_order_type_id', readonly=True, store=True)
     sequence = fields.Integer(default=1, compute='_compute_sequence')
-    transfer_exception_type_id = fields.Many2one("stock.transfer.exception.type", string="Exception Type", domain="[('transfer_order_type_id','=',transfer_order_type_id),('transfer_order_category_id','=',parent.transfer_order_category_id),('apply_stage_id','=',stage_id)]")
+    transfer_exception_type_id = fields.Many2one("stock.transfer.exception.type", string="Exception Type")
     txn_stage_id = fields.Many2one('stock.transfer.order.stage', related='transfer_exception_type_id.stage_id')
     txn_action = fields.Selection([
         ('open', 'Open'),
