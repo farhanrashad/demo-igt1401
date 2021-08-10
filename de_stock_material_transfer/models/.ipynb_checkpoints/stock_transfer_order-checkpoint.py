@@ -5,6 +5,22 @@ from odoo.exceptions import UserError, AccessError, ValidationError
 from odoo.tools.safe_eval import safe_eval
 from odoo.tools.misc import format_date
 
+
+class transferTaskStage(models.Model):
+    _name = 'stock.transfer.order.stage.line'
+    _description = 'Order Stages'
+    _order = 'sequence'
+    
+    stock_order_transfer_id = fields.Many2one('stock.transfer.order', string='Transfer Order', index=True, required=True, ondelete='cascade')
+    
+    stage_id = fields.Many2one('stock.transfer.order.stage', string='Stage', readonly=False, ondelete='restrict', tracking=True, index=True, copy=False)
+    sequence = fields.Integer(string='Sequence')
+    next_stage_id = fields.Many2one('stock.transfer.order.stage', string='Next Stage', readonly=False, ondelete='restrict', tracking=True, index=True, copy=False)
+    prv_stage_id = fields.Many2one('stock.transfer.order.stage', string='Previous Stage', readonly=False, ondelete='restrict', tracking=True, index=True, copy=False)
+    
+    transfer_exception_type_id = fields.Many2one("stock.transfer.exception.type", string="Exception Type", )
+    
+            
 class StockTransferOrder(models.Model):
     _name = 'stock.transfer.order'
     _inherit = ['mail.thread', 'mail.activity.mixin']
@@ -13,7 +29,7 @@ class StockTransferOrder(models.Model):
     _check_company_auto = True
 
     def _get_default_stage_id(self):
-        return self.env['stock.transfer.order.stage'].search([], order='sequence', limit=1)
+        return self.env['stock.transfer.order.stage'].search([('transfer_order_type_ids','=',self.transfer_order_type_id.id)], order='sequence', limit=1)
     
     def _get_type_id(self):
         return self.env['stock.transfer.order.type'].search([], limit=1)
@@ -36,6 +52,8 @@ class StockTransferOrder(models.Model):
         self.sequence_code = self.code    
     
     transfer_order_category_id = fields.Many2one('stock.transfer.order.category', string='Transfer Category', index=True, readonly=True, copy=False, domain="[('transfer_order_type_id','=',transfer_order_type_id)]",default=_get_default_category_id)
+    order_stage_ids = fields.One2many('stock.transfer.order.stage.line', 'stock_order_transfer_id', string='Stage', copy=True)
+        
     action_type = fields.Selection(related='transfer_order_category_id.action_type')
     disallow_staging = fields.Boolean(related='transfer_order_type_id.disallow_staging')
     filter_products = fields.Boolean(related='transfer_order_category_id.filter_products')
@@ -43,14 +61,13 @@ class StockTransferOrder(models.Model):
     
     partner_id = fields.Many2one('res.partner', 'Contractor',check_company=True, readonly=True, )
     
-    stage_id = fields.Many2one('stock.transfer.order.stage', string='Stage', compute='_compute_stage_id',
-        store=True, readonly=False, ondelete='restrict', tracking=True, index=True,
-        default=_get_default_stage_id, copy=False)
+    #stage_id = fields.Many2one('stock.transfer.order.stage', string='Stage', compute='_compute_stage_id', store=True, readonly=False, ondelete='restrict', tracking=True, index=True, default=_get_default_stage_id, copy=False)
+    stage_id = fields.Many2one('stock.transfer.order.stage', string='Stage', store=True, readonly=False, ondelete='restrict', tracking=True, index=True, copy=False, default=_get_default_stage_id)
     picking_state = fields.Char(string='Picking State', compute='_compute_picking_state',
         store=True, copy=False, readonly=True,)
     
-    next_stage_id = fields.Many2one('stock.transfer.order.stage',compute='_compute_next_stage')
-    prv_stage_id = fields.Many2one('stock.transfer.order.stage',related='stage_id.prv_stage_id')
+    next_stage_id = fields.Many2one('stock.transfer.order.stage',compute='_compute_order_stage')
+    prv_stage_id = fields.Many2one('stock.transfer.order.stage',compute='_compute_order_stage')
     stage_category = fields.Selection(related='stage_id.stage_category')
     next_stage_category = fields.Selection(related='next_stage_id.stage_category', string='Next Stage Category')
     prv_stage_category = fields.Selection(related='next_stage_id.stage_category', string='Previous Stage Category')
@@ -216,42 +233,76 @@ class StockTransferOrder(models.Model):
         })
     
     def write(self,vals):
-        #if vals.get('stage_id'):
         stage_id = self.env['stock.transfer.order.stage'].browse(vals.get('stage_id'))
-            #txn_ids = self.env['stock.transfer.exception.type'].search([('apply_stage_id','=',vals.get('stage_id')),('stage_auto_apply','=',True)])
         txn_ids = self.env['stock.transfer.exception.type'].search([('apply_stage_id','=',self.stage_id.id),('stage_auto_apply','=',True)])
-        #for txn in txn_ids:
-            #txn_count = self.env['stock.transfer.txn.line'].search_count([('stock_transfer_order_id','=',self.id),('transfer_exception_type_id','=',txn.id)])
-        #for line in self.stock_transfer_txn_line:
-        #if not txn_count:
-         #   self.env['stock.transfer.txn.line'].create({
-          #      'stock_transfer_order_id': self.id,
-           #     'transfer_exception_type_id': txn.id,
-            #})
-
-        # Create transactions lines if necessary
-        #txn_lines = []
-        # Create transaction line
-        #txn_line_values = {} 
-        #for txn in txn_ids:
-        #    txn_line_values = {
-        #        'stock_transfer_order_id': self.id,
-        #       'transfer_exception_type_id': txn.id,
-        #    }
-            #txn_lines.append((0, 0, txn_line_values))
-        #self.stock_transfer_txn_line = txn_lines
         result = super(StockTransferOrder, self).write(vals)
+        #if 'stage_id' in vals:
+        #raise UserError(_("stage =  '%s'.", self.stage_id.stage_category))
+        if self.stage_id.stage_category == 'draft':
+            if self.order_stage_ids:
+                self.order_stage_ids.unlink()
+            self._compute_order_stages()
         return result
     
-    #@api.onchange('stage_id')
-    #def _onchange_stage_id(self):
-    #    txn_ids = self.env['stock.transfer.exception.type'].search([('apply_stage_id','=',self.stage_id.id),('stage_auto_apply','=',True)])
-     #   for txn in txn_ids:
-      #      self.env['stock.transfer.txn.line'].create({
-       #         'stock_transfer_order_id': self.id,
-        #        'transfer_exception_type_id': txn.id,
-         #   })
-            
+    def _compute_order_stages(self):
+        vals = {}
+        lines_data = []
+        next_stage = prv_stage = False
+        for order in self:
+            stage_ids = self.env['stock.transfer.order.stage'].search(['|', ('transfer_order_category_ids', '=', order.transfer_order_category_id.id),('transfer_order_type_ids','=',order.transfer_order_type_id.id)])
+            for stage in stage_ids:
+                vals = {
+                    'stock_order_transfer_id': order.id,
+                    'stage_id': stage.id,
+                }
+                lines_data.append({
+                    'stock_order_transfer_id': order.id,
+                    'stage_id': stage.id, 
+                    'sequence': stage.sequence,
+                })
+            for txn in order.stock_transfer_txn_line:
+                lines_data.append({
+                    'stock_order_transfer_id': order.id,
+                    'stage_id': txn.transfer_exception_type_id.stage_id.id, 
+                    'sequence': txn.transfer_exception_type_id.stage_id.sequence,
+                    'transfer_exception_type_id': txn.transfer_exception_type_id.id,
+                })
+            order.order_stage_ids.create(lines_data)
+            #order.order_stage_ids = lines_data
+            #===================================
+            #++++++++Assign Next Stage++++++++++++++
+            stages = self.env['stock.transfer.order.stage.line'].search([('stock_order_transfer_id','=', order.id)], order="sequence desc")
+            for stage in stages:
+                stage.update({
+                    'next_stage_id': next_stage,
+                })
+                if stage.transfer_exception_type_id.next_stage_id.id:
+                    next_stage = stage.transfer_exception_type_id.next_stage_id.id
+                else:
+                    next_stage = stage.stage_id.id
+            #++++++++++++++++++++++++++++++++++++++++
+            #+++++++++++Assign Previous Stage++++++++++
+            stages = self.env['stock.transfer.order.stage.line'].search([('stock_order_transfer_id','=', order.id)], order="sequence asc")
+            for stage in stages:
+                stage.update({
+                    'prv_stage_id': prv_stage,
+                })
+                if stage.transfer_exception_type_id.prv_stage_id.id:
+                    prv_stage = stage.transfer_exception_type_id.next_stage_id.id
+                else:
+                    prv_stage = stage.stage_id.id
+            #for order in order.order_stage_ids.sorted(key=lambda r: r.sequence):
+                
+    
+    
+    def _compute_order_stage(self):
+        for order in self:
+            next_stage = prv_stage = False
+            for stage in order.order_stage_ids.filtered(lambda t: t.stage_id.id == order.stage_id.id):
+                    next_stage = stage.next_stage_id.id
+                    prv_stage = stage.prv_stage_id.id
+            order.next_stage_id = next_stage
+            order.prv_stage_id = prv_stage
     
     #@api.depends('stage_id','txn_stage_id')
     @api.depends('stage_id','curr_txn_stage_id')

@@ -70,9 +70,9 @@
                     <button name="action_draft" type="object" string="Set to Draft" attrs="{'invisible': [('stage_category', 'not in', ['cancel'])]}"/>
                     
                     <field name="stage_id" widget="statusbar" domain="[('transfer_order_type_ids', '=', transfer_order_type_id)]" invisible="1"/>
-                    
-                    <field name="stage_id" widget="statusbar" domain="[('transfer_order_type_ids', '=', transfer_order_type_id)]" attrs="{'invisible':[('disallow_staging','=',False)]}"/>
-                    <field name="stage_id" widget="statusbar" domain="['|', ('transfer_order_category_ids', '=', transfer_order_category_id),('id','in',txn_stage_ids)]" attrs="{'invisible':[('disallow_staging','!=',False)]}"/>
+                    <!--
+                    <field name="stage_id" widget="statusbar" domain="[('transfer_order_type_ids', '=', transfer_order_type_id)]" attrs="{'invisible':[('disallow_staging','=',False)]}"/> -->
+                    <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}" domain="['|', ('transfer_order_category_ids', '=', transfer_order_category_id),('transfer_order_type_ids','=',transfer_order_type_id)]" />
 
 
                 </header>
@@ -257,6 +257,17 @@
                                 <group>
                                 </group>
                             </group>
+                        </page>
+                        <page string="Worfklow" id="workflow" groups="base.group_erp_manager">
+                            <field name="order_stage_ids" groups="base.group_erp_manager">
+                                <tree editable="bottom">
+                                    <field name="sequence" readonly="1"/>
+                                    <field name="transfer_exception_type_id" readonly="1"/>
+                                    <field name="stage_id" required="1" options="{'no_create': True,'no_open':True}" domain="[('transfer_order_category_ids','=',parent.transfer_order_category_id)]"/>
+                                    <field name="next_stage_id" options="{'no_create': True,'no_open':True}" domain="[('transfer_order_category_ids','=',parent.transfer_order_category_id)]"/>
+                                    <field name="prv_stage_id" options="{'no_create': True,'no_open':True}" domain="[('transfer_order_category_ids','=',parent.transfer_order_category_id)]"/>
+                                </tree>
+                            </field>
                         </page>
                         <page string="Transactions" name="transactions">
                             <field name="stock_transfer_txn_line" widget="one2many_list" >

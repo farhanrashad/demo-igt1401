@@ -19,7 +19,10 @@ class TransferOrderException(models.Model):
     transfer_order_type_id = fields.Many2one('stock.transfer.order.type', string='Transfer Type', )
     transfer_order_category_id = fields.Many2one('stock.transfer.order.category', string='Transfer Category', domain="[('transfer_order_type_id','=',transfer_order_type_id)]")
 
-    stage_id = fields.Many2one('stock.transfer.order.stage', domain="[('transfer_order_type_ids','=',transfer_order_type_id)]", string='Add Stage')
+    stage_id = fields.Many2one('stock.transfer.order.stage', string='Add Stage')
+    next_stage_id = fields.Many2one('stock.transfer.order.stage', string='Next Stage')
+    prv_stage_id = fields.Many2one('stock.transfer.order.stage', string='Previous Stage')
+
     apply_stage_id = fields.Many2one('stock.transfer.order.stage', domain="[('transfer_order_type_ids','=',transfer_order_type_id)]", string='Apply On')
     exec_stage_id = fields.Many2one('stock.transfer.order.stage', domain="[('transfer_order_type_ids','=',transfer_order_type_id)]", string='Execute On')
     stage_auto_apply = fields.Boolean(string='Stage Auto Apply')
