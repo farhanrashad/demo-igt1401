@@ -70,9 +70,9 @@ class StockTransferOrder(models.Model):
     stage_code = fields.Char(related='stage_id.stage_code')
     
     #exceptions or transactions
-    transfer_exception_type_id = fields.Many2one("stock.transfer.exception.type", string="Exception Type")
-    transaction_code = fields.Char(related='transfer_exception_type_id.code', string='T Code')
-    txn_stage_id = fields.Many2one('stock.transfer.order.stage', related='transfer_exception_type_id.stage_id', string='TXN Stage')
+    transfer_exception_type_ids = fields.Many2many("stock.transfer.exception.type", string="Exception Type")
+    #transaction_code = fields.Char(related='transfer_exception_type_id.code', string='T Code')
+    #txn_stage_id = fields.Many2one('stock.transfer.order.stage', related='transfer_exception_type_id.stage_id', string='TXN Stage')
     
     #exception with multiple lines
     stock_transfer_txn_line = fields.One2many('stock.transfer.txn.line', 'stock_transfer_order_id', string='Transaction Line', copy=False, auto_join=True,)
@@ -229,7 +229,20 @@ class StockTransferOrder(models.Model):
         self.write({
             'stock_transfer_txn_line':lines_data,
         })
-        
+    
+    @api.onchange('transfer_exception_type_ids')
+    def _transfer_exception_type_onchange(self):
+        for order in self:
+            if order.stage_id.stage_category == 'draft':
+                if order.stock_transfer_order_line:
+                    order.stock_transfer_order_line.unlink()
+                for txn in order.transfer_exception_type_ids:
+                    vals = {
+                        'transfer_exception_type_id': txn.id,
+                        'txn_action': 'open',
+                    }
+            
+            
     @api.model
     def create(self, vals):            
         vals['name'] = (
@@ -269,7 +282,7 @@ class StockTransferOrder(models.Model):
     
     def _compute_order_stages(self):
         vals = {}
-        lines_data = []
+        stages_list = []
         next_stage = prv_stage = False
         for order in self:
             stage_ids = self.env['stock.transfer.order.stage'].search(['|', ('transfer_order_category_ids', '=', order.transfer_order_category_id.id),('transfer_order_type_ids','=',order.transfer_order_type_id.id)])
@@ -278,19 +291,22 @@ class StockTransferOrder(models.Model):
                     'stock_order_transfer_id': order.id,
                     'stage_id': stage.id,
                 }
-                lines_data.append({
+                stages_list.append({
                     'stock_order_transfer_id': order.id,
                     'stage_id': stage.id, 
                     'sequence': stage.sequence,
                 })
+            #order.order_stage_ids.create(lines_data)
             for txn in order.stock_transfer_txn_line:
-                lines_data.append({
+                #if not self.env['stock.transfer.order.stage.line'].search([('stage_id','=',txn.transfer_exception_type_id.stage_id.id)]):
+                stages_list.append({
                     'stock_order_transfer_id': order.id,
                     'stage_id': txn.transfer_exception_type_id.stage_id.id, 
                     'sequence': txn.transfer_exception_type_id.stage_id.sequence,
                     'transfer_exception_type_id': txn.transfer_exception_type_id.id,
                 })
-            order.order_stage_ids.create(lines_data)
+            
+            order.order_stage_ids.create(stages_list)
             #order.order_stage_ids = lines_data
             #===================================
             #++++++++Assign Next Stage++++++++++++++
@@ -1231,7 +1247,7 @@ class StockTransferTXNLine(models.Model):
     stage_id = fields.Many2one('stock.transfer.order.stage',related='stock_transfer_order_id.stage_id')
     transfer_order_type_id = fields.Many2one(related='stock_transfer_order_id.transfer_order_type_id', readonly=True, store=True)
     sequence = fields.Integer(default=1, compute='_compute_sequence')
-    transfer_exception_type_id = fields.Many2one("stock.transfer.exception.type", string="Exception Type")
+    transfer_exception_type_id = fields.Many2one("stock.transfer.exception.type", string="Exceptions")
     txn_stage_id = fields.Many2one('stock.transfer.order.stage', related='transfer_exception_type_id.stage_id')
     txn_action = fields.Selection([
         ('open', 'Open'),
