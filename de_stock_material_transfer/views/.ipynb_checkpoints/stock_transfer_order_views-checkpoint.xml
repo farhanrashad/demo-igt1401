@@ -72,7 +72,7 @@
                     <field name="stage_id" widget="statusbar" domain="[('transfer_order_type_ids', '=', transfer_order_type_id)]" invisible="1"/>
                     <!--
                     <field name="stage_id" widget="statusbar" domain="[('transfer_order_type_ids', '=', transfer_order_type_id)]" attrs="{'invisible':[('disallow_staging','=',False)]}"/> -->
-                    <field name="stage_id" widget="statusbar" options="{'clickable': '0', 'fold_field': 'fold'}" domain="['|', ('transfer_order_category_ids', '=', transfer_order_category_id),('transfer_order_type_ids','=',transfer_order_type_id)]" />
+                    <field name="stage_id" widget="statusbar" options="{'clickable': '0', 'fold_field': 'fold'}" domain="[('transfer_order_type_ids','=',transfer_order_type_id)]" />
 
 
                 </header>
@@ -133,7 +133,7 @@
 
                         </group>
                         <group name="transfer_order_details">
-                            <field name="transfer_order_type_id" options="{'no_create':True, 'no_open':True}" attrs="{'readonly': [('stage_category', '!=', 'draft')]}"/>
+                            <field name="transfer_order_type_id" options="{'no_create':True, 'no_open':True}" invisible="1"/>
                             <field name="transfer_order_category_id" options="{'no_create':True, 'no_open':True}" required="1" attrs="{'readonly': [('stage_category', '!=', 'draft')]}"/>
                             <field name="action_type" invisible="1" />
                             <field name="code" invisible="1" />
