@@ -70,9 +70,9 @@
                     <button name="action_draft" type="object" string="Set to Draft" attrs="{'invisible': [('stage_category', 'not in', ['cancel'])]}"/>
                     
                     <field name="stage_id" widget="statusbar" domain="[('transfer_order_type_ids', '=', transfer_order_type_id)]" invisible="1"/>
-                    
-                    <field name="stage_id" widget="statusbar" domain="[('transfer_order_type_ids', '=', transfer_order_type_id)]" attrs="{'invisible':[('disallow_staging','=',False)]}"/>
-                    <field name="stage_id" widget="statusbar" domain="['|', ('transfer_order_category_ids', '=', transfer_order_category_id),('id','in',txn_stage_ids)]" attrs="{'invisible':[('disallow_staging','!=',False)]}"/>
+                    <!--
+                    <field name="stage_id" widget="statusbar" domain="[('transfer_order_type_ids', '=', transfer_order_type_id)]" attrs="{'invisible':[('disallow_staging','=',False)]}"/> -->
+                    <field name="stage_id" widget="statusbar" options="{'clickable': '0', 'fold_field': 'fold'}" domain="['|', ('transfer_order_category_ids', '=', transfer_order_category_id),('transfer_order_type_ids','=',transfer_order_type_id)]" />
 
 
                 </header>
@@ -81,7 +81,8 @@
                     <field name="disallow_staging" invisible="1" />
                     <field name="next_stage_category" invisible="1" />
                     <field name="next_stage_id" invisible="1" />
-                     <field name="txn_stage_id" invisible="1" />
+                    <!--
+                     <field name="txn_stage_id" invisible="1" /> -->
                     <field name="curr_txn_stage_id" invisible="1" />
                     
                     <field name="health_check_form" invisible="1" />
@@ -145,9 +146,14 @@
                             <field name="curr_txn_type_id" string="Transaction" invisible="1"/>
                             <field name="txn_stage_ids" string="TXN Stages" invisible="1" widget="many2many_tags"/>
                             <field name="curr_txn_stage_id" invisible="1" />
-                            
-                            <field name="transfer_exception_type_id" string="Transaction" invisible="0"/>
+                            <div class="o_row no-gutters d-flex">
+                                <div class="o_row">
+                                    <field name="transfer_exception_type_ids" string="Transaction" nolabel="1" invisible="0" widget="many2many_checkboxes" domain="[ ('transfer_order_category_ids', '=', transfer_order_category_id)]" />
+                                </div>
+                            </div>
+                            <!--
                             <field name="transaction_code" string="T Code" invisible="1"/>
+-->
                             <field name="picking_ids" widget="many2many_tags" invisible="1"/>
                             <field name="picking_state" invisible="1"/>
 
@@ -258,13 +264,24 @@
                                 </group>
                             </group>
                         </page>
+                        <page string="Worfklow" id="workflow" groups="base.group_erp_manager">
+                            <field name="order_stage_ids" groups="base.group_erp_manager">
+                                <tree editable="bottom">
+                                    <field name="sequence" readonly="1"/>
+                                    <field name="transfer_exception_type_id" readonly="1"/>
+                                    <field name="stage_id" required="1" options="{'no_create': True,'no_open':True}" domain="[('transfer_order_category_ids','=',parent.transfer_order_category_id)]"/>
+                                    <field name="next_stage_id" options="{'no_create': True,'no_open':True}" domain="[('transfer_order_category_ids','=',parent.transfer_order_category_id)]"/>
+                                    <field name="prv_stage_id" options="{'no_create': True,'no_open':True}" domain="[('transfer_order_category_ids','=',parent.transfer_order_category_id)]"/>
+                                </tree>
+                            </field>
+                        </page>
                         <page string="Transactions" name="transactions">
                             <field name="stock_transfer_txn_line" widget="one2many_list" >
                                 <tree string="TXN Lines" editable="bottom">
                                     <field name="sequence" widget="handle" invisible="1"/>
                                     <field name="transfer_order_type_id" invisible="1"/>
                                     <field name="transfer_exception_type_id" attrs="{'readonly':[('txn_action','=','apply')],'required':[('txn_action','!=','apply')]}"/>
-                                    <field name="txn_stage_id" />
+                                    <!--<field name="txn_stage_id" /> -->
                                     <field name="txn_action" readonly="1"/>
                                     <field name="stage_id" invisible="1"/>
                                 </tree>

@@ -33,6 +33,7 @@ class StockTransferOrderCategory(models.Model):
     code = fields.Char(string='Code', required=True, size=2)
     active = fields.Boolean('Active', default=True, help="If unchecked, it will allow you to hide the transfer category without removing it.")
     transfer_order_type_id = fields.Many2one('stock.transfer.order.type', string="Transfer Type", required=True)
+    
     action_type = fields.Selection([
         ('normal', 'Normal'),
         ('returnable', 'Returnable'),
@@ -82,11 +83,6 @@ class StockTransferOrderCategory(models.Model):
     partner_category_ids = fields.Many2many('res.partner.category', 'res_partner_category_rel', column1='partner_id', column2='category_id', string='Partner Tags')
     transporter_category_ids = fields.Many2many('res.partner.category', 'res_transporter_category_rel', column1='transporter_id', column2='category_id', string='Transporter Tags')
 
-
-
-
-    
-
     _sql_constraints = [
         ('name_uniq', 'unique (name)', "type name already exists!"),
     ]
@@ -95,3 +91,5 @@ class StockTransferOrderCategory(models.Model):
     def _onchange_picking_type(self):
         self.location_src_id = self.picking_type_id.default_location_src_id
         self.location_dest_id = self.picking_type_id.default_location_dest_id
+        
+        
