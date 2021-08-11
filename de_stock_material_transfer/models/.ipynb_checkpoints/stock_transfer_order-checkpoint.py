@@ -736,7 +736,7 @@ class StockTransferOrder(models.Model):
                 if not (group_id & self.env.user.groups_id):
                     raise UserError(_("You are not authorize to approve '%s'.", order.stage_id.name))
                     
-        self.sudo().process_txn_stage()
+        #self.sudo().process_txn_stage()
         self.update({
             'stage_id' : self.next_stage_id.id,
             'date_order': fields.Datetime.now(),
