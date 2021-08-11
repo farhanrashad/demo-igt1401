@@ -80,7 +80,7 @@
                     <field name="stage_category" invisible="1" />
                     <field name="disallow_staging" invisible="1" />
                     <field name="next_stage_category" invisible="1" />
-                    <field name="next_stage_id" invisible="1" />
+                    
                     <!--
                      <field name="txn_stage_id" invisible="1" /> -->
                     <field name="curr_txn_stage_id" invisible="1" />
@@ -182,7 +182,8 @@
                             <field name="reference" attrs="{'invisible':[('has_reference','==','no')], 'required': [('has_reference','==','required')]}"/>
                             <field name="transporter_id" attrs="{'invisible':[('has_transporter','==','no')], 'required': [('has_transporter','==','required')]}" domain="[('category_id','in',transporter_category_ids)]"/>
                             <field name="transporter_category_ids" invisible="1"/>
-                            
+                            <field name="next_stage_id" invisible="0" />
+                            <field name="prv_stage_id" invisible="0" />
                         </group>
                     </group>
                     <notebook>
