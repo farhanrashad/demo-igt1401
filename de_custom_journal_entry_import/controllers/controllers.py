@@ -82,7 +82,7 @@ def get_custom_entry_final(entry_type):
         t_travel_by = 1
         date_subscription = 1
         date_effective = 1
-    if custom_types.has_travel != 'no':
+    if custom_types.has_hotel != 'no':
         customer_type = 1 
         date_subscription = 1
         date_effective = 1
