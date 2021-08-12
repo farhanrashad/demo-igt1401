@@ -82,6 +82,10 @@ def get_custom_entry_final(entry_type):
         t_travel_by = 1
         date_subscription = 1
         date_effective = 1
+    if custom_types.has_travel != 'no':
+        customer_type = 1 
+        date_subscription = 1
+        date_effective = 1
     if custom_types.has_rent_vechile != 'no':
         f_duration_to = 1 
         f_duration_from = 1
