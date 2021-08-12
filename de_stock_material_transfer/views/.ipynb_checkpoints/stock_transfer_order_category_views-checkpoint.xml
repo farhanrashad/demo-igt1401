@@ -32,7 +32,24 @@
                             </group>
                             <group>
                                 <field name="action_type" widget='radio'/>
-                                <field name="auto_expiry" />
+                                <label for="auto_expiry" />
+                                <div class="o_row no-gutters d-flex">
+                                    <div class="o_row" name="auto_expiry" >
+                                        <field name="auto_expiry" nolabel="1" />
+                                        <field name="expiry_stage_id" options="{'no_create':True, 'no_open':True}" attrs="{'invisible':[('auto_expiry','=',False)]}" />
+                                        <span> - </span>
+                                        <field name="expiry_default_reason_id" options="{'no_create':True, 'no_open':True}" attrs="{'invisible':[('auto_expiry','=',False)]}" />
+                                    </div>
+                                </div>
+                                <label for="auto_reject" />
+                                <div class="o_row no-gutters d-flex">
+                                    <div class="o_row" name="auto_reject" >
+                                        <field name="auto_reject" nolabel="1" />
+                                        <field name="reject_stage_id" options="{'no_create':True, 'no_open':True}" attrs="{'invisible':[('auto_reject','=',False)]}" />
+                                        <span> - </span>
+                                        <field name="reject_default_reason_id" options="{'no_create':True, 'no_open':True}" attrs="{'invisible':[('auto_reject','=',False)]}" />
+                                    </div>
+                                </div>
                             </group>
                         </group>
                         
@@ -50,20 +67,20 @@
                                 <field name="return_picking_type_id" attrs="{'invisible':[('action_type','=','normal')]}" />
                                 <field name="return_location_id" attrs="{'invisible':[('action_type','=','normal')]}" />
                             </group>
-                            <group string="Delivery Validity" name="delivery_validity" attrs="{'invisible':[('action_type','=','normal')]}">
-                                <label for="default_delivery_validity" attrs="{'invisible':[('action_type','=','normal')]}"/>
-                                <div class="default_delivery_validity" name="default_delivery_validity" attrs="{'invisible':[('action_type','=','normal')]}">
-                                    <field name="default_delivery_validity" nolabel="1" attrs="{'invisible':[('action_type','=','normal')]}"/>
+                            <group string="Delivery Validity" name="delivery_validity" >
+                                <label for="default_delivery_validity" />
+                                <div class="default_delivery_validity" name="default_delivery_validity" >
+                                    <field name="default_delivery_validity" nolabel="1" />
                                     <span>Day(s)</span>
                                 </div>
-                                <label for="delivery_lead_days" attrs="{'invisible':[('action_type','=','normal')]}"/>
-                                <div class="delivery_lead_days" name="delivery_lead_days" attrs="{'invisible':[('action_type','=','normal')]}">
-                                    <field name="delivery_lead_days" nolabel="1" attrs="{'invisible':[('action_type','=','normal')]}"/>
+                                <label for="delivery_lead_days" />
+                                <div class="delivery_lead_days" name="delivery_lead_days" >
+                                    <field name="delivery_lead_days" nolabel="1" />
                                     <span>Day(s)</span>
                                 </div>
-                                <label for="default_return_validity" attrs="{'invisible':[('action_type','=','normal')]}"/>
-                                <div class="default_return_validity" name="default_return_validity" attrs="{'invisible':[('action_type','=','normal')]}">
-                                    <field name="default_return_validity" nolabel="1" attrs="{'invisible':[('action_type','=','normal')]}"/>
+                                <label for="default_return_validity" />
+                                <div class="default_return_validity" name="default_return_validity" >
+                                    <field name="default_return_validity" nolabel="1" />
                                     <span>Day(s)</span>
                                 </div>
                             </group>
