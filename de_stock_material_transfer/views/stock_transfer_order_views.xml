@@ -72,7 +72,9 @@
                     <field name="stage_id" widget="statusbar" domain="[('transfer_order_type_ids', '=', transfer_order_type_id)]" invisible="1"/>
                     <!--
                     <field name="stage_id" widget="statusbar" domain="[('transfer_order_type_ids', '=', transfer_order_type_id)]" attrs="{'invisible':[('disallow_staging','=',False)]}"/> -->
-                    <field name="stage_id" widget="statusbar" options="{'clickable': '0', 'fold_field': 'fold'}" domain="[ ('transfer_order_category_ids', '=', transfer_order_category_id),('transfer_order_type_ids','=',transfer_order_type_id)]" />
+                    <field name="stage_id" widget="statusbar" domain="[ ('transfer_order_category_ids', '=', transfer_order_category_id),('transfer_order_type_ids','=',transfer_order_type_id)]" attrs="{'invisible':[('picking_state','!=',False)]}"/>
+                    <field name="stage_id" widget="statusbar" domain="['|',('transfer_order_category_ids', '=', transfer_order_category_id),'&amp;', ('transfer_order_type_ids','=',transfer_order_type_id),('transfer_order_category_ids','=',False)]" attrs="{'invisible':[('picking_state','=',False)]}"/>
+
 
 
                 </header>
@@ -113,10 +115,11 @@
                         <button name="action_view_receipt" type="object" class="oe_stat_button" icon="fa-truck" attrs="{'invisible': [('return_count', '=', 0)]}">
                         <field name="return_count" widget="statinfo" string="Receipt"/>
                         </button>
+                        <!--
                         <button class="oe_stat_button" icon="fa-book" name="action_view_credit_note" type="object">
                             <field name="bill_count" widget="statinfo" string="Bills"/>
                         </button>
-                        
+                        -->
                        
                     </div>
                     <div class="oe_title">

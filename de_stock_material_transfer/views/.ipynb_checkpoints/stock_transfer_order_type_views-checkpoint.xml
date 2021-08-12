@@ -49,6 +49,16 @@
                         <group>
                             <field name="description" placeholder="Give your team the details for material transfer type."/>
                         </group>
+                        <notebook>
+                        <page string="Picking Status" name="picking_status">
+                            <field name="stock_transfer_status_line" widget="one2many_list">
+                                <tree string="Picking Status" editable="bottom">
+                                    <field name="picking_state" required="1"/>
+                                    <field name="stage_id" required="1" options="{'no_create':True}"/>
+                                </tree>
+                            </field>
+                            </page>
+                        </notebook>
                     </sheet>
                 </form>
             </field>

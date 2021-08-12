@@ -34,6 +34,7 @@ class StockTransferOrderType(models.Model):
     open_orders_count = fields.Integer("Number of Open Requisitions", compute="_compute_all_requisitions_count")
     pending_orders_count = fields.Integer("Number of Pending Requisitions", compute="_compute_all_requisitions_count")
 
+    stock_transfer_status_line = fields.One2many('stock.transfer.picking.status', 'transfer_order_type_id', string='Order Status Line', copy=False, auto_join=True,)
 
     
     _sql_constraints = [
@@ -112,3 +113,17 @@ class StockTransferOrderType(models.Model):
                 'default_user_id': self.env.user.id,
             },
         }
+    
+class StockTransferStatus(models.Model):
+    _name = 'stock.transfer.picking.status'
+    _description = 'Transfer Picking Status'
+    
+    transfer_order_type_id = fields.Many2one('stock.transfer.order.type', string='Order Type', required=True, ondelete='cascade', index=True, copy=False)
+    stage_id = fields.Many2one('stock.transfer.order.stage', string='Transfer Stage')
+    picking_state = fields.Selection([
+        ('PK', 'Pickup Delivery'),
+        ('PS', 'Partially Shipped'),
+        ('FS', 'Fully Shipped'),
+        ('RT', 'Ready For Transfer'),
+        ('CL', 'Close'),
+    ], string='Picking Status', copy=False, )

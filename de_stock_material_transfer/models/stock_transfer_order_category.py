@@ -41,10 +41,15 @@ class StockTransferOrderCategory(models.Model):
         ], string='Action Type', required=True, readonly=False, default='normal')
     
     auto_expiry = fields.Boolean(string='Enable Auto Expiry', default=False, help='Enable auto expiery of the document.')
+    auto_reject = fields.Boolean(string='Enable Auto Rejection', default=False, help='Enable auto rejection of the document.')
+    expiry_stage_id = fields.Many2one('stock.transfer.order.stage', string='Expiry Stage')
+    reject_stage_id = fields.Many2one('stock.transfer.order.stage', string='Rejection Stage')
+    expiry_default_reason_id = fields.Many2one('stock.transfer.close.reason', string='Default Expiry Reason')
+    reject_default_reason_id = fields.Many2one('stock.transfer.close.reason', string='Default Reject Reason')
     
     description = fields.Text("Requirements", help="Enter here the details of transfer category.")
     default_delivery_validity = fields.Integer('Delivery validity')
-    delivery_lead_days = fields.Integer('Delivery Lead time')
+    delivery_lead_days = fields.Integer('Delivery lead time')
     default_return_validity = fields.Integer('Return validity')
     
     warehouse_id = fields.Many2one('stock.warehouse', string='Warehouse', domain="[('company_id', '=', company_id)]", )

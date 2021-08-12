@@ -13,6 +13,9 @@ access_stock_transfer_order_category_manager,access.stock.transfer.order.categor
 access_stock_transfer_order_stage_line_user,access.stock.transfer.order.stage.line.user,model_stock_transfer_order_stage_line,de_stock_material_transfer.group_stock_requisition_user,1,0,0,0
 access_stock_transfer_order_stage_line_manager,access.stock.transfer.order.stage.line.manager,model_stock_transfer_order_stage_line,de_stock_material_transfer.group_stock_requisition_manager,1,1,1,1
 
+access_stock_transfer_order_picking_status_manager,access.stock.transfer.picking.status.manager,model_stock_transfer_picking_status,de_stock_material_transfer.group_stock_requisition_manager,1,1,1,1
+
+
 
 
 access_stock_transfer_material_condition_user,access.stock.transfer.material.condition.user,model_stock_transfer_material_condition,de_stock_material_transfer.group_stock_requisition_user,1,1,1,1
