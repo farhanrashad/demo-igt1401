@@ -41,9 +41,11 @@ class ProjectProejct(models.Model):
 class ProjectStage(models.Model):
     _name = 'project.stage'
     _description = 'Project Task Stages'
+    _order = 'sequence'
     
     project_id = fields.Many2one('project.task', string='Task', index=True, required=True, ondelete='cascade')
     stage_id = fields.Many2one('project.task.type', string='Stage', readonly=False, ondelete='restrict', tracking=True, index=True, copy=False)
+    sequence = fields.Integer(string='Sequence')
     next_stage_id = fields.Many2one('project.task.type', string='Next Stage', readonly=False, ondelete='restrict', tracking=True, index=True, copy=False)
     prv_stage_id = fields.Many2one('project.task.type', string='Previous Stage', readonly=False, ondelete='restrict', tracking=True, index=True, copy=False)
     
@@ -127,11 +129,13 @@ class ProjectTask(models.Model):
 class ProjectTaskStage(models.Model):
     _name = 'project.task.stage'
     _description = 'Project Task Stages'
+    _order = 'sequence'
     
     task_id = fields.Many2one('project.task', string='Task', index=True, required=True, ondelete='cascade')
 
     #task_stage_ids = fields.Many2many('project.task.type', string='Task Stage', compute='_compute_task_stages')
     stage_id = fields.Many2one('project.task.type', string='Stage', readonly=False, ondelete='restrict', tracking=True, index=True, copy=False)
+    sequence = fields.Integer(string='Sequence')
     next_stage_id = fields.Many2one('project.task.type', string='Next Stage', readonly=False, ondelete='restrict', tracking=True, index=True, copy=False)
     prv_stage_id = fields.Many2one('project.task.type', string='Previous Stage', readonly=False, ondelete='restrict', tracking=True, index=True, copy=False)
     
