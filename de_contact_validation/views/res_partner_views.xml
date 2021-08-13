@@ -27,8 +27,7 @@
                             <field name="stage_code"/>
                             <field name="sequence" groups="base.group_no_one"/>
                             <field name="category_ids" widget="many2many_tags" groups="base.group_no_one"/>
-                            <field name="next_stage_id"/>
-                            <field name="prv_stage_id"/>
+                          
                         </group>
                         <group>
                             <field name="fold"/>
@@ -69,15 +68,53 @@
         <field name="arch" type="xml">
             <xpath expr="/form/*" position="before">
                 <header>
-                    <button name="button_submit" groups="de_contact_validation.group_contact_user" string="Submit for Approval" type="object" class="oe_highlight" attrs="{'invisible':[('stage_category','!=','draft')]}"/>
-                    <button name="button_confirm"  groups="de_contact_validation.group_contact_manager" string="Approve" type="object" class="oe_highlight" attrs="{'invisible':[('stage_category','!=','progress')]}"/>
-                    <button name="button_draft"  groups="de_contact_validation.group_contact_manager" string="Reset to Draft" type="object" attrs="{'invisible':[('stage_category','not in',['progress','confirm'])]}"/>
+                    <button name="button_submit"  string="Submit for Approval" type="object" class="oe_highlight" attrs="{'invisible':[('stage_category','!=','draft')]}"/>
+                    <button name="button_confirm"  string="Approve" type="object" class="oe_highlight" attrs="{'invisible':[('stage_category','!=','progress')]}"/>
+                    <button name="button_refuse"  string="Refuse" type="object" class="" attrs="{'invisible':[('stage_category','!=','progress')]}"/>
+                    <button name="button_cancel"  string="Cancel" type="object" class="" attrs="{'invisible':[('stage_category','!=','confirm')]}"/>
+
+                    <button name="button_draft"  groups="de_contact_validation.group_contact_manager" string="Reset to Draft" type="object" attrs="{'invisible':[('stage_category','not in',['cancel'])]}"/>
 
                     <field name="state" widget="statusbar" invisible="1" options="{'readonly': '1'}"/>
                     <field name="stage_id" widget="statusbar" />
-                    <field name="stage_category" invisible="1" />
+                    
                 </header>
             </xpath>
+            <xpath expr="//sheet" position="inside">
+                <field name="stage_category" invisible="1" />
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Worfklow" id="workflow" groups="base.group_erp_manager">
+                    <field name="partner_stage_ids" groups="base.group_erp_manager">
+                        <tree editable="bottom">
+                            <field name="sequence" readonly="1"/>
+                            <field name="stage_id" required="1" options="{'no_create': True,'no_open':True}" domain="[('category_ids','=',parent.category_id)]"/>
+                            <field name="next_stage_id" options="{'no_create': True,'no_open':True}" domain="[('category_ids','=',parent.category_id)]"/>
+                            <field name="prv_stage_id" options="{'no_create': True,'no_open':True}" domain="[('category_ids','=',parent.category_id)]"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+            <!--
+            <xpath expr="//field[@name='name']" position="attributes">
+                <attribute name="attrs">{"required": [["type","=","contact"]], "readonly": [["stage_category","!=","draft"]]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='vat']" position="attributes">
+                <attribute name="attrs">{'readonly': [('stage_category','!=','draft')]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='phone']" position="attributes">
+                <attribute name="attrs">{'readonly': [('stage_category','!=','draft')]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='mobile']" position="attributes">
+                <attribute name="attrs">{'readonly': [('stage_category','!=','draft')]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='website']" position="attributes">
+                <attribute name="attrs">{'readonly': [('stage_category','!=','draft')]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='category_id']" position="attributes">
+                <attribute name="attrs">{'readonly': [('stage_category','!=','draft')]}</attribute>
+            </xpath>
+-->
         </field>
     </record>
     

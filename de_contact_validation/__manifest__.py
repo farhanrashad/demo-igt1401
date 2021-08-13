@@ -18,8 +18,8 @@
     'author': "Dynexcel",
     'website': "https://www.dynexcel.com",
     'category': 'Marketing',
-    'version': '14.0.0.2',
-    'depends': ['base','contacts'],
+    'version': '14.0.0.3',
+    'depends': ['base','contacts','account'],
     'data': [
         'security/contact_security.xml',
         'security/ir.model.access.csv',

@@ -36,9 +36,14 @@ class ResPartner(models.Model):
     ], string='Status', copy=False, index=True, default='draft')
 
     stage_id = fields.Many2one('res.partner.stage', string='Stage', readonly=False, ondelete='restrict', tracking=True, index=True, domain="[('category_ids', 'in', category_id)]", copy=False, store=True, compute="_compute_stage_id", default=_get_default_stage_id)
+    next_stage_id = fields.Many2one('res.partner.stage',compute='_compute_order_stage')
+    prv_stage_id = fields.Many2one('res.partner.stage',compute='_compute_order_stage')
     stage_category = fields.Selection(related='stage_id.stage_category')
     date_submit = fields.Datetime('Submission Date', readonly=False)
     date_approved = fields.Datetime('Approved Date', readonly=False)
+
+    partner_stage_ids = fields.One2many('res.partner.stage.workflow', 'partner_id', string='Stage', copy=True)
+    no_edit_mode = fields.Boolean(string='Edit Mode')
 
     @api.depends('category_id')
     def _compute_stage_id(self):
@@ -74,52 +79,83 @@ class ResPartner(models.Model):
     def button_submit(self):
         #self.ensure_one()
         stage_id = False
-        for order in self.sudo():
-            group_id = order.stage_id.group_id
+        for partner in self.sudo():
+            group_id = partner.stage_id.group_id
             if group_id:
                 if not (group_id & self.env.user.groups_id):
-                    raise UserError(_("You are not authorize to submit '%s'.", order.stage_id.name))
-           
-        self.update({
+                    raise UserError(_("You are not authorize to submit '%s'.", partner.stage_id.name))
+        
+        self._compute_partner_stages()
+        self.sudo().update({
             'date_submit' : fields.Datetime.now(),
-            'stage_id' : self.stage_id.next_stage_id.id,
-            'state' : 'to_approve',
+            'stage_id' : self.next_stage_id.id,
+            'no_edit_mode': True,
+            #'state' : 'to_approve',
         })
         
     def button_confirm(self):
         stage_id = False
-        for order in self.sudo():
-            group_id = order.stage_id.group_id
+        for partner in self.sudo():
+            group_id = partner.stage_id.group_id
             if group_id:
                 if not (group_id & self.env.user.groups_id):
-                    raise UserError(_("You are not authorize to approve '%s'.", order.stage_id.name))
-                    
-        if self.stage_id.next_stage_id.id == self.stage_id.next_stage_id.next_stage_id.id:
-            stage_id = self.stage_id.next_stage_id.next_stage_id
-        else:
-            stage_id = self.stage_id.next_stage_id.next_stage_id    
+                    raise UserError(_("You are not authorize to approve '%s'.", partner.stage_id.name))
             
         self.update({
             'date_approved' : fields.Datetime.now(),
-            'stage_id' : stage_id.id,
-            'state': 'approved',
+            'stage_id' : self.next_stage_id.id,
+            #'state': 'approved',
         })
-    
-    def button_draft(self):
-        for order in self.sudo():
-            group_id = order.stage_id.group_id
+    def button_refuse(self):
+        for partner in self.sudo():
+            group_id = partner.stage_id.group_id
             if group_id:
                 if not (group_id & self.env.user.groups_id):
-                    raise UserError(_("You are not authorize to resetn to draft '%s'.", order.stage_id.name))
+                    raise UserError(_("You are not authorize to refuse '%s'.", partner.stage_id.name))
+                    
+        if self.prv_stage_id:
+            self.update({
+                'stage_id' : self.prv_stage_id.id,
+            })
+            
+    
+    def button_draft(self):
+        for partner in self.sudo():
+            group_id = partner.stage_id.group_id
+            if group_id:
+                if not (group_id & self.env.user.groups_id):
+                    raise UserError(_("You are not authorize to set draft '%s'.", partner.stage_id.name))
                     
         stage_id = self.env['res.partner.stage'].search([('category_ids','in',self.category_id.ids),('stage_category','=','draft')],limit=1)
         self.update({
             'stage_id': stage_id.id,
             'state': 'draft',
         })
+        
+    def button_cancel(self):
+        for partner in self.sudo():
+            group_id = partner.stage_id.group_id
+            if group_id:
+                if not (group_id & self.env.user.groups_id):
+                    raise UserError(_("You are not authorize to cancel '%s'.", partner.stage_id.name))
+                    
+        stage_id = self.env['res.partner.stage'].search([('category_ids','in',self.category_id.ids),('stage_category','=','cancel')],limit=1)
+        self.update({
+            'stage_id': stage_id.id,
+            'state': 'draft',
+        })
 
-    @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+
+    def write1(self, vals):
+        res = super(ResPartner, self).write(vals)
+        raise UserError(_("You are not authorize to change record for approved contact '%s'.", self.stage_id.stage_category))
+        #if self.stage_id.stage_category != 'draft':
+            #if self.no_edit_mode == True:
+                #raise UserError(_("You are not authorize to change record for approved contact '%s'.", self.stage_id.name))
+        return res
+    #@api.model
+    #def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+    def _test(self):
         self = self.with_user(name_get_uid or self.env.uid)
         # as the implementation is in SQL, we force the recompute of fields if necessary
         self.recompute(['display_name'])
@@ -180,4 +216,60 @@ class ResPartner(models.Model):
 #             raise UserError((type(k)))
         return super(ResPartner, self)._name_search(name, args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
+    def _compute_order_stage(self):
+        for partner in self:
+            next_stage = prv_stage = False
+            for stage in partner.partner_stage_ids.filtered(lambda t: t.stage_id.id == partner.stage_id.id):
+                    next_stage = stage.next_stage_id.id
+                    prv_stage = stage.prv_stage_id.id
+            partner.next_stage_id = next_stage
+            partner.prv_stage_id = prv_stage
+            
+    def _compute_partner_stages(self):
+        vals = {}
+        stages_list = []
+        next_stage = prv_stage = False
+        for partner in self:
+            stage_ids = self.env['res.partner.stage'].search([('category_ids', '=', partner.category_id.id)])
+            for stage in stage_ids:
+                vals = {
+                    'partner_id': partner.id,
+                    'stage_id': stage.id,
+                }
+                stages_list.append({
+                    'partner_id': partner.id,
+                    'stage_id': stage.id, 
+                    'sequence': stage.sequence,
+                })
+            
+            partner.partner_stage_ids.create(stages_list)
+            #order.order_stage_ids = lines_data
+            #===================================
+            #++++++++Assign Next Stage++++++++++++++
+            stages = self.env['res.partner.stage.workflow'].search([('partner_id','=', partner.id)], order="sequence desc")
+            for stage in stages:
+                stage.update({
+                    'next_stage_id': next_stage,
+                })
+                next_stage = stage.stage_id.id
+            #++++++++++++++++++++++++++++++++++++++++
+            #+++++++++++Assign Previous Stage++++++++++
+            stages = self.env['res.partner.stage.workflow'].search([('partner_id','=', partner.id)], order="sequence asc")
+            for stage in stages:
+                stage.update({
+                    'prv_stage_id': prv_stage,
+                })
+                prv_stage = stage.stage_id.id
+            #for order in order.order_stage_ids.sorted(key=lambda r: r.sequence):
+                
+class PartnerStage(models.Model):
+    _name = 'res.partner.stage.workflow'
+    _description = 'Partner Stage Workflows'
+    _order = 'sequence'
     
+    partner_id = fields.Many2one('res.partner', string='Partner', index=True, required=True, ondelete='cascade')
+    
+    stage_id = fields.Many2one('res.partner.stage', string='Stage', readonly=False, ondelete='restrict', tracking=True, index=True, copy=False)
+    sequence = fields.Integer(string='Sequence')
+    next_stage_id = fields.Many2one('res.partner.stage', string='Next Stage', readonly=False, ondelete='restrict', tracking=True, index=True, copy=False)
+    prv_stage_id = fields.Many2one('res.partner.stage', string='Previous Stage', readonly=False, ondelete='restrict', tracking=True, index=True, copy=False)

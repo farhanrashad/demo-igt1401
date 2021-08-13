@@ -30,10 +30,9 @@ class PartnerStage(models.Model):
         ('draft', 'Draft'),
         ('progress', 'In Progress'),
         ('confirm', 'Confirmed'),
+        ('cancel', 'Cancelled'),
     ], string='Category', default='draft')
     
-    next_stage_id = fields.Many2one('res.partner.stage', string='Next Stage' )
-    prv_stage_id = fields.Many2one('res.partner.stage', string='Previous Stage')
 
     group_id = fields.Many2one('res.groups', string='Security Group')
     
