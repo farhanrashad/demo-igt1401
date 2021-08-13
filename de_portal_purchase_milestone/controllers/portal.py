@@ -180,7 +180,7 @@ class CustomerPortal(CustomerPortal):
         values = super()._prepare_home_portal_values(counters)
         if 'milestone_count' in counters:
             active_user = request.env['res.users'].search([('id','=',http.request.env.context.get('uid'))])    
-            values['milestone_count'] = request.env['project.task'].search_count([('partner_id','=', active_user.partner_id.id)])
+            values['milestone_count'] = request.env['project.task'].search_count([('partner_id','=', active_user.partner_id.id),('purchase_id','!=',False),('stage_id.submission_type', 'in', [1,2])])
         return values
 
    
@@ -267,6 +267,8 @@ class CustomerPortal(CustomerPortal):
             
         active_user = request.env['res.users'].search([('id','=',http.request.env.context.get('uid'))])    
         domain += [('partner_id', '=', active_user.partner_id.id)]
+        domain += [('stage_id.submission_type', 'in', [1,2])]
+        domain += [('purchase_id', '!=', False)] 
         # task count
         milestone_count = request.env['project.task'].search_count(domain)
         # pager
