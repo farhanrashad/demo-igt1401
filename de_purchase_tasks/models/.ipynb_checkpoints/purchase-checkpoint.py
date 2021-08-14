@@ -84,27 +84,35 @@ class PurchaseOrder(models.Model):
                         'task_id': task_id.id,
                     })
                     doc_id = self.env['project.task.documents'].sudo().create(docs)
-        #next_stage = prv_stage = stage_id = self.env['project.task.type']        
-        for stage in task_id.purchase_task_stage_ids:
-            next_stage = prv_stage = stage_id = False
-            stage.update({'project_ids': [(4, project_id.id)]})
-            #next_stage = self.env['project.task.type'].search([('id','!=',stage.id),('project_ids','=',task_id.project_id.id)],order="sequence asc",limit=1)
-            #prv_stage = self.env['project.task.type'].search([('id','!=',stage.id),('project_ids','=',task_id.project_id.id)],order="sequence desc",limit=1)
-            #stage_id = self.env['project.task.type'].search([('id','!=',stage.id),('project_ids','=',task_id.project_id.id)])
-            for next in task_id.purchase_task_stage_ids.filtered(lambda t: t.sequence > stage.sequence):
-                next_stage = next.id
-                break;
-                
-            for prv in task_id.purchase_task_stage_ids.filtered(lambda t: t.sequence < stage.sequence).sorted(key=lambda r: r.sequence):
-                prv_stage = prv.id
-                
-            self.env['project.task.stage'].create({
-                'task_id': task_id.id,
-                'stage_id': stage.id,
-                'next_stage_id': next_stage,
-                'prv_stage_id': prv_stage,
-            })
+                #compute stage of milestone tasks
+                stages_list = []
+                next_stage = prv_stage = False
+                for stage in task_id.purchase_task_stage_ids:
+                    stages_list.append({
+                        'task_id': task_id.id,
+                        'stage_id': stage.id, 
+                        'sequence': stage.sequence,
+                    })
             
+                task_id.task_stage_ids.create(stages_list)
+                #order.order_stage_ids = lines_data
+                #===================================
+                #++++++++Assign Next Stage++++++++++++++
+                next_stages = self.env['project.task.stage'].search([('task_id','=', task_id.id)], order="sequence desc")
+                for stage in next_stages:
+                    stage.update({
+                        'next_stage_id': next_stage,
+                    })
+                    next_stage = stage.stage_id.id
+                #++++++++++++++++++++++++++++++++++++++++
+                #+++++++++++Assign Previous Stage++++++++++
+                prv_stages = self.env['project.task.stage'].search([('task_id','=', task_id.id)], order="sequence asc")
+                for stage in prv_stages:
+                    stage.update({
+                        'prv_stage_id': prv_stage,
+                    })
+                    prv_stage = stage.stage_id.id
+                
         return res
 
     def button_cancel(self):

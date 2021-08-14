@@ -34,6 +34,7 @@
                         <field name="project_stage_ids">
                             <tree editable="bottom">
                                 <field name="project_id" invisible="1" />
+                                <field name="sequence" />
                                 <field name="stage_id" required="1" options="{'no_create': True,'no_open':True}" domain="[('project_ids','=',project_id)]"/>
                                 <field name="next_stage_id" options="{'no_create': True,'no_open':True}" domain="[('project_ids','=',project_id)]"/>
                                 <field name="prv_stage_id" options="{'no_create': True,'no_open':True}" domain="[('project_ids','=',project_id)]"/>
