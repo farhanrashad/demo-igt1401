@@ -10,8 +10,6 @@
                 <field name="name"/>
                 <field name="requisition_type_ids" widget="many2many_tags" />
                 <field name="stage_category" />
-                <field name="next_stage_id"/>
-                <field name="prv_stage_id"/>
             </tree>
         </field>
     </record>
@@ -28,8 +26,6 @@
                             <field name="sequence" groups="base.group_no_one"/>
                             <field name="stage_code" required="1"/>
                             <field name="requisition_type_ids" widget="many2many_tags" />
-                            <field name="next_stage_id"/>
-                            <field name="prv_stage_id"/>
                         </group>
                         <group>
                             <field name="fold"/>
