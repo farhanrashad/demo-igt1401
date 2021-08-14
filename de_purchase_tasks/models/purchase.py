@@ -96,22 +96,22 @@ class PurchaseOrder(models.Model):
             
                 task_id.task_stage_ids.create(stages_list)
                 #order.order_stage_ids = lines_data
-            #===================================
-            #++++++++Assign Next Stage++++++++++++++
-            stages = self.env['project.task.stage'].search([('task_id','=', task_id.id)], order="sequence desc")
-            for stage in stages:
-                stage.update({
-                    'next_stage_id': next_stage,
-                })
-                next_stage = stage.stage_id.id
-            #++++++++++++++++++++++++++++++++++++++++
-            #+++++++++++Assign Previous Stage++++++++++
-            stages = self.env['project.task.stage'].search([('task_id','=', task_id.id)], order="sequence asc")
-            for stage in stages:
-                stage.update({
-                    'prv_stage_id': prv_stage,
-                })
-                prv_stage = stage.stage_id.id
+                #===================================
+                #++++++++Assign Next Stage++++++++++++++
+                next_stages = self.env['project.task.stage'].search([('task_id','=', task_id.id)], order="sequence desc")
+                for stage in next_stages:
+                    stage.update({
+                        'next_stage_id': next_stage,
+                    })
+                    next_stage = stage.stage_id.id
+                #++++++++++++++++++++++++++++++++++++++++
+                #+++++++++++Assign Previous Stage++++++++++
+                prv_stages = self.env['project.task.stage'].search([('task_id','=', task_id.id)], order="sequence asc")
+                for stage in prv_stages:
+                    stage.update({
+                        'prv_stage_id': prv_stage,
+                    })
+                    prv_stage = stage.stage_id.id
                 
         return res
 
