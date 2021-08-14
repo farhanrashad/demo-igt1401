@@ -151,7 +151,7 @@ class CustomerPortal(CustomerPortal):
             domain += search_domain
             
         active_user = request.env['res.users'].sudo().search([('id','=',http.request.env.context.get('uid'))])    
-        domain += [('partner_id', '=', active_user.partner_id.id)]
+        domain += ['|',('partner_id', '=', active_user.partner_id.id),('project_id.name','=','HOTO')]
         # task count
         task_count = request.env['project.task'].sudo().search_count(domain)
         # pager
