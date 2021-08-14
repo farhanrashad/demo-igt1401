@@ -270,7 +270,7 @@ class CustomerPortal(CustomerPortal):
         domain += [('stage_id.submission_type', 'in', [1,2])]
         domain += [('purchase_id', '!=', False)] 
         # task count
-        milestone_count = request.env['project.task'].search_count(domain)
+        milestone_count = request.env['project.task'].sudo().search_count(domain)
         # pager
         pager = portal_pager(
             url="/purchase/milestone/tasks",
@@ -285,7 +285,7 @@ class CustomerPortal(CustomerPortal):
         elif groupby == 'stage':
             order = "stage_id, %s" % order  # force sort on stage first to group by stage in view
 
-        tasks = request.env['project.task'].search(domain, order=order, limit=self._items_per_page, offset=pager['offset'])
+        tasks = request.env['project.task'].sudo().search(domain, order=order, limit=self._items_per_page, offset=pager['offset'])
         request.session['milestone_tasks_history'] = tasks.ids[:100]
 
         
