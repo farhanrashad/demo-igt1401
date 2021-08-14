@@ -49,7 +49,7 @@ class CreateHotoTask(http.Controller):
             'date_rfi': kw.get('date_rfi'),
             'date_onair': kw.get('date_onair'),
         }
-        task = request.env['project.task'].create(vals)
+        task = request.env['project.task'].sudo().create(vals)
         return request.redirect('/hoto/task/%s'%(task.id))
 
 class CustomerPortal(CustomerPortal):
