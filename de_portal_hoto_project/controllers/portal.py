@@ -14,9 +14,9 @@ from odoo.tools import groupby as groupbyelem
 from odoo.osv.expression import OR
 
 def hoto_site_page_content(flag = 0):
-    partners = request.env['res.users'].search([('id','=',http.request.env.context.get('uid'))])
-    projects = request.env['project.project'].search([('name','=','HOTO')])
-    sites = request.env['project.project'].search([('allow_site_planning','=',True)])
+    partners = request.env['res.users'].sudo().search([('id','=',http.request.env.context.get('uid'))])
+    projects = request.env['project.project'].sudo().search([('name','=','HOTO')])
+    sites = request.env['project.project'].sudo().search([('allow_site_planning','=',True)])
     return {
         'partners': partners,
         'projects': projects,
@@ -57,8 +57,8 @@ class CustomerPortal(CustomerPortal):
     def _prepare_home_portal_values(self, counters):
         values = super()._prepare_home_portal_values(counters)
         if 'hoto_count' in counters:
-            active_user = request.env['res.users'].search([('id','=',http.request.env.context.get('uid'))])    
-            values['hoto_count'] = request.env['project.task'].search_count([('partner_id','=', active_user.partner_id.id)])
+            active_user = request.env['res.users'].sudo().search([('id','=',http.request.env.context.get('uid'))])    
+            values['hoto_count'] = request.env['project.task'].sudo().search_count([('partner_id','=', active_user.partner_id.id)])
         return values
 
    
@@ -101,7 +101,7 @@ class CustomerPortal(CustomerPortal):
         }
 
         # extends filterby criteria with project the customer has access to
-        projects = request.env['project.project'].search([('name','=','HOTO')])
+        projects = request.env['project.project'].sudo().search([('name','=','HOTO')])
         for project in projects:
             searchbar_filters.update({
                 str(project.id): {'label': project.name, 'domain': [('project_id', '=', project.id)]}
@@ -150,10 +150,10 @@ class CustomerPortal(CustomerPortal):
                 search_domain = OR([search_domain, [('project_id', 'ilike', search)]])
             domain += search_domain
             
-        active_user = request.env['res.users'].search([('id','=',http.request.env.context.get('uid'))])    
+        active_user = request.env['res.users'].sudo().search([('id','=',http.request.env.context.get('uid'))])    
         domain += [('partner_id', '=', active_user.partner_id.id)]
         # task count
-        task_count = request.env['project.task'].search_count(domain)
+        task_count = request.env['project.task'].sudo().search_count(domain)
         # pager
         pager = portal_pager(
             url="/hoto/tasks",
@@ -168,7 +168,7 @@ class CustomerPortal(CustomerPortal):
         elif groupby == 'stage':
             order = "stage_id, %s" % order  # force sort on stage first to group by stage in view
 
-        tasks = request.env['project.task'].search(domain, order=order, limit=self._items_per_page, offset=pager['offset'])
+        tasks = request.env['project.task'].sudo().search(domain, order=order, limit=self._items_per_page, offset=pager['offset'])
         request.session['hoto_tasks_history'] = tasks.ids[:100]
 
         
