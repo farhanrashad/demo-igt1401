@@ -313,7 +313,7 @@ class CustomerPortal(CustomerPortal):
     @http.route(['/purchase/milestone/task/<int:task_id>'], type='http', auth="public", website=True)
     def portal_purchase_milestone_task(self, task_id, access_token=None, **kw):
         try:
-            task_sudo = self._document_check_access('project.task', task_id, access_token)
+            task_sudo = request.env['project.task'].sudo().search([('id', '=', task_id)])
         except (AccessError, MissingError):
             return request.redirect('/my')
 
