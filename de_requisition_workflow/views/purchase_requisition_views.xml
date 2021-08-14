@@ -18,25 +18,29 @@
             <field name="inherit_id" ref="purchase_requisition.view_purchase_requisition_form"/>
             <field name="priority">24</field>
             <field name="arch" type="xml">
-                <xpath expr="//header" position="replace">
-                    <header>
-                        <button name="button_submit" string="Submit for Approval" type="object" class="oe_highlight" attrs="{'invisible': [('stage_category', 'not in', ['draft'])]}"/>
-                        <button name="%(purchase_requisition.action_purchase_requisition_to_so)d" type="action" string="New Quotation" attrs="{'invisible': ['|',('state', '!=', 'open'),('stage_category', '!=', 'done')]}"/>
-                        <button name="%(purchase_requisition.action_purchase_requisition_to_so)d" type="action" string="New Quotation" class="btn-primary" attrs="{'invisible': ['|',('state', 'not in', ('in_progress', 'ongoing')),('stage_category', '!=', 'done')]}"/>
-                        <button name="action_in_progress" string="Confirm" type="object" class="btn-primary" attrs="{'invisible': [('stage_category', '!=', 'confirm')]}"/>
-                        <button name="button_confirm" type="object" string="Approve" class="oe_highlight" attrs="{'invisible': [('stage_category', 'not in', ['progress'])]}"/>
-
-                        <button name="action_open" states="in_progress" string="Validate" type="object" class="btn-primary"/>
-                        <button name="action_done" states="open,ongoing" string="Close" type="object" class="btn-primary"/>
-                        <button name="action_draft" states="cancel" string="Reset to Draft" type="object"/>
-                        <button name="action_cancel" states="draft,in_progress,ongoing" string="Cancel" type="object"/>
-                        <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,open,done" attrs="{'invisible': [('is_quantity_copy', '=', 'none')]}"/>
-                        <field name="state_blanket_order" widget="statusbar" statusbar_visible="draft,ongoing,done" attrs="{'invisible': [('is_quantity_copy', '!=', 'none')]}"/>
-                        
-                    </header>
-
+                <xpath expr="//button[1]" position="before">
+                    <button name="button_submit" string="Submit for Approval" type="object" class="oe_highlight" attrs="{'invisible': [('stage_category', 'not in', ['draft'])]}"/>
+                    <button name="button_confirm" type="object" string="Approve" class="oe_highlight" attrs="{'invisible': [('stage_category', 'not in', ['progress'])]}"/>
+                    <button name="button_refuse" type="object" string="Refuse" class="" attrs="{'invisible': [('stage_category', 'not in', ['progress'])]}"/>
                 </xpath>
-                
+                <xpath expr="//button[@name='action_in_progress']" position="replace">
+                    <button name="action_in_progress" string="Confirm" type="object" class="btn-primary" attrs="{'invisible': [('stage_category', '!=', 'progress')]}" />
+                </xpath>
+                <xpath expr="//button[@name='action_open']" position="replace">
+                    <button name="action_open" string="Validate" type="object" class="btn-primary" attrs="{'invisible': ['|',('stage_category', '!=', 'confirm'),('state', '!=', 'in_progress')]}" />
+                </xpath>
+                <xpath expr="//button[@name='action_done']" position="replace">
+                    <button name="action_done" string="Close" type="object" class="btn-primary" attrs="{'invisible': ['|',('stage_category', '!=', 'confirm'),('state', 'not in', ['open','ongoing'])]}" />
+                </xpath>
+                <xpath expr="//field[@name='state']" position="replace">
+                    <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,open,done" attrs="{'invisible': ['|',('is_quantity_copy', '=', 'none'),('stage_category', '=', 'progress')]}"/>
+                </xpath>
+                <xpath expr="//field[@name='state_blanket_order']" position="replace">
+                    <field name="state_blanket_order" widget="statusbar" statusbar_visible="draft,ongoing,done" attrs="{'invisible': ['|',('is_quantity_copy', '!=', 'none'),('stage_category', '=', 'progress')]}"/>
+                </xpath>
+                <xpath expr="//field[@name='state']" position="after">
+                    <field name="stage_id" widget="statusbar" attrs="{'invisible': [('stage_category', '!=', 'progress')]}"/>
+                </xpath>
                 
                 <xpath expr="//group[1]/group[2]" position="inside">
                     <field name="stage_id" string="Approval State" readony="1" invisible="1"/>
@@ -71,6 +75,24 @@
                     <attribute name="attrs">
                         {'readonly': [('stage_category', '!=', 'draft')]}
                     </attribute>
+                </xpath>
+                <xpath expr="//group[1]/group[2]" position="inside">
+                    <field name="stage_id" invisible="0"/>
+                    <field name="stage_category" invisible="0"/>
+                    <field name="next_stage_id" invisible="0"/>
+                    <field name="prv_stage_id" invisible="0"/>
+                </xpath>
+                <xpath expr="//notebook" position="inside">
+                    <page string="Worfklow" id="workflow" groups="base.group_erp_manager">
+                        <field name="requisition_stage_ids" groups="base.group_erp_manager">
+                            <tree editable="bottom">
+                                <field name="sequence" readonly="1"/>
+                                <field name="stage_id" required="1" options="{'no_create': True,'no_open':True}" domain="[('requisition_type_ids','=',parent.type_id)]"/>
+                                <field name="next_stage_id" options="{'no_create': True,'no_open':True}" domain="[('requisition_type_ids','=',parent.type_id)]"/>
+                                <field name="prv_stage_id" options="{'no_create': True,'no_open':True}" domain="[('requisition_type_ids','=',parent.type_id)]"/>
+                            </tree>
+                        </field>
+                    </page>
                 </xpath>
                 
             </field>
