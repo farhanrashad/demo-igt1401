@@ -31,14 +31,15 @@ class PurchaseAgreementWizard(models.TransientModel):
         requisition_id = self.env['purchase.requisition'].browse(self._context.get('active_ids',[]))
         pr_lines_list = []
         for line in requisition_id.line_ids:
-            pr_lines_list.append((0,0,{
-                'product_id' : line.product_id.id,
-                'product_uom' : line.product_uom_id.id,
-                'requisition_id': line.requisition_id.id,
-                'name' : line.product_description_variants,
-                'product_qty' : line.product_qty,
-                'price_unit' : line.price_unit,
-            }))
+            if (line.product_qty - line.qty_ordered) > 0:
+                pr_lines_list.append((0,0,{
+                    'product_id' : line.product_id.id,
+                    'product_uom' : line.product_uom_id.id,
+                    'requisition_id': line.requisition_id.id,
+                    'name' : line.product_description_variants,
+                    'product_qty' : line.product_qty - line.qty_ordered,
+                    'price_unit' : line.price_unit,
+                }))
         res.update({
             'wizard_line_ids':pr_lines_list,
             #'vendor_ids' : [(4, x.id) for x in self.wizard_line_ids if x.state not in ('done', 'cancel')],
@@ -54,16 +55,16 @@ class PurchaseAgreementWizard(models.TransientModel):
         item_count = 0
         
         for wizard in self:
-            vendors = wizard.wizard_line_ids.partner_ids
+            vendors = wizard.wizard_line_ids.filtered(lambda p: p.record_selection == True).partner_ids
             for vendor in vendors:
                 item_count = 0
-                for line in wizard.wizard_line_ids.filtered(lambda p: p.record_selection):
+                for line in wizard.wizard_line_ids.filtered(lambda p: p.record_selection == True):
                     #vend_product = self.env['product.supplierinfo'].search([('product_tmpl_id','=',line.product_id.product_tmpl_id.id),('name','=',vendor.id)],limit=1)
                     if vendor in line.partner_ids:
                     #if vend_product:
                     #if line.product_id.product_tmpl_id.id == vendor.product_tmpl_id.id:
                         item_count += 1
-                if item_count == len(wizard.wizard_line_ids):
+                if item_count == len(wizard.wizard_line_ids.filtered(lambda p: p.record_selection == True)):
                     filtered_vendors += vendor
                         
             wizard.partner_ids = filtered_vendors
@@ -104,7 +105,7 @@ class PurchaseAgreementWizard(models.TransientModel):
         partner_pricelist = self.partner_id.property_product_pricelist
         order_name = ""
         price = 0
-        for data in self.wizard_line_ids:
+        for data in self.wizard_line_ids.filtered(lambda p: p.record_selection == True):
             order_name = data.requisition_id.name
             if not order_name:
                 order_name = requisition_id.name

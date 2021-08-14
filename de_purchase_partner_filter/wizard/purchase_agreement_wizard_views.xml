@@ -27,7 +27,7 @@
                                 <field name="product_qty" />
                                 <field name="product_uom" readonly="0" groups="uom.group_uom" class="oe_inline"/>
                                 <field name="price_unit" readonly="0"/>
-                                <field name="partner_ids" widget="many2many_tags"/>
+                                <field name="partner_ids" widget="many2many_tags" invisible="1"/>
                             </tree>
                         </field>
                     </group>
