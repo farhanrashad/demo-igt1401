@@ -21,6 +21,7 @@
             </xpath>
             <xpath expr="//page[1]" position="after">
                 <page name="assets" string="Assets" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
+                    <field name="asset_ids" />
                 </page>
                 <page name="po_lines" string="PO Lines" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
                     <field name="purchase_line_ids" groups="de_msa.group_msa_user" attrs="{'invisible':[('allow_site_planning','!=',True)]}">

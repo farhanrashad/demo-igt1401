@@ -21,3 +21,4 @@ from . import product_product
 from . import monthly_models
 from . import account_move
 from . import project
+from . import account_asset

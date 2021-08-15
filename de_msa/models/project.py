@@ -14,6 +14,7 @@ class ProjectProject(models.Model):
     
     purchase_line_ids = fields.One2many('purchase.order.line', 'project_id', string='PO Lines', copy=False, readonly=True)
     site_billing_info_ids = fields.One2many('site.billing.info', 'site_id', string='Billing Info', copy=False, readonly=True)
+    asset_ids = fields.One2many('account.asset', 'project_id', string='Assets', copy=False, readonly=True)
     
 class ProjectPowerModelLine(models.Model):
     _name = 'project.power.product.line'

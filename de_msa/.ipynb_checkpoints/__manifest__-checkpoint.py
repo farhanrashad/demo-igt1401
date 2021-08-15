@@ -17,7 +17,7 @@
     'category': 'Sale',
     'version': '14.0.0.7',
 
-    'depends': ['base','product','project','account','contacts'],
+    'depends': ['base','product','de_project_planning','account','contacts','account_asset'],
 
     'data': [
         'security/msa_security.xml',
@@ -31,6 +31,7 @@
         'views/project_views.xml',
         'views/account_move_view.xml',
         'views/msa_menu.xml',
+        'views/account_asset_views.xml',
 #         'report/employee_report_pdf.xml',
     ],
     "price": 25,
