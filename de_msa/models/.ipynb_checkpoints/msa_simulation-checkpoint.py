@@ -8,6 +8,7 @@ class msa_simulation(models.Model):
     _name = 'msa.simulation'
     _description = 'MSA Simulation'
     
+    @api.depends('msa_id','site_billing_info_id','site_id')
     def compute_values(self):
         for rec in self:
             if rec.month_days > 0:
@@ -42,14 +43,14 @@ class msa_simulation(models.Model):
     head_lease_full_extra = fields.Boolean(string='Head Lease Full Extra', readonly=True)
     inv_tower_type = fields.Many2one('product.product', string='Tower Type', readonly=True)
     inv_power_model = fields.Many2one('product.product', string='Power Model', readonly=True)
-    ip_fee_capex = fields.Float(string='Tower w/o Power CAPEX', compute='compute_values')
-    ip_fee_opex = fields.Float(string='Tower w/o Power OPEX', compute='compute_values')
-    power_fee_capex = fields.Float(string='Power CAPEX', compute='compute_values')
+    ip_fee_capex = fields.Float(string='Tower w/o Power CAPEX', compute='compute_values', store=True)
+    ip_fee_opex = fields.Float(string='Tower w/o Power OPEX', compute='compute_values', store=True)
+    power_fee_capex = fields.Float(string='Power CAPEX', compute='compute_values', stroe=True)
     opex_cpi = fields.Float(string='CPI OPEX')
     capex_escalation = fields.Float(string='CPI CAPEX')
     collocation_capex = fields.Float(string='Collocation Discount for Tower CAPEX')
     collocation_opex = fields.Float(string='Collocation Discount for Tower OPEX')
-    head_lease = fields.Float(string='Lease Agreement', compute='compute_values')
+    head_lease = fields.Float(string='Lease Agreement', compute='compute_values', store=True)
     head_lease_extra = fields.Float(string='Lease Agreement Extra')
     num_of_tenant = fields.Float(string='Number of Tenants')
     gross_ip_fee_capex = fields.Float(string='IP Fee CAPEX')
