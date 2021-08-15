@@ -15,9 +15,9 @@
     'author': "Dynexcel",
     'website': "https://www.dynexcel.com",
     'category': 'Sale',
-    'version': '14.0.0.6',
+    'version': '14.0.0.8',
 
-    'depends': ['base','product','project','account','contacts'],
+    'depends': ['base','product','de_project_planning','account','contacts','account_asset'],
 
     'data': [
         'security/msa_security.xml',
@@ -28,9 +28,10 @@
         'views/sla_factor_views.xml',
         'views/wind_factor_views.xml',
         'views/product_view.xml',
-        'views/project_project_view.xml',
+        'views/project_views.xml',
         'views/account_move_view.xml',
         'views/msa_menu.xml',
+        'views/account_asset_views.xml',
 #         'report/employee_report_pdf.xml',
     ],
     "price": 25,

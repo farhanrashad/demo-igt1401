@@ -200,13 +200,18 @@
                     				<field name="number_days_in_month"/>
                     			</group>
                     			<group>
-                    				<group>
-                    					<button name='refresh_simulation' string="Refresh Simulation" type="object" class='btn-success' />
-                    				</group>
-                    				<group>
-                    					<button name='create_capax_invoice' string="Create Capex Invoice" type="object" class='oe_highlight' />
-                    					<button name='create_opex_invoice' string="Create Opex Invoice" type="object" class='oe_highlight' />
-                    				</group>
+                                    <div class="o_row no-gutters d-flex">
+                                        <div class="o_row">
+                                            <button name='refresh_simulation' string="Refresh Simulation" type="object" class='btn-success' />
+                                        </div>
+                                    </div>
+                                    <separator/>
+                                    <div class="o_row no-gutters d-flex mt16">
+                                        <div class="o_row">
+                                            <button name='create_capax_invoice' string="Create Capex Invoice" type="object" class='oe_highlight' />
+                                            <button name='create_opex_invoice' string="Create Opex Invoice" type="object" class='oe_highlight' />
+                                        </div>
+                                    </div>
                     			</group>
                     		</group> 
                     		<separator string=" Totals"/>
