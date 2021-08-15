@@ -43,7 +43,7 @@ class msa_simulation(models.Model):
     head_lease_full_extra = fields.Boolean(string='Head Lease Full Extra', readonly=True)
     inv_tower_type = fields.Many2one('product.product', string='Tower Type', readonly=True)
     inv_power_model = fields.Many2one('product.product', string='Power Model', readonly=True)
-    ip_fee_capex = fields.Float(string='Tower w/o Power CAPEX', compute='compute_values', store=True)
+    ip_fee_capex = fields.Float(string='Tower w/o Power CAPEX', )
     ip_fee_opex = fields.Float(string='Tower w/o Power OPEX', compute='compute_values', store=True)
     power_fee_capex = fields.Float(string='Power CAPEX', compute='compute_values', stroe=True)
     opex_cpi = fields.Float(string='CPI OPEX')
