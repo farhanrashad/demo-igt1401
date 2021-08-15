@@ -15,7 +15,7 @@
     'author': "Dynexcel",
     'website': "https://www.dynexcel.com",
     'category': 'Sale',
-    'version': '14.0.0.6',
+    'version': '14.0.0.7',
 
     'depends': ['base','product','project','account','contacts'],
 
@@ -28,7 +28,7 @@
         'views/sla_factor_views.xml',
         'views/wind_factor_views.xml',
         'views/product_view.xml',
-        'views/project_project_view.xml',
+        'views/project_views.xml',
         'views/account_move_view.xml',
         'views/msa_menu.xml',
 #         'report/employee_report_pdf.xml',

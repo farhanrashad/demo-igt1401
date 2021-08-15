@@ -12,26 +12,30 @@
 		
 		<menuitem id="msa_menu_sites" name="Sites" parent="msa_root_menu"
 			sequence="3" />
-			
+		
+        <menuitem id="msa_menu_project_sites_all" name="Sites" parent="msa_menu_sites"
+			action="de_msa.open_view_site_all"
+			sequence="1" />
+        
 		<menuitem id="msa_menu_billing_info" name="Billing Info" parent="msa_menu_sites"
 			action="de_msa.action_site_billing_info_view"
-			sequence="1" />
+			sequence="2" />
 		
 		<menuitem id="msa_menu_monthly_power_model" name="Monthly Power Model" parent="msa_menu_sites"
 			action="de_msa.action_monthly_power_model_view"
-			sequence="2" />
+			sequence="3" />
 		
 		<menuitem id="msa_menu_monthly_tower_model" name="Monthly Tower Model" parent="msa_menu_sites"
 			action="de_msa.action_monthly_tower_model_view"
-			sequence="3" />
+			sequence="4" />
 			
 		<menuitem id="msa_menu_monthly_load_model" name="Monthly Tower Load" parent="msa_menu_sites"
 			action="de_msa.action_monthly_tower_load_view"
-			sequence="4" />
+			sequence="5" />
 		
 		<menuitem id="msa_menu_monthly_sla_factor" name="Monthly SLA Factor" parent="msa_menu_sites"
 			action="de_msa.action_monthly_sla_factor_view"
-			sequence="5" />
+			sequence="6" />
 			
 		<menuitem id="msa_menu_config" name="Configuration" parent="msa_root_menu" groups="group_msa_manager"
 			sequence="5" />

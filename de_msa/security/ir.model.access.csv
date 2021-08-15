@@ -24,3 +24,4 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 23,access.tower.without.power.user,model_tower_without_power,de_msa.group_msa_user,1,1,1,1
 24,access.wind.factor.user,model_wind_factor,de_msa.group_msa_user,1,1,1,1
 25,access.msa.simulation.user,model_msa_simulation,de_msa.group_msa_user,1,1,1,1
+26,access.msa.power.product.line.user,model_project_power_product_line,de_msa.group_msa_user,1,1,1,1
