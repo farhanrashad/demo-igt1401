@@ -44,13 +44,13 @@ class msa_simulation(models.Model):
     inv_tower_type = fields.Many2one('product.product', string='Tower Type', readonly=True)
     inv_power_model = fields.Many2one('product.product', string='Power Model', readonly=True)
     ip_fee_capex = fields.Float(string='Tower w/o Power CAPEX', )
-    ip_fee_opex = fields.Float(string='Tower w/o Power OPEX', compute='compute_values', store=True)
-    power_fee_capex = fields.Float(string='Power CAPEX', compute='compute_values', stroe=True)
+    ip_fee_opex = fields.Float(string='Tower w/o Power OPEX')
+    power_fee_capex = fields.Float(string='Power CAPEX', )
     opex_cpi = fields.Float(string='CPI OPEX')
     capex_escalation = fields.Float(string='CPI CAPEX')
     collocation_capex = fields.Float(string='Collocation Discount for Tower CAPEX')
     collocation_opex = fields.Float(string='Collocation Discount for Tower OPEX')
-    head_lease = fields.Float(string='Lease Agreement', compute='compute_values', store=True)
+    head_lease = fields.Float(string='Lease Agreement', )
     head_lease_extra = fields.Float(string='Lease Agreement Extra')
     num_of_tenant = fields.Float(string='Number of Tenants')
     gross_ip_fee_capex = fields.Float(string='IP Fee CAPEX')
@@ -76,6 +76,7 @@ class msa_simulation(models.Model):
     power_price_capex = fields.Float(string='Power Price Capex')
     monthly_lease_amount = fields.Float(string='Montly Lease Amount')
     no_of_tenants_capex = fields.Integer(string='No. of Tenants Capex')
+    rfu_date = fields.Date(string='RFU Date')
     
     
     
