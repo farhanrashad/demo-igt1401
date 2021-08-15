@@ -227,7 +227,7 @@
                     		<field name="msa_simulation_ids">
                     			<tree string="Price Details" >
                     				<field name="site_id"/>
-                    				<field name="year" invisible="True"/>
+                    				<field name="year" invisible="0"/>
                     				<field name="month_year"/>
                     				<field name="ip_start_date"/>
                     				<field name="head_lease"/>
