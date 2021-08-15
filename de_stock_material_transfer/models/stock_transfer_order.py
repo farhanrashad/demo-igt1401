@@ -110,13 +110,12 @@ class StockTransferOrder(models.Model):
     picking_ids = fields.One2many('stock.picking', 'stock_transfer_order_id', string='Picking')
     bill_count = fields.Integer(compute='_compute_bill_count')
 
-    location_src_id = fields.Many2one('stock.location', string='Source Location', compute='_compute_all_picking', store=True, readonly=True, )
-    location_dest_id = fields.Many2one('stock.location', string='Destination Location', compute='_compute_all_picking', store=True, readonly=True, )
-    picking_type_id = fields.Many2one('stock.picking.type', compute='_compute_all_picking', store=True )
+    location_src_id = fields.Many2one('stock.location', string='Source Location',  )
+    location_dest_id = fields.Many2one('stock.location', string='Destination Location', )
+    picking_type_id = fields.Many2one('stock.picking.type',  )
     picking_type_code = fields.Selection(related='picking_type_id.code')
-    return_location_id = fields.Many2one('stock.location', string='Return Location', compute='_compute_all_picking', store=True, readonly=True, )
-    sequence_id = fields.Many2one('ir.sequence', 'Reference Sequence',
-        copy=False, check_company=True)
+    return_location_id = fields.Many2one('stock.location', string='Return Location',  )
+    sequence_id = fields.Many2one('ir.sequence', 'Reference Sequence', copy=False, check_company=True)
     
     #document fields
     health_check_form = fields.Boolean(related='transfer_order_category_id.health_check_form')
@@ -204,7 +203,8 @@ class StockTransferOrder(models.Model):
                 line.location_dest_id = order.return_location_id.id
                 if not line.location_src_id:
                     line.location_src_id = order.location_dest_id.id
-                    
+    
+    
     @api.onchange('transfer_order_type_id')
     def _onchange_transfer_type_id(self):
         self.stage_id = self.env['stock.transfer.order.stage'].search([('transfer_order_type_ids','=',self.transfer_order_type_id.id),('stage_category','=','draft')], order='sequence',limit=1).id
