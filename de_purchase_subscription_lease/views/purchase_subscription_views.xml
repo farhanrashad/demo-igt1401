@@ -39,12 +39,17 @@
  <!--
                     <button name="%(action_purchase_subscription_plan_wizard)d" string="Populate" type="action" class="btn-primary"  />-->
                 </xpath>
-
+                <xpath expr="//field[@name='subscription_date']" position="before">
+                    <field name="amount_lease_original" />
+                    <field name="amount_lease_current" />
+                    <field name="amount_lease_total" />
+                </xpath>
+                
                 <xpath expr="//field[@name='subscription_plan_id']" position="after">
                     <field name="allow_payment_schedule" invisible="1"/>
                 </xpath>
                 <xpath expr="//notebook" position="inside">
-					<page string="Revisions" name="revisions" attrs="{'invisible': [('old_revision_ids' , '=', [])]}">
+					<page string="Revisions" name="revisions" >
 						<field name="old_revision_ids">
 							<tree>
 								<field name='name'/>
@@ -72,10 +77,13 @@
                                  <field name="date_from" readonly="1"/>
                                 <field name="date_to" readonly="1"/>
                                 <field name="recurring_intervals" sum="Intervals" attrs="{'readonly':[('invoice_id','!=',False)]}"/>
-                                <field name="recurring_price" sum="Recurring" attrs="{'readonly':[('invoice_id','!=',False)]}"/>
-                                <field name="recurring_sub_total" sum="Subtotal"/>
-                                <field name="discount" attrs="{'readonly':[('invoice_id','!=',False)]}"/>
                                 <field name="escalation" attrs="{'readonly':[('invoice_id','!=',False)]}"/>
+                                 <field name="discount" attrs="{'readonly':[('invoice_id','!=',False)]}"/>
+                                <field name="recurring_price" invisible="1" sum="Recurring" attrs="{'readonly':[('invoice_id','!=',False)]}"/>
+                                <field name="recurring_monthly_total" sum="Recurring" attrs="{'readonly':[('invoice_id','!=',False)]}"/>
+                                <field name="recurring_sub_total" invisible="1" sum="Subtotal"/>
+                               
+                                
                                 <field name="accum_escalation" invisible="1"/>
                                 <field name="recurring_total" sum="Total"/>
                                  <field name="invoice_id" readonly="1"/>
