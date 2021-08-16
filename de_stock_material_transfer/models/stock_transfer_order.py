@@ -305,6 +305,13 @@ class StockTransferOrder(models.Model):
                     'sequence': txn.transfer_exception_type_id.stage_id.sequence,
                     'transfer_exception_type_id': txn.transfer_exception_type_id.id,
                 })
+                if txn.transfer_exception_type_id.next_stage_id.id:
+                    stages_list.append({
+                        'stock_order_transfer_id': order.id,
+                        'stage_id': txn.transfer_exception_type_id.next_stage_id.id, 
+                        'sequence': txn.transfer_exception_type_id.next_stage_id.sequence,
+                        'transfer_exception_type_id': txn.transfer_exception_type_id.id,
+                    }) 
             
             order.order_stage_ids.create(stages_list)
             #order.order_stage_ids = lines_data
@@ -686,6 +693,7 @@ class StockTransferOrder(models.Model):
         if self.transfer_order_category_id:
             self.location_src_id = self.transfer_order_category_id.location_src_id.id
             self.location_dest_id = self.transfer_order_category_id.location_dest_id.id
+            self.picking_type_id = self.transfer_order_category_id.picking_type_id.id
             ddays = self.transfer_order_category_id.default_delivery_validity
             ldays = self.transfer_order_category_id.delivery_lead_days
             if ddays > 0:
