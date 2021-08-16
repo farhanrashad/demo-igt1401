@@ -33,7 +33,7 @@ class PurchaseSubscriptionPlanSchedule(models.Model):
 class PurchaseSubscription(models.Model):
     _inherit = 'purchase.subscription'    
     
-    purchase_subscription_schedule_line = fields.One2many('purchase.subscription.schedule', 'purchase_subscription_id', string='Subscription Schedules', copy=True)
+    purchase_subscription_schedule_line = fields.One2many('purchase.subscription.schedule', 'purchase_subscription_id', string='Subscription Schedules', copy=False)
     allow_payment_schedule = fields.Boolean(related='subscription_plan_id.allow_payment_schedule')
     select_all = fields.Boolean(string='Select All', default=False)
     
@@ -45,10 +45,30 @@ class PurchaseSubscription(models.Model):
     active = fields.Boolean('Active',default=True,copy=True) 
     revised = fields.Boolean('Revised Subscription')
     
+    amount_lease_original = fields.Monetary(string='Original Amount')
+    amount_lease_current = fields.Monetary(string='Current amount', compute='_compute_lease_current')
+    amount_lease_total = fields.Monetary(string='Total Committment',  compute='_compute_lease_total')
+    
+    def _compute_lease_current(self):
+        amount = 0
+        for subs in self:
+            amount = 0
+            subs_schedule_line_id = self.env['purchase.subscription.schedule'].search([('purchase_subscription_id','=',subs.id),('record_selection','=',False)],limit=1,order="date_from")
+            amount = subs_schedule_line_id.recurring_monthly_total
+            subs.amount_lease_current = amount
+            
+    def _compute_lease_total(self):
+        total = 0
+        for subs in self:
+            total = 0
+            for line in subs.purchase_subscription_schedule_line:
+                total += line.recurring_total
+            subs.amount_lease_total = total
+    
     @api.onchange('select_all')
     def _select_all(self):
         for line in self.purchase_subscription_schedule_line:
-            if not line.invoice_id:
+            if line.state =='draft':
                 line.record_selection = self.select_all
     
     def add_record(self):
@@ -100,6 +120,9 @@ class PurchaseSubscription(models.Model):
                         #'analytic_tag_ids': [(6, 0, line.analytic_tag_ids.ids)],
                         #'project_id': line.project_id.id,
                     }])
+                    line.update({
+                        'state': 'invoice',
+                    })
             invoice.create({
                 'move_type': 'in_invoice',
                 'purchase_subscription_id': self.id,
@@ -181,7 +204,7 @@ class PurchaseSubscriptionSchedule(models.Model):
     
     purchase_subscription_id = fields.Many2one('purchase.subscription', string='Subscription', ondelete='cascade')
     
-    record_selection = fields.Boolean(string='Selection', default=False)
+    record_selection = fields.Boolean(string='Selection', default=False, copy=False)
 
     date_from = fields.Date(string='Date From')
     date_to = fields.Date(string='Date To')
@@ -193,11 +216,19 @@ class PurchaseSubscriptionSchedule(models.Model):
     escalation = fields.Float(string='Escalation (%)', digits='Discount')
     accum_escalation = fields.Float(string='Accum. Escalation (%)', digits='Discount')
     
+    recurring_monthly_total = fields.Float(string="Monthly Price", compute='_compute_recurring_total_all')
     recurring_total = fields.Float(string="Total", compute='_compute_recurring_total_all')
     
     invoice_id = fields.Many2one('account.move', string="Invoice", check_company=True, compute='_get_invoice')
     invoice_status = fields.Selection(related='invoice_id.state')
-    company_id = fields.Many2one('res.company', related='purchase_subscription_id.company_id', store=True, index=True)
+    company_id = fields.Many2one('res.company', related='purchase_subscription_id.company_id', store=True, index=True)    
+    state = fields.Selection(selection=[
+            ('draft', 'Draft'),
+            ('invoice', 'Invoice Created'),
+            ('posted', 'Posted'),
+            ('cancel', 'Cancelled'),
+        ], string='Status', required=True, readonly=True, copy=False, tracking=True,
+        default='draft')
     
     @api.onchange('escalation')
     def _onchange_escalation(self):
@@ -206,9 +237,11 @@ class PurchaseSubscriptionSchedule(models.Model):
     
     def _get_invoice(self):
         for line in self:
-            line.invoice_id = self.env['account.move.line'].search([('purchase_subscription_schedule_id','=',line.id)]).move_id.id
+            line.invoice_id = self.env['account.move.line'].search([('purchase_subscription_schedule_id','=',line.id)],limit=1).move_id.id
             
     def _compute_recurring_total_all(self):
         for line in self:
             line.recurring_sub_total = line.recurring_price * line.recurring_intervals
             line.recurring_total = line.recurring_sub_total + (line.recurring_sub_total * (line.accum_escalation / 100)) - (line.recurring_sub_total * (line.discount / 100))
+            line.recurring_monthly_total = line.recurring_price + (line.recurring_price * (line.accum_escalation / 100))
+
