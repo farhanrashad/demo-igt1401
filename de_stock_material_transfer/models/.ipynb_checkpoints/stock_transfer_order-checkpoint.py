@@ -313,13 +313,13 @@ class StockTransferOrder(models.Model):
                         'transfer_exception_type_id': txn.transfer_exception_type_id.id,
                     }) 
             
-            order.order_stage_ids.create(stages_list)
+            order.order_stage_ids.sudo().create(stages_list)
             #order.order_stage_ids = lines_data
             #===================================
             #++++++++Assign Next Stage++++++++++++++
             stages = self.env['stock.transfer.order.stage.line'].search([('stock_order_transfer_id','=', order.id)], order="sequence desc")
             for stage in stages:
-                stage.update({
+                stage.sudo().update({
                     'next_stage_id': next_stage,
                 })
                 #if stage.transfer_exception_type_id.next_stage_id.id:
@@ -330,7 +330,7 @@ class StockTransferOrder(models.Model):
             #+++++++++++Assign Previous Stage++++++++++
             stages = self.env['stock.transfer.order.stage.line'].search([('stock_order_transfer_id','=', order.id)], order="sequence asc")
             for stage in stages:
-                stage.update({
+                stage.sudo().update({
                     'prv_stage_id': prv_stage,
                 })
                 #if stage.transfer_exception_type_id.prv_stage_id.id:
