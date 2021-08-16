@@ -322,10 +322,10 @@ class StockTransferOrder(models.Model):
                 stage.update({
                     'next_stage_id': next_stage,
                 })
-                if stage.transfer_exception_type_id.next_stage_id.id:
-                    next_stage = stage.transfer_exception_type_id.next_stage_id.id
-                else:
-                    next_stage = stage.stage_id.id
+                #if stage.transfer_exception_type_id.next_stage_id.id:
+                    #next_stage = stage.transfer_exception_type_id.next_stage_id.id
+                #else:
+                next_stage = stage.stage_id.id
             #++++++++++++++++++++++++++++++++++++++++
             #+++++++++++Assign Previous Stage++++++++++
             stages = self.env['stock.transfer.order.stage.line'].search([('stock_order_transfer_id','=', order.id)], order="sequence asc")
@@ -333,10 +333,10 @@ class StockTransferOrder(models.Model):
                 stage.update({
                     'prv_stage_id': prv_stage,
                 })
-                if stage.transfer_exception_type_id.prv_stage_id.id:
-                    prv_stage = stage.transfer_exception_type_id.next_stage_id.id
-                else:
-                    prv_stage = stage.stage_id.id
+                #if stage.transfer_exception_type_id.prv_stage_id.id:
+                    #prv_stage = stage.transfer_exception_type_id.next_stage_id.id
+                #else:
+                prv_stage = stage.stage_id.id
             #for order in order.order_stage_ids.sorted(key=lambda r: r.sequence):
                 
     
