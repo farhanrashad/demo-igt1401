@@ -13,8 +13,25 @@ class HrExpenseSheetType(models.Model):
     
     name = fields.Char(string='Expense Type', required=True, translate=True)
     
+    group_id = fields.Many2one('res.groups', string='Security Group')
+    
 class HrExpenseSheet(models.Model):
     _inherit = 'hr.expense.sheet'
+    
+    sheet_ref = fields.Char(string='Reference', readonly=True, default=lambda self: 'HEX/')
+    
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('submit', 'Submitted'),
+        ('approve', 'Line Manager Approval'),
+        ('exp_approve', 'Expense Category Approval'),
+        ('fin_approve', 'Finance Approval'),
+        ('post', 'Waiting Account Entries'),
+        ('payment', 'Waiting Payment'),
+        ('done', 'Paid'),
+        ('cancel', 'Refused')
+    ], string='Status', index=True, readonly=True, tracking=True, copy=False, default='draft', required=True, help='Expense Report State')
+    
     
     hr_salary_advance_id  = fields.Many2one('hr.salary.advance', string='Advances Request', domain='[("employee_id","=", employee_id), ("state","in", ("paid","close"))]')
     
@@ -26,9 +43,129 @@ class HrExpenseSheet(models.Model):
     def _compute_curr_amount(self):
         for sheet in self:
             sheet.total_currency_amount = sum(sheet.expense_line_ids.mapped('total_amount'))
-
-
     
+    @api.model
+    def create(self, vals):
+        vals['sheet_ref'] = self.env['ir.sequence'].get('hr.expense.sheet') or ' '
+        sheet = super(HrExpenseSheet, self.with_context(mail_create_nosubscribe=True, mail_auto_subscribe_no_notify=True)).create(vals)
+        sheet.activity_update()
+        return sheet
+    
+    # --------------------------------------------
+    # Expense Sheet Submit Button
+    # --------------------------------------------
+    def action_submit_sheet(self):
+        for sheet in self.sudo():
+            group_id = sheet.hr_expense_sheet_type_id.group_id
+            if group_id:
+                if not (group_id & self.env.user.groups_id):
+                    raise UserError(_("You are not authorize to submit request in category '%s'.", sheet.hr_expense_sheet_type_id.name))
+            
+            if not sheet.expense_line_ids:
+                raise UserError(_("You cannot submit expense '%s' because there is no line.", self.name))
+                    
+        self.write({'state': 'submit'})
+        self.activity_update()
+    
+    # --------------------------------------------
+    # Expense Sheet Approval Buttons
+    # --------------------------------------------
+    def approve_expense_finance(self):
+        #Finanace Approval
+        notification = {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('There are no expense reports to approve.'),
+                'type': 'warning',
+                'sticky': False,  #True/False will display for few seconds if false
+            },
+        }
+        
+        #Line Finance Approval
+        filtered_sheet_exp = self.filtered(lambda s: s.state in ['exp_approve'])
+        if not filtered_sheet_exp:
+            return notification
+        for sheet in filtered_sheet_exp:
+            sheet.write({'state': 'fin_approve', 'user_id': sheet.user_id.id or self.env.user.id})
+        
+        notification['params'].update({
+            'title': _('The expense reports were successfully approved.'),
+            'type': 'success',
+            'next': {'type': 'ir.actions.act_window_close'},
+        })
+        
+    def approve_expense_category(self):
+        for line in self.expense_line_ids:
+            expense_type_id = self.env['hr.expense.type'].search([('id','=',line.expense_type_id.id)],limit=1)
+            group_id = expense_type_id.group_id
+            if group_id:
+                if (group_id & self.env.user.groups_id):
+                    line.write({
+                        'expense_approved': True, 
+                    })
+        
+        #Line Category Expense Approval
+        notification = {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('There are no expense reports to approve.'),
+                'type': 'warning',
+                'sticky': False,  #True/False will display for few seconds if false
+            },
+        }
+        
+        filtered_sheet_apr = self.filtered(lambda s: s.state in ['approve'])
+        if not filtered_sheet_apr:
+            return notification
+        for sheet in filtered_sheet_apr:
+            sheet.write({'state': 'exp_approve', 'user_id': sheet.user_id.id or self.env.user.id})
+        
+        notification['params'].update({
+            'title': _('The expense reports were successfully approved.'),
+            'type': 'success',
+            'next': {'type': 'ir.actions.act_window_close'},
+        })
+                            
+    def approve_expense_sheets(self):
+        expense_type_id = self.env['hr.expense.type']
+        if not self.user_has_groups('hr_expense.group_hr_expense_team_approver'):
+            raise UserError(_("Only Managers and HR Officers can approve expenses"))
+        elif not self.user_has_groups('hr_expense.group_hr_expense_manager'):
+            current_managers = self.employee_id.expense_manager_id | self.employee_id.parent_id.user_id | self.employee_id.department_id.manager_id.user_id
+
+            if self.employee_id.user_id == self.env.user:
+                raise UserError(_("You cannot approve your own expenses"))
+
+            if not self.env.user in current_managers and not self.user_has_groups('hr_expense.group_hr_expense_user') and self.employee_id.expense_manager_id != self.env.user:
+                raise UserError(_("You can only approve your department expenses"))
+                
+            
+        
+        notification = {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('There are no expense reports to approve.'),
+                'type': 'warning',
+                'sticky': False,  #True/False will display for few seconds if false
+            },
+        }
+        #Line Manager Approval
+        if self.state in ('submit','draft'):
+            filtered_sheet = self.filtered(lambda s: s.state in ['submit', 'draft'])
+            if not filtered_sheet:
+                return notification
+            for sheet in filtered_sheet:
+                sheet.write({'state': 'approve', 'user_id': sheet.user_id.id or self.env.user.id})
+            
+        notification['params'].update({
+            'title': _('The expense reports were successfully approved.'),
+            'type': 'success',
+            'next': {'type': 'ir.actions.act_window_close'},
+        })
+        
     # --------------------------------------------
     # Actions
     # --------------------------------------------
@@ -71,6 +208,7 @@ class HrExpenseType(models.Model):
     _description = 'Expense Type'
     
     name = fields.Char(string='Expense Category', required=True, translate=True)
+    group_id = fields.Many2one('res.groups', string='Security Group')
 
 class HrExpense(models.Model):
     _inherit = 'hr.expense'
@@ -81,8 +219,9 @@ class HrExpense(models.Model):
     advance_line_id  = fields.Many2one('hr.salary.advance.line', string='Advances Line', domain='[("advance_id","=", hr_salary_advance_id)]')
     hr_expense_sheet_type_id  = fields.Many2one('hr.expense.sheet.type', related='sheet_id.hr_expense_sheet_type_id')
     expense_type_id = fields.Many2one('hr.expense.type', string='Expense Category', copy=False)
+    amount_approved = fields.Monetary(string='Approved Amount')
+    expense_approved = fields.Boolean(string='Is Approved', default=False)
 
-    
     #@api.depends('product_id', 'company_id')
     def _compute_from_product_id_company_id(self):
         for expense in self.filtered('product_id'):
@@ -96,7 +235,7 @@ class HrExpense(models.Model):
             if account:
                 expense.account_id = account
     
-    
+   
     
     @api.onchange('hr_salary_advance_id')
     def onchange_advaces(self):

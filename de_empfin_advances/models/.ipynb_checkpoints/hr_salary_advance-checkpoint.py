@@ -260,8 +260,6 @@ class SalaryAdvancePayment(models.Model):
             cash_line.update({
                 'state': 'close'
             })
-        
-         
           
         
     def action_refuse(self):
@@ -361,9 +359,6 @@ class SalaryAdvancePayment(models.Model):
             })
         return invoice
     
-    
-    
-    
     @api.depends('cash_line_ids.approved_amount')
     def _amount_all(self):
         for order in self:
@@ -381,7 +376,7 @@ class AdvancePayment(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_name='name'
     
-    name = fields.Char(string='Name', compute='_compute_name')
+    name = fields.Char(string='Name', compute='_compute_name', store=True)
     type_id = fields.Many2one('hr.advance.type', string='Type')
     #product_id = fields.Many2one('product.product', string='Product', domain="[('can_be_expensed','=', True)]", required=True, change_default=True)
     product_id = fields.Many2one('product.product', string='Product', domain=[('type', '=', 'service')], change_default=True)
@@ -415,9 +410,10 @@ class AdvancePayment(models.Model):
             #if line.approved_amount > line.total_amount:
                 #raise UserError(_('The amount is exceeded than requested amount'))
     
+    @api.depends('type_id','advance_id')
     def _compute_name(self):
         for line in self:
-            line.name = line.advance_id.name + ' - ' + line.product_id.name
+            line.name = str(line.advance_id.name) + ' - ' + str(line.product_id.name)
             
     @api.onchange('type_id')
     def _onchange_type(self):
@@ -428,13 +424,10 @@ class AdvancePayment(models.Model):
     @api.onchange('total_amount')
     def onchange_amount(self):
         for line in self:
-            
             line.update({
                 'approved_amount': line.unit_price * line.quantity,
             })
-    
-    
-    
+            
     @api.depends('quantity', 'unit_price')
     def _compute_amount(self):
         for line in self:

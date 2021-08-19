@@ -78,7 +78,7 @@
                                 <tree editable="bottom">
                                     <field name="currency_id" invisible="1" />
                                 <field name="name" invisible="1"/>
-                                  <field name="type_id" options="{'no_create':True}" attrs="{'readonly':[('state','!=','draft')]}" />
+                                  <field name="type_id" required="1" options="{'no_create':True}" attrs="{'readonly':[('state','!=','draft')]}" />
                                  <field name="product_id" options="{'no_create':True}" attrs="{'readonly':[('state','!=','draft')]}" />
                                  <field name="desc" attrs="{'readonly':[('state','!=','draft')]}" />
                                  <field name="quantity" attrs="{'readonly':[('state','!=','draft')]}" />
