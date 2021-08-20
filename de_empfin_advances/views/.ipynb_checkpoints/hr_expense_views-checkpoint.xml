@@ -106,7 +106,7 @@
                     </group>
                 </xpath>
                 <xpath expr="//field[@name='expense_line_ids']" position="replace">
-                    <field name="expense_line_ids" nolabel="1" widget="many2many" domain="[('state', '=', 'draft'), ('employee_id', '=', employee_id), ('company_id', '=', company_id), ('currency_id', '=', currency_id)]" options="{'reload_on_button': True}" context="{'form_view_ref' : 'hr_expense.hr_expense_view_form_without_header', 'default_company_id': company_id, 'default_employee_id': employee_id, 'default_hr_salary_advance_id': hr_salary_advance_id, 'default_hr_expense_sheet_type_id': hr_expense_sheet_type_id, 'default_currency_id': currency_id}">
+                    <field name="expense_line_ids" nolabel="1" widget="many2many" domain="[('state', '=', 'draft'), ('employee_id', '=', employee_id), ('company_id', '=', company_id), ('currency_id', '=', currency_id)]" options="{'reload_on_button': True}" context="{'form_view_ref' : 'hr_expense.hr_expense_view_form_without_header', 'default_company_id': company_id, 'default_employee_id': employee_id, 'default_hr_salary_advance_id': hr_salary_advance_id, 'default_hr_expense_sheet_type_id': hr_expense_sheet_type_id, 'default_currency_id': currency_id}" attrs="{'readonly':[]}">
                             <tree decoration-danger="is_refused" editable="bottom">
                                 <field name="date" optional="show"/>
                                 <field name="name"/>
@@ -129,6 +129,8 @@
                                 <field name="company_currency_id" invisible="1"/>
                                 <field name="currency_id" optional="show"/>
                                 <field name="is_refused" invisible="True"/>
+                                <field name="remarks" optional="show"/>
+                                <field name="fin_remarks" optional="show"/>
                                 <field name="expense_approved" optional="show" readonly="1"/>
                            </tree>
                         </field>

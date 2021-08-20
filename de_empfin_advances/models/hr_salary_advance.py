@@ -233,18 +233,33 @@ class SalaryAdvancePayment(models.Model):
             })
 
     def action_line_manager_approve(self):
+        #if all(adv.approved == False for adv in self.cash_line_ids.filtered(lambda p: p.advance_id.state == 'confirmed')):
+            #raise UserError(_("Only Managers and HR Officers can approve expenses"))
+            
         self.state = 'hr_approval'
         for cash_line in self.cash_line_ids:
-            cash_line.update({
-                'state': 'hr_approval'
-            })
+            if cash_line.approved:
+                cash_line.update({
+                    'state': 'hr_approval'
+                })
+            else:
+                cash_line.update({
+                    'state': 'reject',
+                    'approved_amount': 0,
+                })
         
     def action_hr_manager_approve(self):
         self.state = 'finance_approval'
         for cash_line in self.cash_line_ids:
-            cash_line.update({
-                'state': 'finance_approval'
-            })
+            if cash_line.approved:
+                cash_line.update({
+                    'state': 'finance_approval'
+                })
+            else:
+                cash_line.update({
+                    'state': 'reject',
+                    'approved_amount': 0,
+                })
         
     def action_finance_manager_approve(self):
         self.state = 'approved'
@@ -389,10 +404,10 @@ class AdvancePayment(models.Model):
     remarks = fields.Text(string='Remarks')
     finance_remarks = fields.Text(string='Finance Remarks')
     #approve_amount = fields.Float(string='Amount For Approval')
-    approved_amount = fields.Monetary(string='Approved Amt', readonly=False)
+    approved_amount = fields.Monetary(string='Approved Amt', compute='_compute_approved_amount', store=True)
     advance_id = fields.Many2one('hr.salary.advance', string='Advances')
     employee_id = fields.Many2one(related='advance_id.employee_id')
-    approved = fields.Boolean(string='Approved', default=True)
+    approved = fields.Boolean(string='Approved', default=False)
     state = fields.Selection([('draft', 'Draft'),
                               ('confirmed', 'Waiting Line Manager Approval'),
                               ('hr_approval', 'Waiting HR Approval'),
@@ -410,6 +425,12 @@ class AdvancePayment(models.Model):
             #if line.approved_amount > line.total_amount:
                 #raise UserError(_('The amount is exceeded than requested amount'))
     
+    def unlink(self):
+        for adv in self:
+            if adv.state != 'draft':
+                raise UserError(_('You cannot delete a posted or approved advance.'))
+        return super(AdvancePayment, self).unlink()
+    
     @api.depends('type_id','advance_id')
     def _compute_name(self):
         for line in self:
@@ -421,8 +442,8 @@ class AdvancePayment(models.Model):
             line.product_id = line.type_id.product_id.id
             #line.description = line.product_id.name
         
-    @api.onchange('total_amount')
-    def onchange_amount(self):
+    @api.depends('total_amount','unit_price','quantity')
+    def _compute_approved_amount(self):
         for line in self:
             line.update({
                 'approved_amount': line.unit_price * line.quantity,

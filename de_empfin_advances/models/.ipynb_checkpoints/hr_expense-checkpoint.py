@@ -101,9 +101,10 @@ class HrExpenseSheet(models.Model):
             group_id = expense_type_id.group_id
             if group_id:
                 if (group_id & self.env.user.groups_id):
-                    line.write({
-                        'expense_approved': True, 
-                    })
+                    if line.expense_approved == True or line.remarks != False:
+                        line.write({
+                            'state': 'approved', 
+                        })
         
         #Line Category Expense Approval
         notification = {
@@ -116,17 +117,18 @@ class HrExpenseSheet(models.Model):
             },
         }
         
-        filtered_sheet_apr = self.filtered(lambda s: s.state in ['approve'])
-        if not filtered_sheet_apr:
-            return notification
-        for sheet in filtered_sheet_apr:
-            sheet.write({'state': 'exp_approve', 'user_id': sheet.user_id.id or self.env.user.id})
+        if all(expense.state == 'approved' for expense in self.expense_line_ids.filtered(lambda p: p.sheet_id.state == 'approve')):
+            filtered_sheet_apr = self.filtered(lambda s: s.state in ['approve'])
+            if not filtered_sheet_apr:
+                return notification
+            for sheet in filtered_sheet_apr:
+                sheet.write({'state': 'exp_approve', 'user_id': sheet.user_id.id or self.env.user.id})
         
-        notification['params'].update({
-            'title': _('The expense reports were successfully approved.'),
-            'type': 'success',
-            'next': {'type': 'ir.actions.act_window_close'},
-        })
+            notification['params'].update({
+                'title': _('The expense reports were successfully approved.'),
+                'type': 'success',
+                'next': {'type': 'ir.actions.act_window_close'},
+            })
                             
     def approve_expense_sheets(self):
         expense_type_id = self.env['hr.expense.type']
@@ -178,7 +180,7 @@ class HrExpenseSheet(models.Model):
             self.write({'state': 'post'})
             return
 
-        if any(sheet.state != 'approve' for sheet in self):
+        if any(sheet.state != 'fin_approve' for sheet in self):
             raise UserError(_("You can only generate accounting entry for approved expense(s)."))
 
         if any(not sheet.journal_id for sheet in self):
@@ -221,6 +223,10 @@ class HrExpense(models.Model):
     expense_type_id = fields.Many2one('hr.expense.type', string='Expense Category', copy=False)
     amount_approved = fields.Monetary(string='Approved Amount')
     expense_approved = fields.Boolean(string='Is Approved', default=False)
+    remarks = fields.Char(string='Remarks')
+    fin_remarks = fields.Char(string='Finance Remarks')
+    
+    
 
     #@api.depends('product_id', 'company_id')
     def _compute_from_product_id_company_id(self):
@@ -244,8 +250,16 @@ class HrExpense(models.Model):
                 'name': self.hr_salary_advance_id.name, 
                 #'product_id': self.hr_salary_advance_id.product_id.id,
                 'unit_amount': self.hr_salary_advance_id.amount_total,
-                'currency_id': self.hr_salary_advance_id.currency_id,
+                #'currency_id': self.hr_salary_advance_id.currency_id,
                 'quantity': 1,
                 'payment_mode': 'own_account',
             })
-
+            
+    @api.onchange('advance_line_id')
+    def onchange_advace_line(self):
+        if self.advance_line_id:
+            self.update({
+                'unit_amount': self.advance_line_id.unit_price,
+                'quantity': self.advance_line_id.quantity,
+                'product_id': False,
+            })
