@@ -74,20 +74,20 @@
                     	</group>
                         <notebook>
                             <page string="Lines">
-                               <field name="cash_line_ids" attrs="{'readonly':[('state','in',('paid','cancel','close','reject'))]}" >
-                                <tree editable="bottom">
+                               <field name="cash_line_ids"  >
+                                <tree editable="bottom"  >
                                     <field name="currency_id" invisible="1" />
                                 <field name="name" invisible="1"/>
-                                  <field name="type_id" options="{'no_create':True}" attrs="{'readonly':[('state','!=','draft')]}" />
+                                  <field name="type_id" options="{'no_create':True}" attrs="{'readonly':[('parent.state','not in',('draft'))], 'required':[('parent.state','=','draft')]}" />
                                  <field name="product_id" options="{'no_create':True}" attrs="{'readonly':[('state','!=','draft')]}" />
-                                 <field name="desc" attrs="{'readonly':[('state','!=','draft')]}" />
-                                 <field name="quantity" attrs="{'readonly':[('state','!=','draft')]}" />
-                                 <field name="unit_price" attrs="{'readonly':[('state','!=','draft')]}" />
+                                 <field name="desc" attrs="{'readonly':[('parent.state','!=','draft')], 'required':[('parent.state','=','draft')]}" />
+                                 <field name="quantity" attrs="{'readonly':[('parent.state','!=','draft')], 'required':[('parent.state','=','draft')]}" />
+                                 <field name="unit_price" attrs="{'readonly':[('parent.state','!=','draft')], 'required':[('parent.state','=','draft')]}" />
                                  <field name="total_amount" sum="Total"/>  
-                                 <field name="approved_amount" sum="Approved Amount" attrs="{'readonly':[('state','in',('paid','close','cancel', 'reject'))]}" groups="de_empfin_advances.group_hr_advance_finance_manager, de_empfin_advances.group_hr_advance_hr_manager"/>  
-                                 <field name="remarks" attrs="{'readonly':[('state','!=','draft')]}" /> 
-                                 <field name="finance_remarks" attrs="{'readonly':[('state','!=','draft')]}" groups="de_empfin_advances.group_hr_advance_finance_manager"/>   
-                                 <field name="approved" attrs="{'readonly':[('state','!=','draft')]}" />
+                                 <field name="approved_amount" sum="Approved Amount" attrs="{'readonly':['|',('state','in',('reject')),('parent.state','not in',('confirmed','hr_approval','finance_approval'))]}" groups="de_empfin_advances.group_hr_advance_finance_manager, de_empfin_advances.group_hr_advance_hr_manager"/>  
+                                 <field name="remarks" attrs="{'readonly':[('state','not in',('confirmed','hr_approval'))]}" /> 
+                                 <field name="finance_remarks" attrs="{'readonly':[('state','!=','finance_approval')]}" groups="de_empfin_advances.group_hr_advance_finance_manager"/>   
+                                 <field name="approved" attrs="{'readonly':['|',('state','in',('reject')),('parent.state','not in',('confirmed','hr_approval'))]}" />
                                 <field name="state" readonly="1"/> 
                                 <field name="advance_id" invisible="1"/>
                                 <field name="employee_id" invisible="1"/>     

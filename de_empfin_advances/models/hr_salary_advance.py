@@ -233,25 +233,46 @@ class SalaryAdvancePayment(models.Model):
             })
 
     def action_line_manager_approve(self):
+        #if all(adv.approved == False for adv in self.cash_line_ids.filtered(lambda p: p.advance_id.state == 'confirmed')):
+            #raise UserError(_("Only Managers and HR Officers can approve expenses"))
+            
         self.state = 'hr_approval'
         for cash_line in self.cash_line_ids:
-            cash_line.update({
-                'state': 'hr_approval'
-            })
+            if cash_line.approved:
+                cash_line.update({
+                    'state': 'hr_approval'
+                })
+            else:
+                cash_line.update({
+                    'state': 'reject',
+                    'approved_amount': 0,
+                })
         
     def action_hr_manager_approve(self):
         self.state = 'finance_approval'
         for cash_line in self.cash_line_ids:
-            cash_line.update({
-                'state': 'finance_approval'
-            })
+            if cash_line.approved:
+                cash_line.update({
+                    'state': 'finance_approval'
+                })
+            else:
+                cash_line.update({
+                    'state': 'reject',
+                    'approved_amount': 0,
+                })
         
     def action_finance_manager_approve(self):
         self.state = 'approved'
         for cash_line in self.cash_line_ids:
-            cash_line.update({
-                'state': 'approved'
-            })
+            if cash_line.approved:
+                cash_line.update({
+                    'state': 'approved'
+                })
+            else:
+                cash_line.update({
+                    'state': 'reject',
+                    'approved_amount': 0,
+                })
         
         
     def action_close(self):
@@ -260,8 +281,6 @@ class SalaryAdvancePayment(models.Model):
             cash_line.update({
                 'state': 'close'
             })
-        
-         
           
         
     def action_refuse(self):
@@ -317,14 +336,15 @@ class SalaryAdvancePayment(models.Model):
                     #account_id = self.account_id
                 #else:
                     #account_id = False
-                lines_data.append([0,0,{
-                    'product_id': line.product_id.id,
-                    'name': line.desc,
-                    'price_unit': line.approved_amount,
-                    #'account_id': account_id,
-                    'hr_salary_advance_line_id': line.id,
-                    'quantity': 1,
-                }])
+                if line.approved:
+                    lines_data.append([0,0,{
+                        'product_id': line.product_id.id,
+                        'name': line.desc,
+                        'price_unit': line.approved_amount,
+                        #'account_id': account_id,
+                        'hr_salary_advance_line_id': line.id,
+                        'quantity': 1,
+                    }])
             invoice.create({
                 'partner_id': self.partner_id.id,
                 'move_type': 'in_invoice',
@@ -356,13 +376,11 @@ class SalaryAdvancePayment(models.Model):
             'state': 'paid'
         })
         for cash_line in self.cash_line_ids:
-            cash_line.update({
-                'state': 'paid'
-            })
+            if cash_line.approved:
+                cash_line.update({
+                    'state': 'paid'
+                })
         return invoice
-    
-    
-    
     
     @api.depends('cash_line_ids.approved_amount')
     def _amount_all(self):
@@ -381,7 +399,7 @@ class AdvancePayment(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_name='name'
     
-    name = fields.Char(string='Name', compute='_compute_name')
+    name = fields.Char(string='Name', compute='_compute_name', store=True)
     type_id = fields.Many2one('hr.advance.type', string='Type')
     #product_id = fields.Many2one('product.product', string='Product', domain="[('can_be_expensed','=', True)]", required=True, change_default=True)
     product_id = fields.Many2one('product.product', string='Product', domain=[('type', '=', 'service')], change_default=True)
@@ -394,17 +412,17 @@ class AdvancePayment(models.Model):
     remarks = fields.Text(string='Remarks')
     finance_remarks = fields.Text(string='Finance Remarks')
     #approve_amount = fields.Float(string='Amount For Approval')
-    approved_amount = fields.Monetary(string='Approved Amt', readonly=False)
+    approved_amount = fields.Monetary(string='Approved Amt', compute='_compute_approved_amount', store=True)
     advance_id = fields.Many2one('hr.salary.advance', string='Advances')
     employee_id = fields.Many2one(related='advance_id.employee_id')
-    approved = fields.Boolean(string='Approved', default=True)
+    approved = fields.Boolean(string='Approved', default=False)
     state = fields.Selection([('draft', 'Draft'),
                               ('confirmed', 'Waiting Line Manager Approval'),
                               ('hr_approval', 'Waiting HR Approval'),
                               ('finance_approval', 'Waiting Finance Approval'),
                               ('accepted', 'Waiting Account Entries'),
                               ('approved', 'Waiting Payment'),
-                              ('paid', 'Open'),
+                              ('paid', 'Paid'),
                               ('close', 'Close'),
                               ('cancel', 'Cancelled'),
                               ('reject', 'Rejected')], string='Status', default='draft')
@@ -415,9 +433,16 @@ class AdvancePayment(models.Model):
             #if line.approved_amount > line.total_amount:
                 #raise UserError(_('The amount is exceeded than requested amount'))
     
+    def unlink(self):
+        for adv in self:
+            if adv.state != 'draft':
+                raise UserError(_('You cannot delete a posted or approved advance.'))
+        return super(AdvancePayment, self).unlink()
+    
+    @api.depends('type_id','advance_id')
     def _compute_name(self):
         for line in self:
-            line.name = line.advance_id.name + ' - ' + line.product_id.name
+            line.name = str(line.advance_id.name) + ' - ' + str(line.product_id.name)
             
     @api.onchange('type_id')
     def _onchange_type(self):
@@ -425,16 +450,13 @@ class AdvancePayment(models.Model):
             line.product_id = line.type_id.product_id.id
             #line.description = line.product_id.name
         
-    @api.onchange('total_amount')
-    def onchange_amount(self):
+    @api.depends('total_amount','unit_price','quantity')
+    def _compute_approved_amount(self):
         for line in self:
-            
             line.update({
                 'approved_amount': line.unit_price * line.quantity,
             })
-    
-    
-    
+            
     @api.depends('quantity', 'unit_price')
     def _compute_amount(self):
         for line in self:
