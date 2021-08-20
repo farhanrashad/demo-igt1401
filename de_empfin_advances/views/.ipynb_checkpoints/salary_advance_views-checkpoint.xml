@@ -85,7 +85,7 @@
                                  <field name="unit_price" attrs="{'readonly':[('parent.state','!=','draft')], 'required':[('parent.state','=','draft')]}" />
                                  <field name="total_amount" sum="Total"/>  
                                  <field name="approved_amount" sum="Approved Amount" attrs="{'readonly':['|',('state','in',('reject')),('parent.state','not in',('confirmed','hr_approval','finance_approval'))]}" groups="de_empfin_advances.group_hr_advance_finance_manager, de_empfin_advances.group_hr_advance_hr_manager"/>  
-                                 <field name="remarks" attrs="{'readonly':[('state','!=','confirmed')]}" /> 
+                                 <field name="remarks" attrs="{'readonly':[('state','not in',('confirmed','hr_approval'))]}" /> 
                                  <field name="finance_remarks" attrs="{'readonly':[('state','!=','finance_approval')]}" groups="de_empfin_advances.group_hr_advance_finance_manager"/>   
                                  <field name="approved" attrs="{'readonly':['|',('state','in',('reject')),('parent.state','not in',('confirmed','hr_approval'))]}" />
                                 <field name="state" readonly="1"/> 

@@ -264,9 +264,15 @@ class SalaryAdvancePayment(models.Model):
     def action_finance_manager_approve(self):
         self.state = 'approved'
         for cash_line in self.cash_line_ids:
-            cash_line.update({
-                'state': 'approved'
-            })
+            if cash_line.approved:
+                cash_line.update({
+                    'state': 'approved'
+                })
+            else:
+                cash_line.update({
+                    'state': 'reject',
+                    'approved_amount': 0,
+                })
         
         
     def action_close(self):
@@ -330,14 +336,15 @@ class SalaryAdvancePayment(models.Model):
                     #account_id = self.account_id
                 #else:
                     #account_id = False
-                lines_data.append([0,0,{
-                    'product_id': line.product_id.id,
-                    'name': line.desc,
-                    'price_unit': line.approved_amount,
-                    #'account_id': account_id,
-                    'hr_salary_advance_line_id': line.id,
-                    'quantity': 1,
-                }])
+                if line.approved:
+                    lines_data.append([0,0,{
+                        'product_id': line.product_id.id,
+                        'name': line.desc,
+                        'price_unit': line.approved_amount,
+                        #'account_id': account_id,
+                        'hr_salary_advance_line_id': line.id,
+                        'quantity': 1,
+                    }])
             invoice.create({
                 'partner_id': self.partner_id.id,
                 'move_type': 'in_invoice',
@@ -369,9 +376,10 @@ class SalaryAdvancePayment(models.Model):
             'state': 'paid'
         })
         for cash_line in self.cash_line_ids:
-            cash_line.update({
-                'state': 'paid'
-            })
+            if cash_line.approved:
+                cash_line.update({
+                    'state': 'paid'
+                })
         return invoice
     
     @api.depends('cash_line_ids.approved_amount')
@@ -414,7 +422,7 @@ class AdvancePayment(models.Model):
                               ('finance_approval', 'Waiting Finance Approval'),
                               ('accepted', 'Waiting Account Entries'),
                               ('approved', 'Waiting Payment'),
-                              ('paid', 'Open'),
+                              ('paid', 'Paid'),
                               ('close', 'Close'),
                               ('cancel', 'Cancelled'),
                               ('reject', 'Rejected')], string='Status', default='draft')

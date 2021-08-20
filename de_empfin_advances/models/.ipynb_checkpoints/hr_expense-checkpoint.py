@@ -72,6 +72,12 @@ class HrExpenseSheet(models.Model):
     # --------------------------------------------
     def approve_expense_finance(self):
         #Finanace Approval
+        for line in self.expense_line_ids:
+            if line.expense_approved:
+                if line.total_amount != line.amount_approved and line.fin_remarks == False:
+                    raise UserError(_("Approved amount is different than advance amount, Please specify remarks"))
+                    break
+                    
         notification = {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
@@ -97,6 +103,10 @@ class HrExpenseSheet(models.Model):
         
     def approve_expense_category(self):
         for line in self.expense_line_ids:
+            if line.expense_approved:
+                if line.total_amount != line.amount_approved and line.remarks == False:
+                    raise UserError(_("Approved amount is different than advance amount, Please specify remarks"))
+                    break
             expense_type_id = self.env['hr.expense.type'].search([('id','=',line.expense_type_id.id)],limit=1)
             group_id = expense_type_id.group_id
             if group_id:
@@ -143,7 +153,11 @@ class HrExpenseSheet(models.Model):
             if not self.env.user in current_managers and not self.user_has_groups('hr_expense.group_hr_expense_user') and self.employee_id.expense_manager_id != self.env.user:
                 raise UserError(_("You can only approve your department expenses"))
                 
-            
+        for line in self.expense_line_ids:
+            if line.expense_approved:
+                if line.total_amount != line.amount_approved and line.remarks == False:
+                    raise UserError(_("Approved amount is different than advance amount, Please specify remarks"))
+                    break
         
         notification = {
             'type': 'ir.actions.client',
@@ -221,13 +235,18 @@ class HrExpense(models.Model):
     advance_line_id  = fields.Many2one('hr.salary.advance.line', string='Advances Line', domain='[("advance_id","=", hr_salary_advance_id)]')
     hr_expense_sheet_type_id  = fields.Many2one('hr.expense.sheet.type', related='sheet_id.hr_expense_sheet_type_id')
     expense_type_id = fields.Many2one('hr.expense.type', string='Expense Category', copy=False)
-    amount_approved = fields.Monetary(string='Approved Amount')
+    amount_approved = fields.Monetary(string='Approved Amount', compute='_compute_amount_approved', store=True)
     expense_approved = fields.Boolean(string='Is Approved', default=False)
     remarks = fields.Char(string='Remarks')
     fin_remarks = fields.Char(string='Finance Remarks')
     
-    
 
+    @api.depends('total_amount')
+    def _compute_amount_approved(self):
+        for line in self:
+            line.update({
+                'amount_approved': line.total_amount,
+            })
     #@api.depends('product_id', 'company_id')
     def _compute_from_product_id_company_id(self):
         for expense in self.filtered('product_id'):
