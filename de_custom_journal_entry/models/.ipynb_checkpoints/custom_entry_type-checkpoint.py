@@ -74,6 +74,7 @@ class CustomEntryType(models.Model):
 
     #Line Item fields
     has_line_period = fields.Selection(CATEGORY_SELECTION, string="Has Line Period", default="no", required=True,)
+    has_note = fields.Selection(CATEGORY_SELECTION, string="Has Note", default="no", required=True,)
     has_project = fields.Selection(CATEGORY_SELECTION, string="Has Project", default="no", required=True,)
     has_product = fields.Selection(CATEGORY_SELECTION, string="Has Product", default="no", required=True,)
     has_advanced = fields.Selection(CATEGORY_SELECTION, string="Has Advanced Amount", default="no", required=True,)

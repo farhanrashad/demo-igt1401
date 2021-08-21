@@ -91,6 +91,7 @@ class CustomEntry(models.Model):
     
     #optional line items fields
     has_line_period = fields.Selection(related="custom_entry_type_id.has_line_period")
+    has_note = fields.Selection(related="custom_entry_type_id.has_note")
     has_project = fields.Selection(related="custom_entry_type_id.has_project")
     has_analytic = fields.Selection(related="custom_entry_type_id.has_analytic")
     has_product = fields.Selection(related="custom_entry_type_id.has_product")

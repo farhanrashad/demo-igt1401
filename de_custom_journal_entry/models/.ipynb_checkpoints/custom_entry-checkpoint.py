@@ -31,7 +31,7 @@ class CustomEntry(models.Model):
     name = fields.Char(string='Order Reference', required=True, copy=False, readonly=True, index=True, default=lambda self: _('New'))
     date_entry = fields.Datetime(string='Entry Date', required=True, index=True, copy=False, default=fields.Datetime.now,)
     date_entry_month = fields.Selection(MONTH_LIST, string='Month')
-    date_entry_year = fields.Char(string='Year', compute='_compute_entry_year', store=True)
+    date_entry_year = fields.Char(string='Year', store=True)
 
     date_submit = fields.Datetime('Submission Date', readonly=False)
     date_approved = fields.Datetime('Approved Date', readonly=False)
@@ -91,6 +91,7 @@ class CustomEntry(models.Model):
     
     #optional line items fields
     has_line_period = fields.Selection(related="custom_entry_type_id.has_line_period")
+    has_note = fields.Selection(related="custom_entry_type_id.has_note")
     has_project = fields.Selection(related="custom_entry_type_id.has_project")
     has_analytic = fields.Selection(related="custom_entry_type_id.has_analytic")
     has_product = fields.Selection(related="custom_entry_type_id.has_product")
@@ -114,7 +115,7 @@ class CustomEntry(models.Model):
     
     @api.depends('date_entry')
     def _compute_entry_year(self):
-        for entry in self:
+        for entry in self: 
             entry_year = entry.date_entry
             entry.date_entry_year = entry_year.year
 
