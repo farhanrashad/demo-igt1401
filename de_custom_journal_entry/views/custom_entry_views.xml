@@ -105,6 +105,7 @@
                         <field name="has_invoice" invisible="1"/>
                         
                         <field name="has_line_period" invisible="1"/>
+                        <field name="has_note" invisible="1"/>
                         <field name="has_project" invisible="1"/>
                         <field name="has_analytic" invisible="1"/>
                         <field name="has_product" invisible="1"/>
@@ -183,7 +184,7 @@
                                     <field name="supplier_id" attrs="{'column_invisible':[('parent.has_supplier','==','no')], 'required': [('parent.has_supplier','==','required')]}"/>
 
 
-                                    <field name='note' optional="show"/>
+                                    <field name='note' optional="show" attrs="{'column_invisible':[('parent.has_note','==','no')], 'required': [('parent.has_note','==','required')]}"/>
 
                                 </tree>
                             </field>

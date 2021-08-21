@@ -13,7 +13,7 @@
     'author': "Dynexcel",
     'website': "https://www.dynexcel.com",
     'category': 'Accounting',
-    'version': '14.0.0.2',
+    'version': '14.0.0.3',
 
     # any module necessary for this one to work correctly
     'depends': ['de_custom_journal_entry','de_travel_request'],
