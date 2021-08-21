@@ -13,8 +13,6 @@ from odoo.osv.expression import OR
 class ProjectTaskType(models.Model):
     _inherit = 'project.task.type'
     
-    stage_id = fields.Many2one('project.task.type', 'Parent Stage', index=True, ondelete='cascade')
-    #complete_name = fields.Char("Full Stage Name", compute='_compute_complete_name', store=True)
     stage_code = fields.Char(string='Code', size=3)
     
     stage_category = fields.Selection([
@@ -25,29 +23,13 @@ class ProjectTaskType(models.Model):
     
     group_id = fields.Many2one('res.groups', string='Security Group')
     
-    @api.depends('name', 'stage_id.complete_name')
-    def _compute_complete_name(self):
-        for stage in self:
-            if stage.stage_id:
-                stage.complete_name = '%s/%s' % (stage.stage_id.complete_name, stage.name)
-            else:
-                stage.complete_name = stage.name    
-
-class ProjectProejct(models.Model):
-    _inherit = 'project.project'
-    
-    project_stage_ids = fields.One2many('project.stage', 'project_id', string='Project Stage', copy=True)
-    
-class ProjectStage(models.Model):
-    _name = 'project.stage'
-    _description = 'Project Task Stages'
-    _order = 'sequence'
-    
-    project_id = fields.Many2one('project.task', string='Task', index=True, required=True, ondelete='cascade')
-    stage_id = fields.Many2one('project.task.type', string='Stage', readonly=False, ondelete='restrict', tracking=True, index=True, copy=False)
-    sequence = fields.Integer(string='Sequence')
-    next_stage_id = fields.Many2one('project.task.type', string='Next Stage', readonly=False, ondelete='restrict', tracking=True, index=True, copy=False)
-    prv_stage_id = fields.Many2one('project.task.type', string='Previous Stage', readonly=False, ondelete='restrict', tracking=True, index=True, copy=False)
+    @api.constrains('sequence')
+    def _check_sequence(self):
+        ex_task_type_id = env['project.task.type']
+        for record in self:
+            ex_task_type_id = env['project.task.type'].search([('id','!=',record.id),('sequence','=',record.name),('active','=',True)],limit=1)
+            if record.ex_task_type_id:
+                raise ValidationError(_('Sequence already found.'))
     
 class ProjectTask(models.Model):
     _inherit = 'project.task'
@@ -73,8 +55,48 @@ class ProjectTask(models.Model):
                 if group_id:
                     if not (group_id & self.env.user.groups_id):
                         raise UserError(_("You are not authorize to approve '%s'.", stage_id.name))
+                
+                if task.stage_id.stage_category == 'draft':
+                    if task.order_stage_ids:
+                        task.task_stage_ids.unlink()
+                    self._compute_task_stages()
         return result
-                    
+    
+    def _compute_task_stages(self):
+        stages_list = []
+        next_stage = prv_stage = False
+        for task in self:
+            stage_ids = self.env['project.task.type'].search([('project_ids', '=', task.project_id.id)])
+            for stage in stage_ids:
+                stages_list.append({
+                    'project_id': task.id,
+                    'stage_id': stage.id, 
+                    'sequence': stage.sequence,
+                })            
+            task.task_stage_ids.sudo().create(stages_list)
+            #===================================
+            #++++++++Assign Next Stage++++++++++++++
+            stages = self.env['project.task.stage'].search([('project_id','=', task.id)], order="sequence desc")
+            for stage in stages:
+                stage.sudo().update({
+                    'next_stage_id': next_stage,
+                })
+                next_stage = stage.stage_id.id
+            #++++++++++++++++++++++++++++++++++++++++
+            #+++++++++++Assign Previous Stage++++++++++
+            stages = self.env['project.task.stage'].search([('project_id','=', task.id)], order="sequence asc")
+            for stage in stages:
+                stage.sudo().update({
+                    'prv_stage_id': prv_stage,
+                })
+                prv_stage = stage.stage_id.id
+            
+    def unlink(self):
+        for task in self:
+            if task.stage_category != 'draft':
+                raise UserError(_('You cannot delete a submitted task.'))
+        return super(ProjectTask, self).unlink()
+    
     def _compute_task_stage(self):
         for task in self:
             next_stage = prv_stage = False
