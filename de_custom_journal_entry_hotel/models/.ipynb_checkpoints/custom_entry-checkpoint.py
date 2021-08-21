@@ -33,7 +33,7 @@ class CustomEntryLine(models.Model):
     h_check_in = fields.Date(string="Check-In")
     h_check_out = fields.Date(string="Check-Out")
     h_number_of_nights = fields.Float(string="Number of Nights", compute='_number_of_nights')
-    h_travel_id = fields.Many2one('travel.request' , string="Travel Request")
+    h_travel_id = fields.Many2one('travel.request' , string="Travel Reference")
     h_travel_description = fields.Char(related='h_travel_id.description_main')
     h_travel_type = fields.Selection(related='h_travel_id.travel_type')
     h_unit_price = fields.Float(string="Hotel Unit Price")
