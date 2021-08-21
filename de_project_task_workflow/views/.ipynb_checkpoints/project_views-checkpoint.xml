@@ -6,13 +6,15 @@
             <field name="model">project.task.type</field>
             <field name="inherit_id" ref="project.task_type_edit"/>
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='name']" position="after">
-                    <field name="stage_code" />
+                
+                <xpath expr="//field[@name='sequence']" position="attributes">
+                    <attribute name="required">1</attribute>
                 </xpath>
                 <xpath expr="//group[1]" position="after">
                     <group string="Workflow" name="task_workflow">
                         <group >
                             <field name="stage_category" widget="radio"/>
+                            <field name="user_id" string="Default Task Assign To" options="{'no_create': True,'no_open':True}"/>
                             <field name="group_id" options="{'no_create': True,'no_open':True}"/>
                         </group>
                         <group>
@@ -31,7 +33,6 @@
                 <xpath expr="//sheet" position="inside">
                     <field name="next_stage_id" invisible="1"/>
                     <field name="prv_stage_id" invisible="1"/>
-                    <field name="stage_code" invisible="1"/>
                     <field name="stage_category" invisible="1"/>
                 </xpath>
                 <xpath expr="//header" position="inside">
@@ -67,7 +68,7 @@
                 
                 <xpath expr="//notebook" position="inside">
                     <page string="Worfklow" id="workflow">
-                        <field name="task_stage_ids">
+                        <field name="task_stage_ids" attrs="{'readonly': [('stage_category','!=','draft')]}">
                             <tree editable="bottom">
                                 <field name="stage_id" required="1" options="{'no_create': True,'no_open':True}" domain="[('project_ids','=',parent.project_id)]"/>
                                 <field name="next_stage_id" options="{'no_create': True,'no_open':True}" domain="[('project_ids','=',parent.project_id)]"/>
