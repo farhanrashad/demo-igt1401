@@ -2,7 +2,7 @@
 {
     'name': "Third-Party Billing",
     'summary': """
-        Third Party Billing
+        Third Party Billing 
         """,
     'description': """
         Third Party Billing
