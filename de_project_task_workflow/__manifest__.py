@@ -11,7 +11,7 @@
     'website': "http://www.dynexcel.com",
     'category': 'Project',
     'version': '14.0.0.3',
-    "price": 75,
+    "price": 25,
     "currency": "USD",
     'depends': ['project'],
     'data': [
@@ -21,6 +21,6 @@
     ],
     "auto_install": False,
     "installable": True,
-    "live_test_url":'https://www.youtube.com/watch?v=2A6UAiSnpW0',
+    "live_test_url":'https://youtu.be/HzTNu6QfBoM',
     "images":['static/description/banner.jpg'],
 }
