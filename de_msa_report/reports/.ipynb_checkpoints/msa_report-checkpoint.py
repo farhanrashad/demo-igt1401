@@ -95,6 +95,7 @@ class GenerateXLSXReport(models.Model):
 
 
         msa_obj = self.env['master.service.agreement'].browse(data['id'])
+        site_billing_id = self.env['site.billing.info']
         sheet.write(1, 1, str(msa_obj.partner_id.name), format2)
         sheet.write(2, 1, str(msa_obj.simulation_date_from), format2)
         sheet.write(3, 1, str(msa_obj.exchange_rate), format2)
@@ -103,7 +104,11 @@ class GenerateXLSXReport(models.Model):
         sheet.write(6, 3, str(msa_obj.total_gross_opex), format2)
         row = 10
         for line in msa_obj.msa_simulation_ids:
+            site_billing_id = self.env['site.billing.info'].search([('msa_id','=',line.msa_id.id),('site_id','=',line.site_id.id)],limit=1)
             sheet.write(row, 0, line.site_id.name, format2)
+            sheet.write(row, 1, site_billing_id.name, format2)
+            sheet.write(row, 4, site_billing_id.network_type_id.name, format2)
+            sheet.write(row, 5, line.year, format2)
             sheet.write(row, 6, line.month_year, format2)
             sheet.write(row, 7, line.rfu_date, format2)
             sheet.write(row, 8, line.invoicing_days, format2)
