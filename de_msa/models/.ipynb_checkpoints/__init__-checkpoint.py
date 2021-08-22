@@ -5,9 +5,7 @@ from . import site_billing_info
 from . import network_type
 from . import tower_without_power
 from . import power_prices
-from . import location_factor
-from . import wind_factor
-from . import sla_factor
+from . import factors
 from . import collocation_discount_power_capex
 from . import collocation_discount_tower_capex
 from . import collocation_discount_tower_opex
