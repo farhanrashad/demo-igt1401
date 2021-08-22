@@ -39,7 +39,7 @@ class msa_simulation(models.Model):
     site_billing_info_id = fields.Many2one('site.billing.info', string='Site Billing Info')
     site_id = fields.Many2one('project.project', string='Site', readonly=True)
     region_factor = fields.Float(string='Region Factor')
-    year = fields.Float(string='Year')
+    year = fields.Integer(string='Year')
     head_lease_full_extra = fields.Boolean(string='Head Lease Full Extra', readonly=True)
     inv_tower_type = fields.Many2one('product.product', string='Tower Type', readonly=True)
     inv_power_model = fields.Many2one('product.product', string='Power Model', readonly=True)
