@@ -354,4 +354,3 @@ class master_service_agreement(models.Model):
     collocation_power_capex_ids = fields.One2many('collocation.discount.power.capex', 'msa_id', string='Collocation Discount for Power CAPEX')
     collocation_power_capex = fields.Text('Comment for Power CAPEX')
     target_pass_through_ids = fields.One2many('target.pass.through', 'msa_id', string='Target Pass-Through')
-

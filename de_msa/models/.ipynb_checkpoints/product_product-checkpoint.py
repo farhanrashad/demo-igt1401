@@ -13,7 +13,7 @@ class ProductTemplate(models.Model):
     is_product_category_tower = fields.Boolean(string='Is Category Tower?')
     
     wind_factor = fields.Many2one('wind.factor.value', string='Wind Category')
-
+    tower_height = fields.Float(string='Tower Height')
 
 class ProjectProjectInh(models.Model):
     _inherit = 'project.project'

@@ -34,6 +34,7 @@ class PurchaseSubscription(models.Model):
     _inherit = 'purchase.subscription'    
     
     purchase_subscription_schedule_line = fields.One2many('purchase.subscription.schedule', 'purchase_subscription_id', string='Subscription Schedules', copy=False)
+    project_id = fields.Many2one('project.project', string='Project')
     allow_payment_schedule = fields.Boolean(related='subscription_plan_id.allow_payment_schedule')
     select_all = fields.Boolean(string='Select All', default=False)
     

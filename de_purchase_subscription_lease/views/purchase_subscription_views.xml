@@ -44,6 +44,9 @@
                     <field name="amount_lease_current" />
                     <field name="amount_lease_total" />
                 </xpath>
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="project_id" invisible="0"/>
+                </xpath>
                 
                 <xpath expr="//field[@name='subscription_plan_id']" position="after">
                     <field name="allow_payment_schedule" invisible="1"/>
