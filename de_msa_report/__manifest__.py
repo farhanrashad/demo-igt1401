@@ -18,7 +18,7 @@
     # Check https://github.com/odoo/odoo/blob/14.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     'category': 'Agreement',
-    'version': '14.0.0.3',
+    'version': '14.0.0.4',
 
     # any module necessary for this one to work correctly
     'depends': ['base', 'de_msa','report_xlsx'],
