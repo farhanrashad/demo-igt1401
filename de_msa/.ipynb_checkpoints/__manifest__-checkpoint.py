@@ -17,7 +17,7 @@
     'category': 'Sale',
     'version': '14.0.1.4',
 
-    'depends': ['base','product','de_project_planning','account','contacts','account_asset'],
+    'depends': ['base','product','de_project_planning','account','contacts','account_asset','de_purchase_subscription'],
 
     'data': [
         'security/msa_security.xml',

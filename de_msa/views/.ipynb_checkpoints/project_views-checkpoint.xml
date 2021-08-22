@@ -39,7 +39,17 @@
                     </field>
                 </page>
                 <page name="site_billing_info" string="Billing Info" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
-                    <field name="site_billing_info_ids" />
+                    <field name="site_billing_info_ids" attrs="{'invisible':[('allow_site_planning','!=',True)]}"/>
+                </page>
+                <page name="purchase_subscriptions" string="Subscriptions" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
+                    <field name="purchase_subscription_ids" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
+                        <tree editable="bottom">
+                            <field name="name" />
+                            <field name="date_start" />
+                            <field name="date" />
+                            <field name="stage_id" />
+                        </tree>
+                    </field>
                 </page>
                 <page name="power_models" string="Power Models" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
                     <field name="power_product_ids" groups="de_msa.group_msa_user" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
