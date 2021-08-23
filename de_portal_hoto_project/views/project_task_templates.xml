@@ -114,15 +114,15 @@
                         <div class="col-12 col-md-6 mb-1">
                             <strong>HandOver Date:</strong> <span t-field="task.date_handover" t-options='{"widget": "date"}'/>
                         </div>
-                        <div class="col-12 col-md-6" t-if="task.date_rfi">
-                            <strong>RFI Date:</strong> <span t-field="task.date_deadline" t-options='{"widget": "date"}'/>
+                        <div class="col-12 col-md-6" >
+                          <strong>Project:</strong> <span t-field="task.project_id.name" />
                         </div>
                     </div>
                      <div class="row mb-4">
                         <div class="col-12 col-md-6 mb-1">
-                            <strong>Site:</strong> <span t-field="task.site_id.name" />
+                           <!-- <strong>Site:</strong> <span t-field="task.site_id.name" />-->
                         </div>
-                        <div class="col-12 col-md-6" t-if="task.date_rfi">
+                        <div class="col-12 col-md-6" >
                             <strong>Hoto Type:</strong> 
                              <t t-if="task.hoto_type =='new'">
                                       
