@@ -3,7 +3,7 @@
 	
 	    <record id="ms_report_stock_form_view" model="ir.ui.view">
 			<field name="name">ms.report.stock.form</field>
-			<field name="model">ms.report.stock</field>
+			<field name="model">report.purchase.budget</field>
 			<field name="type">form</field>
 			<field name="arch" type="xml">
 				
@@ -27,16 +27,16 @@
 	    	</field>
 	    </record>
 		
-	    <record id="ms_action_report_stock_xlsx" model="ir.actions.act_window">
-			<field name="name">Stock Report</field>
+	    <record id="action_report_purchase_budget_xlsx" model="ir.actions.act_window">
+			<field name="name">Budget Report</field>
 			<field name="type">ir.actions.act_window</field>
-			<field name="res_model">ms.report.stock</field>
+			<field name="res_model">report.purchase.budget</field>
 			<field name="view_mode">form</field>
 			<field name="view_id" ref="ms_report_stock_form_view"/>
 			<field name="target">new</field>
 	    </record>
 		
-		<menuitem id="ms_menu_report_stock_xlsx" action="ms_action_report_stock_xlsx" parent="stock.menu_warehouse_report"/>
+		<menuitem id="menu_report_purchase_budget_report_xlsx" action="action_report_purchase_budget_xlsx" parent="de_purchase_budget.menu_procurement_management_budget" sequence="50"/>
 	
 	</data>
 </odoo>

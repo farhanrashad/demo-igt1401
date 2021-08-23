@@ -6,9 +6,9 @@ from datetime import datetime
 from pytz import timezone
 import pytz
 
-class MsReportStock(models.TransientModel):
-    _name = "ms.report.stock"
-    _description = "Stock Report .xlsx"
+class ReportPurchaseBudget(models.TransientModel):
+    _name = "report.purchase.budget"
+    _description = "Report Purchase Budget"
     
     @api.model
     def get_default_date_model(self):
@@ -16,11 +16,11 @@ class MsReportStock(models.TransientModel):
     
     datas = fields.Binary('File', readonly=True)
     datas_fname = fields.Char('Filename', readonly=True)
-    product_ids = fields.Many2many('product.product', 'ms_report_stock_product_rel', 'ms_report_stock_id',
+    product_ids = fields.Many2many('product.product', 'purchase_budget_report_product_rel', 'purchase_budget_report_id',
         'product_id', 'Products')
-    categ_ids = fields.Many2many('product.category', 'ms_report_stock_categ_rel', 'ms_report_stock_id',
+    categ_ids = fields.Many2many('product.category', 'purchase_budget_report_category_rel', 'purchase_budget_report_id',
         'categ_id', 'Categories')
-    location_ids = fields.Many2many('stock.location', 'ms_report_stock_location_rel', 'ms_report_stock_id',
+    location_ids = fields.Many2many('stock.location', 'purchase_budget_report_location_rel', 'purchase_budget_report_id',
         'location_id', 'Locations')
         
     def print_excel_report(self):
