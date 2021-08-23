@@ -3,8 +3,8 @@ from odoo.exceptions import UserError
 from datetime import date, datetime, timedelta
 
 class GenerateXLSXReport(models.Model):
-    _name = 'report.de_msa_report.msa_report_xlsx_1'
-    _description = 'MSA Commercial Invoice'
+    _name = 'report.purchase.budget.xlsx_1'
+    _description = 'Purchase Report Budget'
     _inherit = 'report.report_xlsx.abstract'
 
     def generate_xlsx_report(self, workbook, data, line):
@@ -93,7 +93,7 @@ class GenerateXLSXReport(models.Model):
         sheet.set_column(row, 37, 20)
         
 
-
+"""
         msa_obj = self.env['master.service.agreement'].browse(data['id'])
         site_billing_id = self.env['site.billing.info']
         sheet.write(1, 1, str(msa_obj.partner_id.name), format2)
@@ -105,6 +105,7 @@ class GenerateXLSXReport(models.Model):
         row = 10
         network_type_id = ''
         rfu_date = ''
+        
         for line in msa_obj.msa_simulation_ids:
             site_billing_id = self.env['site.billing.info'].search([('msa_id','=',line.msa_id.id),('site_id','=',line.site_id.id)],limit=1)
             if site_billing_id.network_type_id:
@@ -144,4 +145,4 @@ class GenerateXLSXReport(models.Model):
             sheet.write(row, 29, line.diff_opex, format2)
             
             row = row + 1
-        
+        """

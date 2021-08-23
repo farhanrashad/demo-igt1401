@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Commercial Invoice (MSA)",
+    'name': "Purchase Budget Report",
 
     'summary': """
-        Commercial Invoice
-        - MSA Report
+        Purchase Budget Report
         """,
 
     'description': """
-       MSA Report
+       Purchase Budget Report
     """,
 
     'author': "Dynexcel",
@@ -17,17 +16,18 @@
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/14.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
-    'category': 'Agreement',
-    'version': '14.0.0.5',
+    'category': 'Purchase',
+    'version': '14.0.0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'de_msa','report_xlsx'],
+    'depends': ['de_purchase_budget','report_xlsx'],
 
     # always loaded
     'data': [
         'security/ir.model.access.csv',
-        'views/view_msa_report.xml',
-        'reports/msa_report.xml',
+        'views/purchase_budget_views.xml',
+        #'views/report_purchase_budget_views.xml',
+        'reports/report_purchase_budget.xml',
     ],
 }
 
