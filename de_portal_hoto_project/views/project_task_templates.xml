@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="portal_layout_hoto_site" name="Portal layout: project menu entry" inherit_id="portal.portal_breadcrumbs" priority="40">
+    <template id="portal_layout" name="Portal layout: project menu entry" inherit_id="portal.portal_breadcrumbs" priority="40">
         <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
           
             <li t-if="page_name == 'hoto_task' or hoto_task" t-attf-class="breadcrumb-item #{'active ' if not hoto_task else ''}">
