@@ -50,6 +50,7 @@ class GenerateXLSXReport(models.Model):
         sheet.set_column(row, 15, 20)
         sheet.set_column(row, 16, 20)
 
+        
         for id in lines:
             try:
                 if id.old_revision_ids:
