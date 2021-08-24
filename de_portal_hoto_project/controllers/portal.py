@@ -65,7 +65,7 @@ class CustomerPortal(CustomerPortal):
     # ------------------------------------------------------------
     def _hoto_site_task_get_page_view_values(self, task, access_token, **kwargs):
         values = {
-            'page_name': 'Hoto task',
+            'page_name': 'hoto_task',
             'task': task,
             'user': request.env.user
         }
