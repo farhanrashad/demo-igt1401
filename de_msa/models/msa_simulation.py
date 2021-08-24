@@ -78,6 +78,11 @@ class msa_simulation(models.Model):
     no_of_tenants_capex = fields.Integer(string='No. of Tenants Capex')
     rfu_date = fields.Date(string='RFU Date')
     lease_amount = fields.Float(string='Lease Amount')
+    opex_after_cpi = fields.Float(string='Opex after CPI')
+    capex = fields.Float(string='Capex')
+    opex = fields.Float(string='Opex')
+    lease_sharing = fields.Float(string='Lease Sharing')
+    final_opex = fields.Float(string='Final Opex')
     
     
     
