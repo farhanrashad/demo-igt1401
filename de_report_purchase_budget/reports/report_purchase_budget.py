@@ -3,15 +3,17 @@ from odoo.exceptions import UserError
 
 
 class GenerateXLSXReport(models.Model):
-    _name = 'report.de_msa_report.msa_report_xlsx'
-    _description = 'MSA Commercial Invoice'
+    _name = 'report.de_report_purchase_budget.budget_report_xlsx'
+    _description = 'Purchase Budget'
     _inherit = 'report.report_xlsx.abstract'
 
     def generate_xlsx_report(self, workbook, data, line):
         #         raise UserError(data['id'])
+        report_obj = self.env['report.de_report_purchase_budget.budget_report_xlsx']
+        result = report_obj._get_report_values(line, data)
         format1 = workbook.add_format({'font_size': '12', 'align': 'vcenter', 'bold': True})
         format3 = workbook.add_format({'font_size': '12', 'align': 'vcenter', 'bold': True, 'font_color': '#0000FF'})
-        sheet = workbook.add_worksheet('MSA Report')
+        sheet = workbook.add_worksheet()
         sheet.write(1, 0, 'Client', format1)
         sheet.write(2, 0, 'Simulation Date', format1)
         sheet.write(3, 0, 'Exchange Rate (from USD to MMK)', format1)
@@ -94,46 +96,46 @@ class GenerateXLSXReport(models.Model):
         
 
 
-        msa_obj = self.env['master.service.agreement'].browse(data['id'])
-        site_billing_id = self.env['site.billing.info']
-        sheet.write(1, 1, str(msa_obj.partner_id.name), format2)
-        sheet.write(2, 1, str(msa_obj.simulation_date_from), format2)
-        sheet.write(3, 1, str(msa_obj.exchange_rate), format2)
-        sheet.write(4, 1, str(msa_obj.number_days_in_month), format2)
-        sheet.write(6, 1, str(msa_obj.total_gross_capex), format2)
-        sheet.write(6, 3, str(msa_obj.total_gross_opex), format2)
-        row = 10
-        for line in msa_obj.msa_simulation_ids:
-            site_billing_id = self.env['site.billing.info'].search([('msa_id','=',line.msa_id.id),('site_id','=',line.site_id.id)],limit=1)
-            sheet.write(row, 0, line.site_id.name, format2)
-            sheet.write(row, 1, site_billing_id.name, format2)
-            sheet.write(row, 2, line.year)
-            sheet.write(row, 3, site_billing_id.name, format2)
-            sheet.write(row, 4, site_billing_id.network_type_id.name, format2)
-            sheet.write(row, 5, str(line.year), format2)
-            sheet.write(row, 6, line.month_year, format2)
-            sheet.write(row, 7, line.month_year, format2)
-            sheet.write(row, 8, line.invoicing_days, format2)
-            sheet.write(row, 9, line.head_lease, format2)
-            sheet.write(row, 10, line.head_lease_extra, format2)
-            sheet.write(row, 11, line.region_factor, format2)
-            sheet.write(row, 12, line.collocation_capex, format2)
-            sheet.write(row, 13, line.collocation_opex, format2)
-            sheet.write(row, 14, line.inv_tower_type.name, format2)
-            sheet.write(row, 16, line.wind_factor, format2)
-            sheet.write(row, 17, line.inv_power_model.name, format2)
-            sheet.write(row, 18, line.ip_fee_capex, format2)
-            sheet.write(row, 19, line.ip_fee_opex, format2)
-            sheet.write(row, 20, line.invoiced_rent_adjustment, format2)
-            sheet.write(row, 21, line.power_fee_capex, format2)
-            sheet.write(row, 22, line.capex_escalation, format2)
-            sheet.write(row, 23, line.opex_cpi, format2)
-            sheet.write(row, 24, line.gross_ip_fee_capex, format2)
-            sheet.write(row, 25, line.ip_fee_capex_billed, format2)
-            sheet.write(row, 26, line.diff_capex, format2)
-            sheet.write(row, 27, line.gross_ip_fee_opex, format2)
-            sheet.write(row, 28, line.ip_fee_opex_billed, format2)
-            sheet.write(row, 29, line.diff_opex, format2)
+#         msa_obj = self.env['master.service.agreement'].browse(data['id'])
+#         site_billing_id = self.env['site.billing.info']
+#         sheet.write(1, 1, str(msa_obj.partner_id.name), format2)
+#         sheet.write(2, 1, str(msa_obj.simulation_date_from), format2)
+#         sheet.write(3, 1, str(msa_obj.exchange_rate), format2)
+#         sheet.write(4, 1, str(msa_obj.number_days_in_month), format2)
+#         sheet.write(6, 1, str(msa_obj.total_gross_capex), format2)
+#         sheet.write(6, 3, str(msa_obj.total_gross_opex), format2)
+#         row = 10
+#         for line in msa_obj.msa_simulation_ids:
+#             site_billing_id = self.env['site.billing.info'].search([('msa_id','=',line.msa_id.id),('site_id','=',line.site_id.id)],limit=1)
+#             sheet.write(row, 0, line.site_id.name, format2)
+#             sheet.write(row, 1, site_billing_id.name, format2)
+#             sheet.write(row, 2, line.year)
+#             sheet.write(row, 3, site_billing_id.name, format2)
+#             sheet.write(row, 4, site_billing_id.network_type_id.name, format2)
+#             sheet.write(row, 5, str(line.year), format2)
+#             sheet.write(row, 6, line.month_year, format2)
+#             sheet.write(row, 7, line.month_year, format2)
+#             sheet.write(row, 8, line.invoicing_days, format2)
+#             sheet.write(row, 9, line.head_lease, format2)
+#             sheet.write(row, 10, line.head_lease_extra, format2)
+#             sheet.write(row, 11, line.region_factor, format2)
+#             sheet.write(row, 12, line.collocation_capex, format2)
+#             sheet.write(row, 13, line.collocation_opex, format2)
+#             sheet.write(row, 14, line.inv_tower_type.name, format2)
+#             sheet.write(row, 16, line.wind_factor, format2)
+#             sheet.write(row, 17, line.inv_power_model.name, format2)
+#             sheet.write(row, 18, line.ip_fee_capex, format2)
+#             sheet.write(row, 19, line.ip_fee_opex, format2)
+#             sheet.write(row, 20, line.invoiced_rent_adjustment, format2)
+#             sheet.write(row, 21, line.power_fee_capex, format2)
+#             sheet.write(row, 22, line.capex_escalation, format2)
+#             sheet.write(row, 23, line.opex_cpi, format2)
+#             sheet.write(row, 24, line.gross_ip_fee_capex, format2)
+#             sheet.write(row, 25, line.ip_fee_capex_billed, format2)
+#             sheet.write(row, 26, line.diff_capex, format2)
+#             sheet.write(row, 27, line.gross_ip_fee_opex, format2)
+#             sheet.write(row, 28, line.ip_fee_opex_billed, format2)
+#             sheet.write(row, 29, line.diff_opex, format2)
             
-            row = row + 1
+#             row = row + 1
         
