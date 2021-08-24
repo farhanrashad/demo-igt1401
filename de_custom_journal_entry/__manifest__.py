@@ -2,7 +2,7 @@
 {
     'name': "Third-Party Billing",
     'summary': """
-        Third Party Billing 
+        Third Party Billing
         """,
     'description': """
         Third Party Billing
@@ -16,7 +16,7 @@
     'author': "Dynexcel",
     'website': "https://www.dynexcel.com",
     'category': 'Accounting',
-    'version': '14.0.6.9',
+    'version': '14.0.7.0',
     
     'depends': ['base','de_purchase_subscription','account', 'analytic', 'fleet', 'de_project_planning','project','stock','purchase_requisition','purchase'],
 
