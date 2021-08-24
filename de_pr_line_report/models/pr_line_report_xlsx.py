@@ -6,7 +6,8 @@ class GenerateXLSXReport(models.Model):
     _description = 'Purchase Requisition Report'
     _inherit = 'report.report_xlsx.abstract'
 
-    def generate_xlsx_report(self, workbook, data, lines):
+    def generate_xlsx_report(self, workbook, data, lines,model="ir.actions.report",output_format="xlsx",report_name="de_pr_line_report.pr_line_report_xlsx"):
+        
 
         format1 = workbook.add_format({'font_size': '12', 'align': 'vcenter', 'bold': True})
         sheet = workbook.add_worksheet('Products Report')
@@ -122,7 +123,7 @@ class GenerateXLSXReport(models.Model):
                     else:
                         uom = None
                     if line.price_unit:
-                       price_unit = line.price_uni
+                       price_unit = line.price_unit
                     else:
                         price_unit = None
                     if line.price_total_base:
