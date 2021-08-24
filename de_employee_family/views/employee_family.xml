@@ -18,7 +18,7 @@
                             <field name="email"/>
                             <field name="relation_ship" />
                             <field name="date_of_birth" />
-                            <field name="active" />
+                            <field name="familty_active" />
                         </tree>
                         </field>
                     </page>
