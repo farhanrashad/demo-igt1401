@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     'name': "PR Deviation Report",
-    'summary': """Generate PR Deviation Report""",
+    'summary': """PR Deviation Report""",
     'description': """
-        Generate PR Deviation Report
+        PR Deviation Report
     """,
     'author': "Dynexcel",
     'website': "https://www.dynexcel.co",

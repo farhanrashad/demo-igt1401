@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     'name': "PO Line Report",
-    'summary': """Generate PO Line Excel Report""",
+    'summary': """PO Line Excel Report""",
     'description': """
-        Generate PO Line Report
+        PO Line Report
     """,
     'author': "Dynexcel",
     'website': "https://www.dynexcel.co",

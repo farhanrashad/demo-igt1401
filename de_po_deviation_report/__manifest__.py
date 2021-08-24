@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     'name': "PO Deviation Report",
-    'summary': """Generate PO Deviation Report""",
+    'summary': """PO Deviation Report""",
     'description': """
-        Generate PO Deviation Report
+        PO Deviation Report
     """,
     'author': "Dynexcel",
     'website': "https://www.dynexcel.co",

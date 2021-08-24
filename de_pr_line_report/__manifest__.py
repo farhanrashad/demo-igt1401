@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     'name': "PR Line Report",
-    'summary': """Generate PR Line Excel Report""",
+    'summary': """PR Line Excel Report""",
     'description': """
-        Generate PR Line Report
+        PR Line Report
     """,
     'author': "Dynexcel",
     'website': "https://www.dynexcel.co",
