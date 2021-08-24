@@ -15,8 +15,9 @@
                 model="purchase.budget"
                 string="Budget Report"
                 report_type="xlsx"
-                name="de_report_purchase_budget.report_purchase_budget"
+                name="de_report_purchase_budget.xlsx_1"
                 file="Budget Report"
         />
+        
     </data>
 </odoo>

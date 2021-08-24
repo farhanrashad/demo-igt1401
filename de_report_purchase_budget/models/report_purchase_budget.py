@@ -2,13 +2,19 @@ from odoo import models
 from odoo.exceptions import UserError
 from datetime import date, datetime, timedelta
 
+
+
+
 class GenerateXLSXReport(models.Model):
-    _name = 'report.purchase.budget.xlsx_1'
+    _name = 'report.de_report_purchase_budget.xlsx_1'
     _description = 'Purchase Report Budget'
     _inherit = 'report.report_xlsx.abstract'
 
-    def generate_xlsx_report(self, workbook, data, line):
+    def generate_xlsx_report(self, workbook, data, obj):
+        report_obj = self.env['report.de_report_purchase_budget.xlsx_1']
+        result = report_obj._get_report_values(obj, data)
         #         raise UserError(data['id'])
+       
         format1 = workbook.add_format({'font_size': '12', 'align': 'vcenter', 'bold': True})
         format3 = workbook.add_format({'font_size': '12', 'align': 'vcenter', 'bold': True, 'font_color': '#0000FF'})
         sheet = workbook.add_worksheet('MSA Report')
@@ -145,4 +151,4 @@ class GenerateXLSXReport(models.Model):
             sheet.write(row, 29, line.diff_opex, format2)
             
             row = row + 1
-        """
+"""
