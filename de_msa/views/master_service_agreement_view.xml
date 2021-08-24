@@ -260,6 +260,12 @@
                     				<field name="power_price_capex"/>
                     				<field name="monthly_lease_amount"/>
                     				<field name="no_of_tenants_capex"/>
+                                    <field name="lease_amount" />
+                                    <field name="opex_after_cpi" />
+                                    <field name="capex" />
+                                    <field name="opex" />
+                                    <field name="lease_sharing" />
+                                    <field name="final_opex" />
                     			</tree>
                     			<form string="Price Details" >
                     				<group>

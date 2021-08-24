@@ -15,7 +15,7 @@
     'author': "Dynexcel",
     'website': "https://www.dynexcel.com",
     'category': 'Sale',
-    'version': '14.0.1.4',
+    'version': '14.0.1.5',
 
     'depends': ['base','product','de_project_planning','account','contacts','account_asset','de_purchase_subscription'],
 

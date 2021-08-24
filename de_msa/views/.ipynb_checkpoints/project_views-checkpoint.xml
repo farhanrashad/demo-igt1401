@@ -19,49 +19,7 @@
                         
                 </group>
             </xpath>
-            <xpath expr="//page[1]" position="after">
-                <page name="assets" string="Assets" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
-                    <field name="asset_ids" />
-                </page>
-                <page name="po_lines" string="PO Lines" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
-                    <field name="purchase_line_ids" groups="de_msa.group_msa_user" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
-                        <tree editable="bottom">
-                            <field name="order_id" />
-                            <field name="product_id" />
-                            <field name="product_qty" />
-                            <field name="price_unit" />
-                            <field name="price_subtotal" />
-                            <field name="product_uom" optional="show" />
-                            <field name="qty_received" optional="hide" />
-                            <field name="qty_invoiced" optional="hide" />
-                            <field name="date_planned" string="Schedule Date" optional="show" />
-                        </tree>
-                    </field>
-                </page>
-                <page name="site_billing_info" string="Billing Info" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
-                    <field name="site_billing_info_ids" attrs="{'invisible':[('allow_site_planning','!=',True)]}"/>
-                </page>
-                <page name="purchase_subscriptions" string="Subscriptions" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
-                    <field name="purchase_subscription_ids" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
-                        <tree editable="bottom">
-                            <field name="name" />
-                            <field name="date_start" />
-                            <field name="date" />
-                            <field name="stage_id" />
-                        </tree>
-                    </field>
-                </page>
-                <page name="power_models" string="Power Models" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
-                    <field name="power_product_ids" groups="de_msa.group_msa_user" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
-                        <tree editable="bottom">
-                            <field name="period" required="1"/>
-                            <field name="date_start" required="1" />
-                            <field name="date_end" required="0" />
-                            <field name="product_id" required="1" options="{'no_create': True,'no_open':True}" />
-                        </tree>
-                    </field>
-                </page>
-            </xpath>
+            
 			<xpath expr="//field[@name='partner_id']" position="after">
 				<field name="state_id" />
 			</xpath>
@@ -69,7 +27,6 @@
 		</field>
 	</record>
     <!-- Site View -->
-    <!-- Project -->
     <record id="project_site_form_view" model="ir.ui.view">
         <field name="name">project.site.form.view</field>
         <field name="model">project.project</field>
@@ -106,7 +63,57 @@
                             <field name="description" nolabel="1" placeholder="Describe your project..." type="html"/>
                             <div class="d-none oe_clear"/>
                         </page>
-                        
+                        <page name="assets" string="Assets" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
+                    <field name="asset_ids" />
+                </page>
+                <page name="po_lines" string="PO Lines" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
+                    <field name="purchase_line_ids" groups="de_msa.group_msa_user" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
+                        <tree editable="bottom">
+                            <field name="order_id" />
+                            <field name="product_id" />
+                            <field name="product_qty" />
+                            <field name="price_unit" />
+                            <field name="price_subtotal" />
+                            <field name="product_uom" optional="show" />
+                            <field name="qty_received" optional="hide" />
+                            <field name="qty_invoiced" optional="hide" />
+                            <field name="date_planned" string="Schedule Date" optional="show" />
+                        </tree>
+                    </field>
+                </page>
+                        <page name="site_billing_info" string="Billing Info" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
+                    <field name="site_billing_info_ids" attrs="{'invisible':[('allow_site_planning','!=',True)]}"/>
+                </page>
+                <page name="purchase_subscriptions" string="Subscriptions" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
+                    <field name="purchase_subscription_ids" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
+                        <tree editable="bottom">
+                            <field name="name" />
+                            <field name="date_start" />
+                            <field name="date" />
+                            <field name="stage_id" />
+                        </tree>
+                    </field>
+                </page>
+                        <page name="contractor_ids" string="Contractors" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
+                    <field name="project_contractor_ids" groups="de_msa.group_msa_user" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
+                        <tree editable="bottom">
+                            <field name="project_id" invisible="1"/>
+                            <field name="partner_id" string="Contractor" required="1" options="{'no_create': True,'no_open':True}" />
+                            <field name="date_start" required="1" />
+                            <field name="date_end" required="1" />
+                        </tree>
+                    </field>
+                </page>
+                <page name="power_models" string="Power Models" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
+                    <field name="power_product_ids" groups="de_msa.group_msa_user" attrs="{'invisible':[('allow_site_planning','!=',True)]}">
+                        <tree editable="bottom">
+                            <field name="period" required="1"/>
+                            <field name="date_start" required="1" />
+                            <field name="date_end" required="0" />
+                            <field name="product_id" required="1" options="{'no_create': True,'no_open':True}" />
+                        </tree>
+                    </field>
+                </page>
                         <page name="site_settings" string="Settings">
                             <group>
                                 <group>
@@ -175,7 +182,7 @@
             <field name="view_mode">tree,form</field>
             <field name="view_ids" eval="[(5, 0, 0),
                 (0, 0, {'view_mode': 'tree', 'view_id': ref('project_site_tree_view')}),
-              (0, 0, {'view_mode': 'form', 'view_id': ref('project_form_view_inherit_site')})]"/>
+              (0, 0, {'view_mode': 'form', 'view_id': ref('project_site_form_view')})]"/>
             <field name="search_view_id" ref="project.view_project_project_filter"/>
             <field name="target">main</field>
             <field name="help" type="html">
