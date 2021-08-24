@@ -45,8 +45,6 @@ class CreateHotoTask(http.Controller):
             'site_id': int(kw.get('site_id')),
             'site_hoto': True,
             'hoto_type': kw.get('hoto_type'),
-            'date_handover': kw.get('date_handover'),
-            'date_rfi': kw.get('date_rfi'),
             'date_onair': kw.get('date_onair'),
         }
         task = request.env['project.task'].sudo().create(vals)
