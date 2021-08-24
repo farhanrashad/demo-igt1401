@@ -14,9 +14,9 @@ from odoo.tools import groupby as groupbyelem
 from odoo.osv.expression import OR
 
 def hoto_site_page_content(flag = 0):
-    partners = request.env['res.users'].search([('id','=',http.request.env.context.get('uid'))])
-    projects = request.env['project.project'].search([('name','=','HOTO')])
-    sites = request.env['project.project'].search([('allow_site_planning','=',True)])
+    partners = request.env['res.users'].sudo().search([('id','=',http.request.env.context.get('uid'))])
+    projects = request.env['project.project'].sudo().search([('name','=','HOTO')])
+    sites = request.env['project.project'].sudo().search([('allow_site_planning','=',True)])
     return {
         'partners': partners,
         'projects': projects,
@@ -46,32 +46,30 @@ class CreateHotoTask(http.Controller):
             'site_hoto': True,
             'hoto_type': kw.get('hoto_type'),
             'date_handover': kw.get('date_handover'),
-            'date_rfi': kw.get('date_rfi'),
-            'date_onair': kw.get('date_onair'),
         }
-        task = request.env['project.task'].create(vals)
-        return request.redirect('/hoto/task/%s'%(task.id))
+        task = request.env['project.task'].sudo().create(vals)
+        return request.render('de_portal_hoto_project.hoto_submited', {})
 
 class CustomerPortal(CustomerPortal):
 
     def _prepare_home_portal_values(self, counters):
         values = super()._prepare_home_portal_values(counters)
         if 'hoto_count' in counters:
-            active_user = request.env['res.users'].search([('id','=',http.request.env.context.get('uid'))])    
-            values['hoto_count'] = request.env['project.task'].search_count([('partner_id','=', active_user.partner_id.id)])
+            active_user = request.env['res.users'].sudo().search([('id','=',http.request.env.context.get('uid'))])    
+            values['hoto_count'] = request.env['project.task'].sudo().search_count([('partner_id','=', active_user.partner_id.id)])
         return values
 
    
     # ------------------------------------------------------------
     # My Task
     # ------------------------------------------------------------
-    def _hoto_site_task_get_page_view_values(self, task, access_token, **kwargs):
+    def _hoto_site_task_get_page_view_values(self, hoto_task, access_token, **kwargs):
         values = {
-            'page_name': 'Hoto task',
-            'task': task,
+            'page_name': 'hoto_task',
+            'hoto_task': hoto_task,
             'user': request.env.user
         }
-        return self._get_page_view_values(task, access_token, values, 'hoto_tasks_history', False, **kwargs)
+        return self._get_page_view_values(hoto_task, access_token, values, 'hoto_tasks_history', False, **kwargs)
 
     @http.route(['/hoto/tasks', '/hoto/tasks/page/<int:page>'], type='http', auth="user", website=True)
     def portal_hoto_tasks(self, page=1, date_begin=None, date_end=None, sortby=None, filterby=None, search=None, search_in='content', groupby=None, **kw):
@@ -101,7 +99,7 @@ class CustomerPortal(CustomerPortal):
         }
 
         # extends filterby criteria with project the customer has access to
-        projects = request.env['project.project'].search([('name','=','HOTO')])
+        projects = request.env['project.project'].sudo().search([('name','=','HOTO')])
         for project in projects:
             searchbar_filters.update({
                 str(project.id): {'label': project.name, 'domain': [('project_id', '=', project.id)]}
@@ -150,10 +148,10 @@ class CustomerPortal(CustomerPortal):
                 search_domain = OR([search_domain, [('project_id', 'ilike', search)]])
             domain += search_domain
             
-        active_user = request.env['res.users'].search([('id','=',http.request.env.context.get('uid'))])    
-        domain += [('partner_id', '=', active_user.partner_id.id)]
+        active_user = request.env['res.users'].sudo().search([('id','=',http.request.env.context.get('uid'))])    
+        domain += ['|',('partner_id', '=', active_user.partner_id.id),('project_id.name','=','HOTO')]
         # task count
-        task_count = request.env['project.task'].search_count(domain)
+        task_count = request.env['project.task'].sudo().search_count(domain)
         # pager
         pager = portal_pager(
             url="/hoto/tasks",
@@ -168,7 +166,7 @@ class CustomerPortal(CustomerPortal):
         elif groupby == 'stage':
             order = "stage_id, %s" % order  # force sort on stage first to group by stage in view
 
-        tasks = request.env['project.task'].search(domain, order=order, limit=self._items_per_page, offset=pager['offset'])
+        tasks = request.env['project.task'].sudo().search(domain, order=order, limit=self._items_per_page, offset=pager['offset'])
         request.session['hoto_tasks_history'] = tasks.ids[:100]
 
         
@@ -196,7 +194,7 @@ class CustomerPortal(CustomerPortal):
     @http.route(['/hoto/task/<int:task_id>'], type='http', auth="public", website=True)
     def portal_hoto_task(self, task_id, access_token=None, **kw):
         try:
-            task_sudo = self._document_check_access('project.task', task_id, access_token)
+            task_sudo = request.env['project.task'].sudo().search([('id', '=', task_id)])
         except (AccessError, MissingError):
             return request.redirect('/my')
 
