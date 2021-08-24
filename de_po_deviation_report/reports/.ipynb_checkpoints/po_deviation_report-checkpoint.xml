@@ -1,7 +1,7 @@
 <odoo>
     <data>
         <record id="po_deviation_report" model="ir.actions.report">
-            <field name="name">Purchase Order Report</field>
+            <field name="name">PO Deviation Report</field>
             <field name="model">purchase.order</field>
             <field name="report_type">xlsx</field>
             <field name="report_name">de_po_deviation_report.po_deviation_report_xlsx</field>

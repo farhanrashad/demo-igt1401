@@ -122,7 +122,7 @@ class GenerateXLSXReport(models.Model):
                     else:
                         uom = None
                     if line.price_unit:
-                       price_unit = line.price_uni
+                       price_unit = line.price_unit
                     else:
                         price_unit = None
                     if line.price_total_base:

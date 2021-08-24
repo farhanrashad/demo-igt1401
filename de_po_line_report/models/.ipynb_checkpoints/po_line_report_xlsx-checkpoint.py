@@ -8,7 +8,7 @@ class GenerateXLSXReport(models.Model):
     _description = 'Purchase Order Line Report'
     _inherit = 'report.report_xlsx.abstract'
 
-    def generate_xlsx_report(self, workbook, data, lines):
+    def generate_xlsx_report(self, workbook, data, lines,model="ir.actions.report",output_format="xlsx",report_name="de_po_line_report.po_line_report_xlsx"):
 
         format1 = workbook.add_format({'font_size': '12', 'align': 'vcenter', 'bold': True})
         sheet = workbook.add_worksheet('PO Line Report')
@@ -149,10 +149,13 @@ class GenerateXLSXReport(models.Model):
                     else:
                         invoice_date = None
 
-                    payment_schedule_date = vendor_bills.invoice_payment_term_id
-                    if payment_schedule_date:
-                        payment_date = payment_schedule_date.strftime("%m/%d/%Y")
-                    else:
+                    try:
+                        payment_schedule_date = vendor_bills.invoice_payment_term_id
+                        if payment_schedule_date:
+                            payment_date = payment_schedule_date.strftime("%m/%d/%Y")
+                        else:
+                            payment_date = None
+                    except:
                         payment_date = None
                     
                     if vendor_bills.amount_residual:
