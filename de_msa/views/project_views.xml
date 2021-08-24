@@ -1,5 +1,5 @@
 <odoo>
-
+<!--
 	<record id="project_form_view_inherit_site" model="ir.ui.view">
 		<field name="name">project.project.form.view.inherit.site</field>
 		<field name="model">project.project</field>
@@ -26,6 +26,7 @@
 
 		</field>
 	</record>
+-->
     <!-- Site View -->
     <record id="project_site_form_view" model="ir.ui.view">
         <field name="name">project.site.form.view</field>
