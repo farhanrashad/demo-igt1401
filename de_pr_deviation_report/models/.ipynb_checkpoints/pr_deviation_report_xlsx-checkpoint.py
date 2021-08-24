@@ -8,7 +8,8 @@ class GenerateXLSXReport(models.Model):
     _description = 'Purchase Requisition Report'
     _inherit = 'report.report_xlsx.abstract'
 
-    def generate_xlsx_report(self, workbook, data, lines):
+    def generate_xlsx_report(self, workbook, data, lines,model="ir.actions.report",output_format="xlsx",report_name="de_pr_deviation_report.pr_deviation_report_xlsx"):
+        
 
         format1 = workbook.add_format({'font_size': '12', 'align': 'vcenter', 'bold': True})
         sheet = workbook.add_worksheet('PR Deviation Report')
