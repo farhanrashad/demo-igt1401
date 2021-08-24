@@ -34,4 +34,5 @@ class HrEmployeeFamily(models.Model):
     date_of_birth = fields.Date()
     # visible_field = fields.Boolean(default=False)
     employee_id = fields.Many2one('hr.employee')
+    active = fields.Boolean(string='Active', default=True)
 

@@ -6,8 +6,8 @@
     'author': "Dynexcel",
     'website': "https://www.dynexcel.com",
     'category': 'Payroll',
-    'version': '14.0.0.3',
-    'depends': ['base', 'hr','hr_payroll'],
+    'version': '14.0.0.4',
+    'depends': ['de_employee_family','hr_payroll'],
     'data': [
         'security/ir.model.access.csv',
         'data/employee_pit_data.xml',

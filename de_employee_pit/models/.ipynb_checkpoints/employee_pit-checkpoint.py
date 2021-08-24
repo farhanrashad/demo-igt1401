@@ -98,7 +98,7 @@ class EmployeeIncomeTax(models.Model):
                 rec.final_wage = 0
 
             if rec.employee_id.employee_family_ids:
-                for dependant in rec.employee_id.employee_family_ids:
+                for dependant in rec.employee_id.employee_family_ids.filtered(lambda x: x.active == True):
                     if dependant.relation_ship == "father":
                         rec.father = True
                         parent_count = parent_count + 1
