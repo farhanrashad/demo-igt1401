@@ -9,7 +9,7 @@
     "sequence": 3,
     "author": "Dynexcel",
     "website": "http://www.dynexcel.com",
-    "version": '14.0.1.3',
+    "version": '14.0.1.4',
     "depends": ['base', 'hr'],
     "data": [
         'security/ir.model.access.csv',
