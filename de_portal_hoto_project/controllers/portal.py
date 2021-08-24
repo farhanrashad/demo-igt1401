@@ -48,7 +48,7 @@ class CreateHotoTask(http.Controller):
             'date_onair': kw.get('date_onair'),
         }
         task = request.env['project.task'].sudo().create(vals)
-        return request.redirect('/hoto/task/%s'%(task.id))
+        return request.render('de_portal_hoto_project.hoto_submited', {})
 
 class CustomerPortal(CustomerPortal):
 
@@ -63,13 +63,13 @@ class CustomerPortal(CustomerPortal):
     # ------------------------------------------------------------
     # My Task
     # ------------------------------------------------------------
-    def _hoto_site_task_get_page_view_values(self, task, access_token, **kwargs):
+    def _hoto_site_task_get_page_view_values(self, hoto_task, access_token, **kwargs):
         values = {
             'page_name': 'hoto_task',
-            'task': task,
+            'hoto_task': hoto_task,
             'user': request.env.user
         }
-        return self._get_page_view_values(task, access_token, values, 'hoto_tasks_history', False, **kwargs)
+        return self._get_page_view_values(hoto_task, access_token, values, 'hoto_tasks_history', False, **kwargs)
 
     @http.route(['/hoto/tasks', '/hoto/tasks/page/<int:page>'], type='http', auth="user", website=True)
     def portal_hoto_tasks(self, page=1, date_begin=None, date_end=None, sortby=None, filterby=None, search=None, search_in='content', groupby=None, **kw):
