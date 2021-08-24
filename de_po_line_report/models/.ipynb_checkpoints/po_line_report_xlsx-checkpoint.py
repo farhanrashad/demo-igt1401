@@ -57,6 +57,7 @@ class GenerateXLSXReport(models.Model):
         sheet.write(3, 42, 'Incoterms', format1)
         sheet.write(3, 43, 'Payment Terms', format1)
 
+        
         format2 = workbook.add_format({'font_size': '12', 'align': 'vcenter'})
         row = 4
         sheet.set_column(row, 0, 50)
