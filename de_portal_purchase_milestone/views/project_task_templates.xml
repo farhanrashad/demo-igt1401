@@ -44,6 +44,7 @@
                                 <th >Task</th>
                                 <th >Site</th>
                                 <th >Deadline</th>
+                                <th >Purchase Order</th>
                                 <th >Completion Days</th>
                                 <th >Completion Percentage</th>
                                 <th >Status</th>
@@ -64,6 +65,10 @@
                                     <td class="text-left">
                                         <span t-esc="task.date_deadline" t-options='{"widget": "date"}'/>
                                     </td>
+                                    <td class="text-left">
+                                        
+                                        <a t-attf-href="/my/purchase/#{task.purchase_id.id}?{{ keep_query() }}"><span t-field="task.purchase_id.name"/></a>
+                                    </td> 
                                     <td class="text-left">
                                         <span t-esc="task.completion_days"  />
                                     </td>
@@ -113,7 +118,8 @@
                             <strong>Deadline:</strong> <span t-field="task.date_deadline" t-options='{"widget": "date"}'/>
                         </div>
                         <div class="col-12 col-md-6" t-if="task.purchase_id">
-                            <strong>Purchase Order:</strong> <span t-field="task.purchase_id.name" />
+                            <strong>Purchase Order:</strong> 
+                             <a t-attf-href="/my/purchase/#{task.purchase_id.id}?{{ keep_query() }}"><span t-field="task.purchase_id.name"/></a>
                         </div>
                     </div>
                      <div class="row mb-4">
