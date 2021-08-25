@@ -435,7 +435,6 @@ class GenerateXLSXReport(models.Model):
                 for line in id.purchase_budget_line:
                     po_lines = self.env['purchase.order.line'].search([('purchase_budget_line_id','=',line.id)])
                     for po in po_lines:
-                        #raise UserError(type(po.date_order.month))
                         
                         ############## For January #############
                         try:
@@ -899,7 +898,7 @@ class GenerateXLSXReport(models.Model):
                         try:
                             if po.date_order:
                                 month8 = po.date_order.strftime("%Y")
-                                month8 = "January/"+month8
+                                month8 = "August/"+month8
                             else:
                                 month8 = None
                         except:

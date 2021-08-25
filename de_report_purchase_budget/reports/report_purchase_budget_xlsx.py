@@ -898,7 +898,7 @@ class GenerateXLSXReport(models.Model):
                         try:
                             if po.date_order:
                                 month8 = po.date_order.strftime("%Y")
-                                month8 = "January/"+month8
+                                month8 = "August/"+month8
                             else:
                                 month8 = None
                         except:
