@@ -179,8 +179,8 @@ class CustomerPortal(CustomerPortal):
     def _prepare_home_portal_values(self, counters):
         values = super()._prepare_home_portal_values(counters)
         if 'milestone_count' in counters:
-            active_user = request.env['res.users'].sudo().search([('id','=',http.request.env.context.get('uid'))])    
-            values['milestone_count'] = request.env['project.task'].sudo().search_count([('partner_id','=', active_user.partner_id.id),('purchase_id','!=',False),('stage_id.submission_type', 'in', [1,2])])
+            active_user = request.env['res.users'].search([('id','=',http.request.env.context.get('uid'))])    
+            values['milestone_count'] = request.env['project.task'].search_count([('partner_id','=', active_user.partner_id.id)])
         return values
 
    
@@ -265,10 +265,8 @@ class CustomerPortal(CustomerPortal):
                 search_domain = OR([search_domain, [('project_id', 'ilike', search)]])
             domain += search_domain
             
-        active_user = request.env['res.users'].sudo().search([('id','=',http.request.env.context.get('uid'))])    
+        active_user = request.env['res.users'].search([('id','=',http.request.env.context.get('uid'))])    
         domain += [('partner_id', '=', active_user.partner_id.id)]
-        domain += [('stage_id.submission_type', 'in', [1,2])]
-        domain += [('purchase_id', '!=', False)] 
         # task count
         milestone_count = request.env['project.task'].sudo().search_count(domain)
         # pager
@@ -313,7 +311,7 @@ class CustomerPortal(CustomerPortal):
     @http.route(['/purchase/milestone/task/<int:task_id>'], type='http', auth="public", website=True)
     def portal_purchase_milestone_task(self, task_id, access_token=None, **kw):
         try:
-            task_sudo = request.env['project.task'].sudo().search([('id', '=', task_id)])
+            task_sudo = self._document_check_access('project.task', task_id, access_token)
         except (AccessError, MissingError):
             return request.redirect('/my')
 
