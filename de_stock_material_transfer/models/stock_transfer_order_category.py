@@ -51,6 +51,7 @@ class StockTransferOrderCategory(models.Model):
     default_delivery_validity = fields.Integer('Delivery validity')
     delivery_lead_days = fields.Integer('Delivery lead time')
     default_return_validity = fields.Integer('Return validity')
+    default_order_validity = fields.Integer('Order validity')
     
     warehouse_id = fields.Many2one('stock.warehouse', string='Warehouse', domain="[('company_id', '=', company_id)]", )
     picking_type_id = fields.Many2one('stock.picking.type', 'Operation Type', required=True, )

@@ -73,6 +73,11 @@
                                     <field name="default_delivery_validity" nolabel="1" />
                                     <span>Day(s)</span>
                                 </div>
+                                <label for="default_order_validity" />
+                                <div class="default_order_validity" name="default_order_validity" >
+                                    <field name="default_order_validity" nolabel="1" />
+                                    <span>Day(s)</span>
+                                </div>
                                 <label for="delivery_lead_days" />
                                 <div class="delivery_lead_days" name="delivery_lead_days" >
                                     <field name="delivery_lead_days" nolabel="1" />
