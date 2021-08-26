@@ -65,6 +65,7 @@ class StockTransferOrder(models.Model):
     next_stage_id = fields.Many2one('stock.transfer.order.stage',compute='_compute_order_stage')
     prv_stage_id = fields.Many2one('stock.transfer.order.stage',compute='_compute_order_stage')
     stage_category = fields.Selection(related='stage_id.stage_category')
+    allow_transactions = fields.Boolean(related='stage_id.allow_transactions')
     next_stage_category = fields.Selection(related='next_stage_id.stage_category', string='Next Stage Category')
     prv_stage_category = fields.Selection(related='next_stage_id.stage_category', string='Previous Stage Category')
     stage_code = fields.Char(related='stage_id.stage_code')

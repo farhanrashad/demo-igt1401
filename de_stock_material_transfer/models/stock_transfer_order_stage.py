@@ -30,6 +30,7 @@ class StockTransferOrderStage(models.Model):
     
     #transfer_order_category_id = fields.Many2one('stock.transfer.order.category', string='Transfer Category', index=True, domain="[('transfer_order_type_id','=',transfer_order_type_ids)]")
 
+    allow_transactions = fields.Boolean(string='Allow Transactions')
     stage_category = fields.Selection([
         ('draft', 'Draft'),
         ('progress', 'In Progress'),
