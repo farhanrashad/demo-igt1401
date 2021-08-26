@@ -69,13 +69,12 @@
                     
                     <button name="action_draft" type="object" string="Set to Draft" attrs="{'invisible': [('stage_category', 'not in', ['cancel'])]}"/>
                     
-                    <field name="stage_id" widget="statusbar" domain="[('transfer_order_type_ids', '=', transfer_order_type_id)]" invisible="1"/>
                     <!--
                     <field name="stage_id" widget="statusbar" domain="[('transfer_order_type_ids', '=', transfer_order_type_id)]" attrs="{'invisible':[('disallow_staging','=',False)]}"/> -->
                     <!--
                     <field name="stage_id" widget="statusbar" domain="[ ('transfer_order_category_ids', '=', transfer_order_category_id),('transfer_order_type_ids','=',transfer_order_type_id)]" attrs="{'invisible':[('picking_state','!=',False)]}"/>
 -->
-                    <field name="stage_id" widget="statusbar" domain="['|',('transfer_order_category_ids', '=', transfer_order_category_id),'&amp;', ('transfer_order_type_ids','=',transfer_order_type_id),('transfer_order_category_ids','=',False)]" attrs="{'invisible':[('picking_state','=',False)]}"/>
+                    <field name="stage_id" widget="statusbar" domain="['|',('transfer_order_category_ids', '=', transfer_order_category_id),'&amp;', ('transfer_order_type_ids','=',transfer_order_type_id),('transfer_order_category_ids','=',False)]" />
                     
 
 
