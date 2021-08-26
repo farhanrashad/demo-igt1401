@@ -92,6 +92,9 @@ class StockTransferOrder(models.Model):
     date_order = fields.Datetime(string='Order Date', required=True, readonly=True, index=True, copy=False, default=fields.Datetime.now, help="Order confirmation date")
     date_scheduled = fields.Datetime(string='Date Scheduled', required=True, readonly=True, index=True, copy=False, default=fields.Datetime.now, help="Deadline schedule date")
     delivery_deadline = fields.Datetime(string='Delivery Deadline', required=True, readonly=True, index=True, copy=False, default=fields.Datetime.now, help="Delivery Deadline")
+    order_deadline = fields.Datetime(string='Order Exipiry', required=True, readonly=True, index=True, copy=False, default=fields.Datetime.now, help="Order Expiry")
+
+    
     return_deadline = fields.Datetime(string='Return Deadline', readonly=False, compute='_compute_return_deadline', store=True, copy=False, help="Retrun Material Deadline")
     date_delivered = fields.Datetime(string="Actual Delivery", compute="_compute_all_dates")
     date_returned = fields.Datetime(string="Actual Return", compute="_compute_all_dates")

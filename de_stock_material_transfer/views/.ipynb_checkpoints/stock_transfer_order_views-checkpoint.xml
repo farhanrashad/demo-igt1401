@@ -171,6 +171,7 @@
                             <field name="date_scheduled" attrs="{'readonly': [('stage_category', '!=', 'draft')]}"/>
                             <field name="delivery_deadline" attrs="{'readonly': [('stage_category', '!=', 'draft')]}"/>
                             <field name="date_delivered" attrs="{'readonly': [('stage_category', '!=', 'draft')]}"/>
+                            <field name="order_deadline" attrs="{'readonly': [('stage_category', '!=', 'draft')]}"/>
                             <field name="return_deadline" attrs="{'invisible':[('action_type','=','normal')]}" />
                             <field name="date_returned" />
                             <field name="close_reason_id" attrs="{'invisible':[('close_reason_id','=',False)]}" decoration-danger="close_reason_id != False" />
