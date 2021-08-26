@@ -277,13 +277,13 @@ class StockTransferOrder(models.Model):
         result = super(StockTransferOrder, self).write(vals)
         #if 'stage_id' in vals:
         #raise UserError(_("stage =  '%s'.", self.stage_id.stage_category))
-        if self.stage_id.stage_category == 'draft':
-            if self.order_stage_ids:
-                self.order_stage_ids.unlink()
-            self._compute_order_stages()
+        #if self.stage_id.stage_category == 'draft':
+        if self.order_stage_ids:
+            self.order_stage_ids.unlink()
+        self.compute_order_stages()
         return result
     
-    def _compute_order_stages(self):
+    def compute_order_stages(self):
         vals = {}
         stages_list = []
         next_stage = prv_stage = False
@@ -722,7 +722,7 @@ class StockTransferOrder(models.Model):
             if not order.stock_transfer_order_line:
                 raise UserError(_("You cannot submit requisition '%s' because there is no product line.", self.name))
         #self.sudo().process_txn_stage()
-        self._compute_order_stages()
+        self.compute_order_stages()
         self.update({
             'stage_id' : self.next_stage_id.id,
         })
