@@ -409,7 +409,7 @@ class StockTransferOrder(models.Model):
         picking_type_id = picking_return_type_id = self.env['stock.picking.type']
         pickings = self.env['stock.picking']
         vals = {}
-        reason_id = self.env['stock.transfer.close.reason'].search([('reason_type','=',type)],limit=1)
+        #reason_id = self.env['stock.transfer.close.reason'].search([('reason_type','=',type)],limit=1)
         for order in self:
             #stage_id = self.env['stock.transfer.order.stage'].search([('transfer_order_type_ids','=',order.transfer_order_type_id.id),('stage_category','=','close'),('stage_code','=','CL')],limit=1)
             if order.picking_state:
@@ -493,8 +493,8 @@ class StockTransferOrder(models.Model):
     def set_close1(self, order_id, type):
         today = fields.Date.from_string(fields.Date.context_today(self))
         pickings = self.env['stock.picking']
-        delivery_reason_id = self.env['stock.transfer.close.reason'].search([('reason_type','=','delivery')],limit=1)
-        return_reason_id = self.env['stock.transfer.close.reason'].search([('reason_type','=','return')],limit=1)
+        #delivery_reason_id = self.env['stock.transfer.close.reason'].search([('reason_type','=','delivery')],limit=1)
+        #return_reason_id = self.env['stock.transfer.close.reason'].search([('reason_type','=','return')],limit=1)
         reason_id = delivery_reason_id
         if type == 'delivery':
             reason_id = delivery_reason_id
