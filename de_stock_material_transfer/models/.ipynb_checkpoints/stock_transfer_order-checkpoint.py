@@ -417,33 +417,22 @@ class StockTransferOrder(models.Model):
             #stage_id = self.env['stock.transfer.order.stage'].search([('transfer_order_type_ids','=',order.transfer_order_type_id.id),('stage_category','=','close'),('stage_code','=','CL')],limit=1)
             if order.picking_state:
                 if order.transfer_order_category_id.auto_expiry:
-                    #if type == 'delivery':
-                        #if not order.date_delivered:
-                            #picking_type_id = order.transfer_order_category_id.picking_type_id.id
-                            #picking_return_type_id = order.transfer_order_category_id.return_picking_type_id.id
-                    vals = {
-                        'stage_id': order.transfer_order_category_id.expiry_stage_id.id, 
-                        'date_closed': today,
-                        'close_reason_id' : order.transfer_order_category_id.expiry_default_reason_id.id,
-                        'close_reason_message' : 'Auto Closed',
-                        }
-                #elif type == 'return':
-                #    if order.return_deadline < today and not (order.date_returned):
-                #        picking_return_type_id = order.transfer_order_category_id.return_picking_type_id.id
-                #        vals = {
-                #            'stage_id': stage_id.id, 
-                #            'date_closed': today,
-                #            'close_reason_id' : reason_id.id,
-                #            'close_reason_message' : 'Auto Closed',
-                #        }
+                    if order.order_deadline < fields.Datetime.now():
+                        vals = {
+                            'stage_id': order.transfer_order_category_id.expiry_stage_id.id, 
+                            'date_closed': today,
+                            'close_reason_id' : order.transfer_order_category_id.expiry_default_reason_id.id,
+                            'close_reason_message' : 'Auto Closed',
+                            }
             elif order.picking_state == False or not order.picking_state:
                 if order.transfer_order_category_id.auto_reject:
-                    vals = {
-                        'stage_id': order.transfer_order_category_id.reject_stage_id.id, 
-                        'date_closed': today,
-                        'close_reason_id' : order.transfer_order_category_id.reject_default_reason_id.id,
-                        'close_reason_message' : 'Auto Reject',
-                    }
+                    if order.delivery_deadline < fields.Datetime.now():
+                        vals = {
+                            'stage_id': order.transfer_order_category_id.reject_stage_id.id, 
+                            'date_closed': today,
+                            'close_reason_id' : order.transfer_order_category_id.reject_default_reason_id.id,
+                            'close_reason_message' : 'Auto Reject',
+                        }
             picking_type_id = order.transfer_order_category_id.picking_type_id.id
             picking_return_type_id = order.transfer_order_category_id.return_picking_type_id.id
 
@@ -455,75 +444,7 @@ class StockTransferOrder(models.Model):
     
     
     
-    @api.model
-    def cron_expire_order(self):        
-        today = fields.Datetime.now()
-        domain_delivery_close = domain_return_close = ''
-        
-        # set to pending deliveries if date is in less than today
-        domain_delivery_pending = [('delivery_deadline', '<', today), ('stage_category', '=', 'transfer')]
-        #delivery_pending = self.search(domain_delivery_pending)
-        delivery_pending = self.env['stock.transfer.order'].search(domain_delivery_pending)
-        if delivery_pending:
-            delivery_pending.set_close('delivery')
-        
-        # set to pending deliveries if date is in less than today
-        domain_return_pending = [('return_deadline', '<', today), ('return_deadline', '!=', False), ('stage_category', '=', 'transfer')]
-        #return_pending = self.search(domain_return_pending)
-        return_pending = self.env['stock.transfer.order'].search(domain_return_pending)
-        if return_pending:
-            return_pending.set_close('return')
-        
-        return dict(delivery_order=delivery_pending.ids, return_order=return_pending.ids)
-        #return dict(delivery_order=delivery_pending.ids)
-        
-        # set to close if date is passed
-        #for order in self:
-            #domain_delivery_close = [('delivery_deadline', '<', today), ('date_delivered', '=', False), ('stage_category', 'in', ['progress','confirm','transfer'])]
-            #order_delivery_close = order.search(domain_delivery_close)
-            #domain_return_close = [('return_deadline', '<', today), ('date_returned', '=', False), ('stage_category', 'in', ['progress','confirm','transfer'])]
-            #order_return_close = order.search(domain_return_close)
-            #if order.transfer_order_category_id.auto_expiry:
-                #if order_delivery_close:
-                    #type = 'delivery'
-                    #res = order_delivery_close.set_close(order, type)
-                #if order_return_close:
-                    #type = 'return'
-                    #res = order_return_close.set_close(order, type)
-        #return dict(closed=order_close.ids)
-        #return self._cancel_delivery(automatic=True)
-    
-    def set_close1(self, order_id, type):
-        today = fields.Date.from_string(fields.Date.context_today(self))
-        pickings = self.env['stock.picking']
-        #delivery_reason_id = self.env['stock.transfer.close.reason'].search([('reason_type','=','delivery')],limit=1)
-        #return_reason_id = self.env['stock.transfer.close.reason'].search([('reason_type','=','return')],limit=1)
-        reason_id = delivery_reason_id
-        if type == 'delivery':
-            reason_id = delivery_reason_id
-        elif type == 'return':
-            reason_id = return_reason_id
-            
-        stage_id = self.env['stock.transfer.order.stage'].search([('transfer_order_type_ids','=',self.transfer_order_type_id.id),('stage_category','=','close')])
-        for order in order_id:
-            if type == 'normal':
-                order.write({
-                    'stage_id': stage_id.id, 
-                    'date_closed': today,
-                })
-            else:
-                if order.transfer_order_category_id.auto_expiry:
-                    order.write({
-                        'stage_id': stage_id.id, 
-                        'date_closed': today,
-                        'close_reason_id' : reason_id.id,
-                        'close_reason_message' : 'Auto Closed',
-                    })
-            #for picking in pickings.search([('stock_transfer_order_id','=',order.id),('state','!=','done')])
-                for picking in order.picking_ids.filtered(lambda p: p.picking_type_id.id in (order.transfer_order_category_id.picking_type_id.id,order.transfer_order_category_id.return_picking_type_id.id) and p.state not in ('done','cancel')):
-                    picking.sudo().action_cancel()
-        return type
-    
+   
     
     def _cancel_delivery(self, automatic=False):
         auto_commit = self.env.context.get('auto_commit', True)
@@ -699,9 +620,10 @@ class StockTransferOrder(models.Model):
             self.picking_type_id = self.transfer_order_category_id.picking_type_id.id
             ddays = self.transfer_order_category_id.default_delivery_validity
             ldays = self.transfer_order_category_id.delivery_lead_days
+            edays = self.transfer_order_category_id.default_order_validity
             if ddays > 0:
                 self.delivery_deadline = fields.Date.to_string(datetime.now() + timedelta(ddays))
-                self.date_scheduled = fields.Date.to_string(datetime.now() + timedelta(ldays))
+                self.order_deadline = fields.Date.to_string(datetime.now() + timedelta(edays))
         
 
     
