@@ -46,6 +46,31 @@
                                 <field name="group_id" options="{'no_create':True}"/>
                             </group>
                         </group>
+                        <group col="2">
+                             <label for="auto_expiry" />
+                                <div class="o_row no-gutters d-flex">
+                                    <div class="o_row" name="auto_expiry" >
+                                        <field name="auto_expiry" nolabel="1" />                                        
+                                        <field name="expiry_default_reason_id" options="{'no_create':True, 'no_open':True}" attrs="{'invisible':[('auto_expiry','=',False)]}" />
+                                        <span> for </span>
+                                        <field name="expiry_stage_id" options="{'no_create':True, 'no_open':True}" attrs="{'invisible':[('auto_expiry','=',False)]}" />
+                                        <span> Apply on </span>
+                                        <field name="close_allow_on_stage_ids" widget="many2many_tags" options="{'no_create':True, 'no_open':True}" attrs="{'invisible':[('auto_reject','=',False)]}" />
+                                    </div>
+                                </div>
+                                <label for="auto_reject" />
+                                <div class="o_row no-gutters d-flex">
+                                    <div class="o_row" name="auto_reject" >
+                                        <field name="auto_reject" nolabel="1" />
+                                        <field name="reject_default_reason_id" options="{'no_create':True, 'no_open':True}" attrs="{'invisible':[('auto_reject','=',False)]}" />
+                                         <span> for </span>
+                                        <field name="reject_stage_id" options="{'no_create':True, 'no_open':True}" attrs="{'invisible':[('auto_reject','=',False)]}" />
+                                        <span> Apply on </span>
+                                        <field name="rej_allow_on_stage_ids" widget="many2many_tags" options="{'no_create':True, 'no_open':True}" attrs="{'invisible':[('auto_reject','=',False)]}" />
+
+                                    </div>
+                                </div>
+                        </group>
                         <group>
                             <field name="description" placeholder="Give your team the details for material transfer type."/>
                         </group>

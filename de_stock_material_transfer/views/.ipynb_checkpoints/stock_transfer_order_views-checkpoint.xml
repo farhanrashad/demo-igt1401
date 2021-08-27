@@ -155,7 +155,7 @@
                             <field name="curr_txn_stage_id" invisible="1" />
                             <div class="o_row no-gutters d-flex">
                                 <div class="o_row">
-                                    <field name="transfer_exception_type_ids" string="Transaction" nolabel="1" invisible="0" widget="many2many_checkboxes" domain="[('transfer_order_category_ids', '=', transfer_order_category_id)]" attrs="{'invisible': ['|',('transfer_order_category_id', '=', False),('allow_transactions', '=', False)]}"/>
+                                    <field name="transfer_exception_type_ids" string="Transaction" nolabel="1" invisible="0" widget="many2many_checkboxes" domain="[('transfer_order_category_ids', '=', transfer_order_category_id),('apply_stage_id', '=', stage_id)]" attrs="{'invisible': ['|',('transfer_order_category_id', '=', False),('allow_transactions', '=', False)]}"/>
                                 </div>
                             </div>
                             <!--

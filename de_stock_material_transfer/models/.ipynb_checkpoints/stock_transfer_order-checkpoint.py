@@ -281,10 +281,10 @@ class StockTransferOrder(models.Model):
         #if self.stage_id.stage_category == 'draft':
         if self.order_stage_ids:
             self.order_stage_ids.unlink()
-        self.compute_order_stages()
+        self._compute_order_stages()
         return result
     
-    def compute_order_stages(self):
+    def _compute_order_stages(self):
         vals = {}
         stages_list = []
         next_stage = prv_stage = False
@@ -417,21 +417,21 @@ class StockTransferOrder(models.Model):
         for order in self:
             #stage_id = self.env['stock.transfer.order.stage'].search([('transfer_order_type_ids','=',order.transfer_order_type_id.id),('stage_category','=','close'),('stage_code','=','CL')],limit=1)
             if order.picking_state:
-                if order.transfer_order_category_id.auto_expiry:
+                if order.transfer_order_type_id.auto_expiry and order.stage_id.id in (order.transfer_order_type_id.close_allow_on_stage_ids.mapped('id')):
                     if order.order_deadline < fields.Datetime.now():
                         vals = {
-                            'stage_id': order.transfer_order_category_id.expiry_stage_id.id, 
+                            'stage_id': order.transfer_order_type_id.expiry_stage_id.id, 
                             'date_closed': today,
-                            'close_reason_id' : order.transfer_order_category_id.expiry_default_reason_id.id,
+                            'close_reason_id' : order.transfer_order_type_id.expiry_default_reason_id.id,
                             'close_reason_message' : 'Auto Closed',
                             }
             elif order.picking_state == False or not order.picking_state:
-                if order.transfer_order_category_id.auto_reject:
+                if order.transfer_order_type_id.auto_reject and order.stage_id.id in (order.transfer_order_type_id.rej_allow_on_stage_ids.mapped('id')):                     
                     if order.delivery_deadline < fields.Datetime.now():
                         vals = {
-                            'stage_id': order.transfer_order_category_id.reject_stage_id.id, 
+                            'stage_id': order.transfer_order_type_id.reject_stage_id.id, 
                             'date_closed': today,
-                            'close_reason_id' : order.transfer_order_category_id.reject_default_reason_id.id,
+                            'close_reason_id' : order.transfer_order_type_id.reject_default_reason_id.id,
                             'close_reason_message' : 'Auto Reject',
                         }
             picking_type_id = order.transfer_order_category_id.picking_type_id.id
@@ -713,7 +713,7 @@ class StockTransferOrder(models.Model):
             txn.sudo().unlink()
             
     def action_submit(self):
-        #self.ensure_one()
+        self.ensure_one()
         for order in self.sudo():
             group_id = order.transfer_order_category_id.group_id
             if group_id:
@@ -723,7 +723,7 @@ class StockTransferOrder(models.Model):
             if not order.stock_transfer_order_line:
                 raise UserError(_("You cannot submit requisition '%s' because there is no product line.", self.name))
         #self.sudo().process_txn_stage()
-        self.compute_order_stages()
+        #self._compute_order_stages()
         self.update({
             'stage_id' : self.next_stage_id.id,
         })
