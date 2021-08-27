@@ -40,6 +40,7 @@ class TransferOrderException(models.Model):
     active = fields.Boolean('Active', default=True,
         help="If unchecked, it will allow you to hide the exception without removing it.")
     
+    
     _sql_constraints = [
         ('unique_exception', 'unique (code)', 'Exception already defined'),
     ]

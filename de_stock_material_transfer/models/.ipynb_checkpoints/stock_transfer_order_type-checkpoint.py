@@ -37,6 +37,19 @@ class StockTransferOrderType(models.Model):
     stock_transfer_status_line = fields.One2many('stock.transfer.picking.status', 'transfer_order_type_id', string='Order Status Line', copy=False, auto_join=True,)
 
     
+    #******************Rejection and Auto Close
+    auto_expiry = fields.Boolean(string='Enable Auto Expiry', default=False, help='Enable auto expiery of the document.')
+    auto_reject = fields.Boolean(string='Enable Auto Rejection', default=False, help='Enable auto rejection of the document.')
+    expiry_stage_id = fields.Many2one('stock.transfer.order.stage', string='Expiry Stage')
+    reject_stage_id = fields.Many2one('stock.transfer.order.stage', string='Rejection Stage')
+    expiry_default_reason_id = fields.Many2one('stock.transfer.close.reason', string='Default Expiry Reason')
+    reject_default_reason_id = fields.Many2one('stock.transfer.close.reason', string='Default Reject Reason')
+    
+    rej_allow_on_stage_ids = fields.Many2many('stock.transfer.order.stage', 'transfer_order_type_rej_stage_rel', 'transfer_order_stage_id', 'transfer_order_type_id', string='Allow auto rejection on stages', )
+    close_allow_on_stage_ids = fields.Many2many('stock.transfer.order.stage', 'transfer_order_type_close_stage_rel', 'transfer_order_stage_id', 'transfer_order_type_id', string='Allow auto close on stages', )
+
+
+    
     _sql_constraints = [
         ('name_uniq', 'unique (name)', "type name already exists!"),
     ]
