@@ -36,7 +36,7 @@
 			<field name="target">new</field>
 	    </record>
 		
-		<menuitem id="menu_report_purchase_budget_report_xlsx" action="action_report_purchase_budget_xlsx" parent="de_purchase_budget.menu_procurement_management_budget" sequence="50"/>
+		<menuitem id="menu_report_purchase_budget_report_xlsx" action="action_report_purchase_budget_xlsx" parent="stock.menu_warehouse_report" sequence="11"/>
 	
 	</data>
 </odoo>
