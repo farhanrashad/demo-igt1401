@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- -->
     <template id="portal_layout" name="Portal layout: project menu entry" inherit_id="portal.portal_breadcrumbs" priority="40">
         <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
             <li t-if="page_name == 'hoto_task' or hoto_task" t-attf-class="breadcrumb-item #{'active ' if not hoto_task else ''}">
@@ -8,6 +9,7 @@
             </li>
         </xpath>
     </template>
+    <!-- -->
     <template id="portal_my_home" name="Show Hoto / Tasks" customize_show="True" inherit_id="portal.portal_my_home" priority="40">
         <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
             <t t-call="portal.portal_docs_entry">
@@ -16,6 +18,7 @@
                 <t t-set="placeholder_count" t-value="'hoto_count'"/></t>
         </xpath>
     </template>
+    <!-- -->
     <template id="portal_hoto_site_tasks" name="My Tasks">
         <t t-call="portal.portal_layout">
             <t t-set="breadcrumbs_searchbar" t-value="True"/>
@@ -45,6 +48,7 @@
                                 <tr>
                                     <td class="text-left">
                                         #
+                                        
                                         <span t-esc="task.id"/>
                                     </td>
                                     <td>
@@ -81,6 +85,7 @@
             </t>
         </t>
     </template>
+    <!-- -->
     <template id="portal_hoto_task" name="Hoto Task">
         <t t-call="portal.portal_layout">
             <t t-call="portal.portal_record_layout">
@@ -89,7 +94,9 @@
                         <div class="col-12">
                             <h5 class="d-flex mb-1 mb-md-0 row">
                                 <span t-field="hoto_task.name" class="col-9 text-truncate"/>
-                                <small class="text-muted d-none d-md-inline"> (#<span t-field="hoto_task.id"/>)
+                                <small class="text-muted d-none d-md-inline"> (#
+                                    <span t-field="hoto_task.id"/>)
+                                
                                 </small>
                                 <div class="col-3 col-md-2 text-right">
                                     <small class="text-right">Status:</small>
@@ -197,6 +204,7 @@
             </div>
         </t>
     </template>
+    <!-- Request Submission Form -->
     <template id="de_portal_hoto_project.hoto_submited" name="hoto Received">
         <t t-call="portal.portal_layout">
             <div id="wrap" class="oe_structure oe_empty">
@@ -209,12 +217,16 @@
                         </h1>
                         <t t-if="leave">
                             <h1 class="text-center">Your Request Number is 
+                                
                                 <a t-if="request.session.uid" t-attf-href="#{task.id}">#
+                                    
                                     <span t-field="task.id"/>
                                 </a>
                                 <t t-if="not request.session.get('uid')">#
+                                    
                                     <span t-field="leave.id"/>
                                 </t>.
+                            
                             </h1>
                         </t>
                         <h1 class="text-center">Thank you for submitting your request!</h1>
@@ -223,6 +235,7 @@
             </div>
         </t>
     </template>
+    <!-- HOT creation form -->
     <template id="hoto_site_task_Create" name="Hoto Task">
         <t t-call="portal.portal_layout">
             <div id="wrap">
