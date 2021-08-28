@@ -47,7 +47,7 @@ class ReportPurchaseBudget(models.TransientModel):
         
         datetime_string = self.get_default_date_model().strftime("%Y-%m-%d %H:%M:%S")
         date_string = self.get_default_date_model().strftime("%Y-%m-%d")
-        report_name = 'Stock Report'
+        report_name = 'Product Availability'
         filename = '%s %s'%(report_name,date_string)
         
         columns = [

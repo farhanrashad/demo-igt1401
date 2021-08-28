@@ -28,7 +28,7 @@
 	    </record>
 		
 	    <record id="action_report_purchase_budget_xlsx" model="ir.actions.act_window">
-			<field name="name">Budget Report</field>
+			<field name="name">Product Availability</field>
 			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">report.purchase.budget</field>
 			<field name="view_mode">form</field>
