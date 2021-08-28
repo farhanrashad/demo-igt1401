@@ -1,6 +1,6 @@
 {
     "name"          : "Stock Valuation Report",
-    "version"       : "1.0.1",
+    "version"       : "1.0.2",
     "author"        : "Miftahussalam",
     "website"       : "https://blog.miftahussalam.com",
     "category"      : "Reporting",

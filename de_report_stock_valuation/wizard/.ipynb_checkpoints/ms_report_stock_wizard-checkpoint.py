@@ -109,7 +109,8 @@ class MsReportStock(models.TransientModel):
                 date_part('days', now() - (quant.in_date + interval '%s')) as aging,
                 sum(quant.quantity) as total_product, 
                 sum(quant.quantity-quant.reserved_quantity) as stock, 
-                sum(quant.reserved_quantity) as reserved
+                sum(quant.reserved_quantity) as reserved,
+                sum(quant.reserved_quantity) as total_stock
             FROM 
                 stock_quant quant
             LEFT JOIN 
