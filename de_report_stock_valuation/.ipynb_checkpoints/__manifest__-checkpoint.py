@@ -15,7 +15,7 @@
         "stock",
     ],
     "data"          : [
-        "wizard/ms_report_stock_wizard.xml",
+        "wizard/report_stock_valuation_wizard_views.xml",
         "security/ir.model.access.csv",
     ],
     "demo"          : [],

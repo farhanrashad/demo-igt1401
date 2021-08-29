@@ -6,8 +6,8 @@ from datetime import datetime
 from pytz import timezone
 import pytz
 
-class MsReportStock(models.TransientModel):
-    _name = "ms.report.stock"
+class ReportStockValuation(models.TransientModel):
+    _name = "report.stock.valuation"
     _description = "Stock Report .xlsx"
     
     @api.model
@@ -47,45 +47,22 @@ class MsReportStock(models.TransientModel):
         
         datetime_string = self.get_default_date_model().strftime("%Y-%m-%d %H:%M:%S")
         date_string = self.get_default_date_model().strftime("%Y-%m-%d")
-        report_name = 'Stock Valuation Report'
+        report_name = 'Stock Report'
         filename = '%s %s'%(report_name,date_string)
         
         columns = [
             ('No', 5, 'no', 'no'),
             ('Product', 30, 'char', 'char'),
+            ('Product Type', 30, 'char', 'char'),
             ('Product Category', 20, 'char', 'char'),
-            ('Product Type', 20, 'char', 'char'),
-            ('Unit Of Measure', 20, 'char', 'char'),
-            ('Total Stock Quantity', 20, 'char', 'char'),
-            ('Total Stock Value', 20, 'char', 'char'),
-            ('In Quantity', 20, 'char', 'char'),
-            ('Out Quantity', 20, 'char', 'char'),
-            ('Out Quantity', 20, 'char', 'char'),
-            ('Quantity', 20, 'char', 'char'),
-            ('Value', 20, 'char', 'char'),
-            ('FREIGHT AVERAGE COST', 20, 'char', 'char'),
-            ('TRANSPORTATION AVERAGE COST', 20, 'char', 'char'),
-            ('TRANSPORTATION AVERAGE COST', 20, 'char', 'char'),
-            ('CLEARANCE AVERAGE COST', 20, 'char', 'char'),
-            ('CUSTOM DUTY AVERAGE COST', 20, 'char', 'char'),
-            ('INSURANCE AVERAGE COST', 20, 'char', 'char'),
-            ('DEMURRAGE AVERAGE COST', 20, 'char', 'char'),
-            ('SERVICE AVERAGE COST', 20, 'char', 'char'),
-            ('COMMERCIAL TAX AVERAGE COST', 20, 'char', 'char'),
-            ('INCOME TAX AVERAGE COST', 20, 'char', 'char'),
-            ('OTHER LANDING AVERAGE COST', 20, 'char', 'char'),
-            ('PURCHASE AVERAGE COST', 20, 'char', 'char'),
-            ('LANDED AVERAGE COST', 20, 'char', 'char'),
-            ('MAX Cost', 20, 'char', 'char'),
-            ('MIN Cost', 20, 'char', 'char'),
-            ('AVG Cost', 20, 'char', 'char'),
-            ('PURCHASE IN-TRANSIT QUANTITY', 20, 'char', 'char'),
+            ('UOM', 20, 'char', 'char'),
             ('Location', 30, 'char', 'char'),
             ('Incoming Date', 20, 'datetime', 'char'),
             ('Stock Age', 20, 'number', 'char'),
             ('Total Stock', 20, 'float', 'float'),
             ('Available', 20, 'float', 'float'),
             ('Reserved', 20, 'float', 'float'),
+            ('Reserved1', 20, 'float', 'float'),
         ]
 
         datetime_format = '%Y-%m-%d %H:%M:%S'
@@ -102,7 +79,9 @@ class MsReportStock(models.TransientModel):
         
         query = """
             SELECT 
-                prod_tmpl.name as product, 
+                prod_tmpl.name as product,
+                prod_tmpl.type as prod_type,
+                uom.name as uom,
                 categ.name as prod_categ, 
                 loc.complete_name as location,
                 quant.in_date + interval '%s' as date_in, 
@@ -110,21 +89,18 @@ class MsReportStock(models.TransientModel):
                 sum(quant.quantity) as total_product, 
                 sum(quant.quantity-quant.reserved_quantity) as stock, 
                 sum(quant.reserved_quantity) as reserved,
-                sum(quant.reserved_quantity) as total_stock
+                sum(quant.reserved_quantity) as reserved1
             FROM 
                 stock_quant quant
-            LEFT JOIN 
-                stock_location loc on loc.id=quant.location_id
-            LEFT JOIN 
-                product_product prod on prod.id=quant.product_id
-            LEFT JOIN 
-                product_template prod_tmpl on prod_tmpl.id=prod.product_tmpl_id
-            LEFT JOIN 
-                product_category categ on categ.id=prod_tmpl.categ_id
+            LEFT JOIN stock_location loc on loc.id=quant.location_id
+            LEFT JOIN product_product prod on prod.id=quant.product_id
+            LEFT JOIN product_template prod_tmpl on prod_tmpl.id=prod.product_tmpl_id
+            LEFT JOIN product_category categ on categ.id=prod_tmpl.categ_id
+            LEFT JOIN uom_uom uom on prod_tmpl.uom_id = uom.id
             WHERE 
                 %s and %s
             GROUP BY 
-                product, prod_categ, location, date_in
+                product, prod_type, uom, prod_categ, location, date_in
             ORDER BY 
                 date_in
         """
