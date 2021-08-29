@@ -70,3 +70,31 @@ class GenerateXLSXReport(models.Model):
             sheet.write(row, 6, quant.value, format2)
             sheet.write(row, 7, quant.location_id.name, format2)
             row = row + 1
+            
+            
+        #---------------------------below is the sample code for gorup by product data -----------------
+        """
+        p = self.env['model_of_product'].search([])
+
+
+_product=[]
+# collect all product id
+for product in p:
+    _product.append(product.id)
+
+box = []
+for _p in _product:
+    domain = [  ('date', '=', specific_date),
+                ('product_id', '=', _p)]
+    record = self.env['stock.move'].search(domain)
+    sum_of_stock = 0
+    sum_of_client = 0
+    # box will contain sets of [product_id, sum_of_stock, sum_of_client ]
+    for rec in record.search([('name', '=', 'Clients')]):
+        sum_of_client = sum_of_client + rec.product_uom_quantity
+    for rec in record.search([('name', '=', 'Stock')]):
+        sum_of_stock = sum_of_stock + rec.product_uom_quantity
+
+    box.append([_p, sum_of_stock, sum_of_client])
+return box
+        """
