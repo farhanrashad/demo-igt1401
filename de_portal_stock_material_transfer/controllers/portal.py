@@ -60,7 +60,7 @@ def stock_material_category_page_content(transfer_category, transfer_type):
                 transfer_type_list.append(transfer.id)
 
     transfer_type = request.env['stock.transfer.order.type'].search([('id', 'in', transfer_type_list)])
-    transfer_categories = request.env['stock.transfer.order.category'].sudo().search([('website_published','=',True),('id','=',transfer_category.id)])
+    transfer_categories = transfer_category
     transfer_categ_list = []
     for categ in transfer_categories:
         for group in categ.group_id.users:
