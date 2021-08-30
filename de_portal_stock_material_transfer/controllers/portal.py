@@ -52,18 +52,27 @@ def stock_material_type_page_content(flag = 0):
     }
 
 def stock_material_category_page_content(transfer_category, transfer_type):
-    transfer_types = request.env['stock.transfer.order.type'].sudo().search([('website_published','=',True),('id','=',transfer_type.id)])
+    transfer_types = transfer_type
     transfer_type_list = []
     for transfer in transfer_types:
         for group in transfer.group_id.users:
             if group.id == http.request.env.context.get('uid'):
                 transfer_type_list.append(transfer.id)
 
+    transfer_type = request.env['stock.transfer.order.type'].search([('id', 'in', transfer_type_list)])
+    transfer_categories = transfer_category
+    transfer_category_list = []
+    for categ in transfer_categories:
+        for group in categ.group_id.users:
+            if group.id == http.request.env.context.get('uid'):
+                transfer_category_list.append(categ.id)
+    transfer_category = request.env['stock.transfer.order.category'].search([('id', 'in', transfer_category_list)])
 
     return {
         'transfer_category': transfer_category,
-        'transfer_type': transfer_type,
+        'transfer_type': transfer_type.id,
     }
+
 
 def stock_material_type_categ_page_content(transfer_category, transfer_type):
     global stock_transfer_list

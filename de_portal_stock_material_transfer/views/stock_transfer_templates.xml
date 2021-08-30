@@ -367,7 +367,7 @@
                                                         </label>
                                                         <div class="col-sm">
                                                             <select class="form-control  o_website_form_input" name="categ_id"  required="1">
-                                                                <t t-foreach="categ" t-as="transfer_categ">
+                                                                <t t-foreach="transfer_category" t-as="transfer_categ">
                                                                     <option t-att-value="transfer_categ.id">
                                                                         <t t-esc="transfer_categ.name"    />
                                                                     </option>
