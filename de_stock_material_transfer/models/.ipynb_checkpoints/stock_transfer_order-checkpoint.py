@@ -704,7 +704,21 @@ class StockTransferOrder(models.Model):
             if group_id:
                 if not (group_id & self.env.user.groups_id):
                     raise UserError(_("You are not authorize to cancel '%s'.", order.stage_id.name))
-        stage_id = self.env['stock.transfer.order.stage'].search([('transfer_order_type_ids','=',self.transfer_order_type_id.id),('transfer_order_category_ids','=',self.transfer_order_category_id.id)],limit=1)
+        stage_id = self.env['stock.transfer.order.stage'].search([('stage_category','=','cancel')],limit=1)
+        self.update({
+            'stage_id': stage_id.id,
+        })
+        for txn in self.stock_transfer_txn_line:
+            txn.txn_action = 'open'
+            txn.sudo().unlink()
+            
+    def action_draft(self):
+        for order in self.sudo():
+            group_id = order.stage_id.group_id
+            if group_id:
+                if not (group_id & self.env.user.groups_id):
+                    raise UserError(_("You are not authorize to cancel '%s'.", order.stage_id.name))
+        stage_id = self.env['stock.transfer.order.stage'].search([('transfer_order_type_ids','=',self.transfer_order_type_id.id),('transfer_order_category_ids','=',self.transfer_order_category_id.id),('stage_category','=','draft')],limit=1)
         self.update({
             'stage_id': stage_id.id,
         })

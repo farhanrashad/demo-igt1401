@@ -53,6 +53,8 @@
                         attrs="{'invisible': [('stage_category', 'not in', ['progress'])]}"/>
                     <button name="action_cancel" string="Cancel" type="object" 
                         attrs="{'invisible': [('stage_category', 'not in', ['progress','confirm'])]}"/>
+                    <button name="action_draft" string="Set to draft" type="object" 
+                        attrs="{'invisible': [('stage_category', 'not in', ['cancel'])]}"/>
                     
                     <!--<button name="%(action_move_in_refund_type_transfer_order)d" type="action" states="confirm,delivery,return" context="{'default_stock_transfer_order_id':id,'default_move_type':'in_refund', 'default_partner_id': partner_id}" string="Penalty Bills" class="btn-primary"/>-->
                     
@@ -65,9 +67,7 @@
                     
                     <button name="%(transfer_order_close_reason_wizard_action)d" type="action"  string="Close" attrs="{'invisible': [('stage_category', 'not in', ['transfer'])]}"/>
                     
-                    <button name="action_cancel" type="object" string="Cancel" attrs="{'invisible': [('stage_category', 'not in', ['done'])]}" />
                     
-                    <button name="action_draft" type="object" string="Set to Draft" attrs="{'invisible': [('stage_category', 'not in', ['cancel'])]}"/>
                     
                     <!--
                     <field name="stage_id" widget="statusbar" domain="[('transfer_order_type_ids', '=', transfer_order_type_id)]" attrs="{'invisible':[('disallow_staging','=',False)]}"/> -->

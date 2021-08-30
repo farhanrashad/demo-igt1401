@@ -35,7 +35,7 @@ class StockTransferOrderStage(models.Model):
         ('confirm', 'Confirmed'),
         ('transfer', 'Transferred'),
         ('close', 'Closed'),
-        ('Cancel', 'Cancelled'),
+        ('cancel', 'Cancelled'),
     ], string='Stage Category', default='draft')
     
     next_stage_id = fields.Many2one('stock.transfer.order.stage', string='Next Stage' )
