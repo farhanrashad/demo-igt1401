@@ -1,0 +1,783 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- -->
+    <template id="portal_layout" name="Portal layout: material menu entry" inherit_id="portal.portal_breadcrumbs" priority="40">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'stock_material' or stock_material" t-attf-class="breadcrumb-item #{'active ' if not stock_material else ''}">
+                <a t-if="stock_material" t-attf-href="/stock/materials?{{ keep_query() }}">Material Requisition</a>
+                <t t-else="">Material Requisition</t>
+            </li>
+        </xpath>
+    </template>
+    <!-- -->
+    <template id="portal_my_home" name="Show Hoto / Tasks" customize_show="True" inherit_id="portal.portal_my_home" priority="40">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Material Requisition</t>
+                <t t-set="url" t-value="'/stock/materials'"/>
+                <t t-set="placeholder_count" t-value="'material_count'"/></t>
+        </xpath>
+    </template>
+    <!-- -->
+    <template id="portal_stock_materials" name="Stock Materials">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Material Requisition</t>
+            </t>
+            <t t-if="not grouped_materials">
+                <div class="alert alert-warning mt8" role="alert">
+                    There are no Material Requisition.
+                </div>
+            </t>
+            <t t-if="grouped_materials">
+                <t t-call="portal.portal_table">
+                    <t t-foreach="grouped_materials" t-as="materials">
+                        <thead>
+                            <tr t-attf-class="{{'thead-light' if not groupby == 'none' else ''}}">
+                                <th class="text-left">Ref</th>
+                                <th >Order Date</th>
+                                <th >Date Scheduled</th>
+                                <th >Contractor</th>
+                                <th >Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="materials" t-as="material">
+                                <tr>
+                                    <td class="text-left">
+                                        #
+                                        <a t-attf-href="/stock/material/#{material.id}?{{ keep_query() }}">
+                                        <span t-esc="material.name"/>
+                                        </a>
+                                    </td>
+                                    <td>
+                                            <span t-field="material.date_order" t-options='{"widget": "date"}'/>
+                                    </td>
+                                    <td class="text-left">
+                                            <span t-field="material.date_order" t-options='{"widget": "date"}'/>
+                                    </td>
+                                    <td class="text-left">
+                                        <span t-esc="material.partner_id.name"/>
+                                    </td>
+
+                                    <td class="text-left">
+                                        <span t-esc="material.stage_id.name"/>
+                                    </td>
+                                </tr>
+                            </t>
+                            <tr>
+                                <div>
+                                    <t class="col-lg-7 col-md-8" >
+                                        <a href="/stock/material/type/" >
+                                            <div class="btn btn-primary pull-left" style="height:30px; line-height:100%; ">Create</div>
+                                        </a>
+                                    </t>
+                                </div>
+                            </tr>
+                        </tbody>
+                    </t>
+                </t>
+            </t>
+        </t>
+    </template>
+    <!-- -->
+    <template id="portal_stock_material" name="Stock Material">
+        <t t-call="portal.portal_layout">
+            <t t-call="portal.portal_record_layout">
+                <t t-set="card_header">
+                    <div class="row no-gutters">
+                        <div class="col-12">
+                            <h5 class="d-flex mb-1 mb-md-0 row">
+                                <span t-field="stock_material.name" class="col-9 text-truncate"/>
+                                <small class="text-muted d-none d-md-inline"> (#
+                                    <span t-field="stock_material.id"/>)
+                                
+                                </small>
+                                <div class="col-3 col-md-2 text-right">
+                                    <small class="text-right">Status:</small>
+                                    <span t-field="stock_material.stage_id.name" class=" badge badge-pill badge-info" title="Current stage of this material s"/>
+                                </div>
+                            </h5>
+                        </div>
+                    </div>
+                </t>
+                <t t-set="card_body">
+
+                    <div class="row mb-4">
+                        <div class="col-12 col-md-6 mb-1">
+                            <strong>Order Date:</strong>
+                            <span t-field="stock_material.date_order" t-options='{"widget": "date"}'/>
+                        </div>
+                        <div class="col-12 col-md-6" >
+                            <strong>Date Scheduled:</strong>
+                            <span t-field="stock_material.date_scheduled"  t-options='{"widget": "date"}' />
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-12 col-md-6 mb-1">
+                             <strong>Contractor:</strong><span t-field="stock_material.partner_id.name" />
+                        </div>
+                        <div class="col-12 col-md-6" >
+                            <strong>Transfer Type:</strong>
+
+                            <span t-field="stock_material.transfer_order_type_id.name"  />
+                        </div>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-12 col-md-6 mb-1">
+                            <strong>Category:</strong>
+                            <span t-field="stock_material.transfer_order_category_id.name"  />
+                        </div>
+                    </div>
+                    <h4><p style="color:blue;">Product Section</p></h4>
+                     <table class="table table-sm table-striped table-bordered" id="stockTable">
+
+
+                            <tr t-attf-class="{{'thead-light' if not groupby == 'none' else ''}}">
+
+                                <th class="text-left">Product</th>
+                                <th class="text-left">Description</th>
+                                <th class="text-left">Quantity</th>
+                                <th class="text-left">Project</th>
+                                <th class="text-left">Schedule Date</th>
+                                <th class="text-left">Supplier</th>
+                            </tr>
+                        <t t-foreach="stock_material.stock_transfer_order_line" t-as="line">
+                               <tr>
+                                     <td class="product">
+
+                                        <span t-esc="line.product_id.name" />
+                                    </td>
+                                   <td class="description">
+
+                                        <span t-esc="line.name" />
+                                    </td>
+                                  <td class="quantity">
+
+                                        <span t-esc="line.product_uom_qty" />
+                                    </td>
+                                <td class="project">
+
+                                        <span t-esc="line.project_id.name" />
+                                    </td>
+                            <td class="sechdule">
+
+                                        <span t-esc="line.date_scheduled" />
+                                    </td>
+                            <td class="supplier">
+
+                                        <span t-esc="line.supplier_id.name" />
+                                    </td>
+                               </tr>
+
+                        </t>
+                     </table>
+                    <t t-if="stock_material.stock_transfer_return_line">
+                    <h4><p style="color:blue;">Returnable Section</p></h4>
+                     <table class="table table-sm table-striped table-bordered" id="stockTable">
+
+
+                            <tr t-attf-class="{{'thead-light' if not groupby == 'none' else ''}}">
+
+                                <th class="text-left">Product</th>
+                                <th class="text-left">Description</th>
+                                <th class="text-left">Quantity</th>
+                                <th class="text-left">Project</th>
+                                <th class="text-left">Schedule Date</th>
+                            </tr>
+                        <t t-foreach="stock_material.stock_transfer_return_line" t-as="line">
+                               <tr>
+                                     <td class="product">
+
+                                        <span t-esc="line.product_id.name" />
+                                    </td>
+                                   <td class="description">
+
+                                        <span t-esc="line.name" />
+                                    </td>
+                                  <td class="quantity">
+
+                                        <span t-esc="line.product_uom_qty" />
+                                    </td>
+                                <td class="project">
+
+                                        <span t-esc="line.project_id.name" />
+                                    </td>
+                            <td class="sechdule">
+
+                                        <span t-esc="line.date_scheduled" />
+                                    </td>
+
+                               </tr>
+
+                        </t>
+                     </table>
+                   </t>
+                </t>
+            </t>
+            <div class="mt32">
+                <h4>
+                    <strong>Message and communication history</strong>
+                </h4>
+                <t t-call="portal.message_thread">
+                    <t t-set="object" t-value="stock_material"/>
+                    <t t-set="pid" t-value="pid"/>
+                    <t t-set="hash" t-value="hash"/></t>
+            </div>
+        </t>
+    </template>
+    <!-- Request Submission Form -->
+    <template id="de_portal_stock_material_transfer.stock_material_submited" name="stock Received">
+        <t t-call="portal.portal_layout">
+            <div id="wrap" class="oe_structure oe_empty">
+                <div class="container">
+
+                    <div class="row">
+                        <h1 class="text-center">
+                            <i class="fa fa-check-circle fa-2x text-success" role="img" aria-label="Success" title="Success"/>
+                        </h1>
+                        <h1 class="text-center">Thank you for submitting your request!</h1>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+<!--    &lt;!&ndash; HOT creation form &ndash;&gt;-->
+    <template id="stock_transfer_type" name="stock transfer type">
+        <t t-call="portal.portal_layout">
+            <div id="wrap">
+                <div class="oe_structure" data-oe-model="ir.ui.view" data-oe-id="2052" data-oe-field="arch" data-oe-xpath="/t[1]/t[1]/div[1]/div[1]">
+                    <section class="s_title parallax s_parallax_is_fixed bg-white-100 pt24 pb24" data-vcss="001" data-snippet="s_title" data-scroll-background-ratio="1">
+                        <span class="s_parallax_bg oe_img_bg" style="background-image: url('/web/image/website.s_banner_default_image'); background-position: 50% 0;"></span>
+                        <div class="o_we_bg_filter bg-white-50"></div>
+                        <div class="container">
+                            <h1 style="margin-left:10px">Material Requisition</h1>
+                        </div>
+                    </section>
+                </div>
+                <div class="container mt-4 mb-5">
+                    <div class="row">
+                        <div class="col-lg-7 col-xl-6 mr-lg-auto">
+                            <div class="oe_structure" data-oe-model="ir.ui.view" data-oe-id="2052" data-oe-field="arch" data-oe-xpath="/t[1]/t[1]/div[1]/div[2]/div[1]/div[1]/div[1]">
+                                <section class="s_text_block" data-snippet="s_text_block">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <p></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                            <span class="hidden" data-for="contactus_form" data-oe-id="2822" data-oe-xpath="/data/xpath/span" data-oe-model="ir.ui.view" data-oe-field="arch" data-values="{'transfer_order_type_id': ''}"></span>
+                            <div id="leave_section" data-oe-id="3374" data-oe-xpath="/data/xpath[2]/div" data-oe-model="ir.ui.view" data-oe-field="arch">
+                                <section class="s_website_form" data-vcss="001" data-snippet="s_website_form">
+                                    <div class="container">
+                                        <form id="portal_expense_form" data-toggle="validator" action="/stock/material/type/categ/">
+                                            <div class="s_website_form_rows row s_col_no_bgcolor">
+                                                <div class="form-group col-12 s_website_form_field" data-type="char" data-name="Field">
+                                                    <div class="row s_col_no_resize s_col_no_bgcolor">
+                                                        <label class="col-form-label col-sm-auto s_website_form_label" style="width: 200px" for="partner">
+                                                            <span class="s_website_form_label_content">Transfer Type</span>
+                                                            <span class="s_website_form_mark"> *</span>
+                                                        </label>
+                                                        <div class="col-sm">
+                                                            <select class="form-control  o_website_form_input" name="transfer_type_id" readonly="1" required="1">
+                                                                <t t-foreach="transfer_type" t-as="transfer_ty">
+                                                                    <option t-att-value="transfer_ty.id">
+                                                                        <t t-esc="transfer_ty.name"    />
+                                                                    </option>
+                                                                </t>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group col-12 s_website_form_submit" data-name="Submit Button">
+                                                    <div style="width: 200px;" class="s_website_form_label"></div>
+                                                    <button type="submit" class="btn btn-primary pull-left">Next</button>
+                                                    <span id="s_website_form_result"></span>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mt-4 mt-lg-0">
+                            <div class='section-custom col-md-12'>
+
+                            </div>
+                            <address itemscope="itemscope" itemtype="http://schema.org/Organization">
+                                <div data-oe-model="res.company" data-oe-id="1" data-oe-field="partner_id" data-oe-type="contact" data-oe-expression="res_company.partner_id" data-oe-many2one-id="1" data-oe-many2one-model="res.partner" data-oe-contact-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;name&quot;, &quot;address&quot;, &quot;phone&quot;, &quot;mobile&quot;, &quot;email&quot;], &quot;tagName&quot;: &quot;div&quot;, &quot;expression&quot;: &quot;res_company.partner_id&quot;, &quot;type&quot;: &quot;contact&quot;, &quot;inherit_branding&quot;: true, &quot;translate&quot;: false}" data-oe-field-xpath="/t[1]/address[1]/div[1]">
+                                    <address class="mb-0" itemscope="itemscope" itemtype="http://schema.org/Organization">
+                                        <div></div>
+                                        <div itemprop="address" itemscope="itemscope" itemtype="http://schema.org/PostalAddress"></div>
+                                        <div></div>
+                                    </address>
+                                </div>
+                            </address>
+                        </div>
+                    </div>
+                </div>
+                <div class="oe_structure mt-2" data-oe-model="ir.ui.view" data-oe-id="2052" data-oe-field="arch" data-oe-xpath="/t[1]/t[1]/div[1]/div[3]"></div>
+            </div>
+        </t>
+    </template>
+
+
+    <template id="stock_transfer_type_categ_Create" name="stock transfer type categ">
+        <t t-call="portal.portal_layout">
+            <div id="wrap">
+                <div class="oe_structure" data-oe-model="ir.ui.view" data-oe-id="2052" data-oe-field="arch" data-oe-xpath="/t[1]/t[1]/div[1]/div[1]">
+                    <section class="s_title parallax s_parallax_is_fixed bg-white-100 pt24 pb24" data-vcss="001" data-snippet="s_title" data-scroll-background-ratio="1">
+                        <span class="s_parallax_bg oe_img_bg" style="background-image: url('/web/image/website.s_banner_default_image'); background-position: 50% 0;"></span>
+                        <div class="o_we_bg_filter bg-white-50"></div>
+                        <div class="container">
+                            <h1 style="margin-left:10px">Material Requisition</h1>
+                        </div>
+                    </section>
+                </div>
+                <div class="container mt-4 mb-5">
+                    <div class="row">
+                        <div class="col-lg-7 col-xl-6 mr-lg-auto">
+                            <div class="oe_structure" data-oe-model="ir.ui.view" data-oe-id="2052" data-oe-field="arch" data-oe-xpath="/t[1]/t[1]/div[1]/div[2]/div[1]/div[1]/div[1]">
+                                <section class="s_text_block" data-snippet="s_text_block">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <p></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                            <span class="hidden" data-for="contactus_form" data-oe-id="2822" data-oe-xpath="/data/xpath/span" data-oe-model="ir.ui.view" data-oe-field="arch" data-values="{'transfer_order_category_id': ''}"></span>
+                            <div id="material_section" data-oe-id="3374" data-oe-xpath="/data/xpath[2]/div" data-oe-model="ir.ui.view" data-oe-field="arch">
+                                <section class="s_website_form" data-vcss="001" data-snippet="s_website_form">
+                                    <div class="container">
+                                        <form id="portal_stock_material_form" data-toggle="validator" action="/stock/material/transfer/categ/">
+                                            <div class="s_website_form_rows row s_col_no_bgcolor">
+                                                <div class="form-group col-12 s_website_form_field" data-type="char" data-name="Field">
+                                                    <div class="row s_col_no_resize s_col_no_bgcolor">
+                                                        <label class="col-form-label col-sm-auto s_website_form_label" style="width: 200px" for="partner">
+                                                            <span class="s_website_form_label_content">Transfer Category</span>
+                                                            <span class="s_website_form_mark"> *</span>
+                                                        </label>
+                                                        <div class="col-sm">
+                                                            <select class="form-control  o_website_form_input" name="categ_id"  required="1">
+                                                                <t t-foreach="categ" t-as="transfer_categ">
+                                                                    <option t-att-value="transfer_categ.id">
+                                                                        <t t-esc="transfer_categ.name"    />
+                                                                    </option>
+                                                                </t>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                    <input type="hidden" class="form-control s_website_form_input" name="transfer_type_id" t-att-value="transfer_type"/>                                                <div class="form-group col-12 s_website_form_submit" data-name="Submit Button">
+                                                    <div style="width: 200px;" class="s_website_form_label"></div>
+                                                    <button type="submit" class="btn btn-primary pull-left">Next</button>
+                                                    <span id="s_website_form_result"></span>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mt-4 mt-lg-0">
+                            <div class='section-custom col-md-12'>
+                                <a class="mb-5" id="submit-stock" t-attf-href="/stock/materials">
+                                    <button t-attf-class="btn btn-primary #{'col-md-10' if multi_type else 'col-md-12'} mb-2">View Material Requisition</button>
+                                </a>
+                            </div>
+                            <address itemscope="itemscope" itemtype="http://schema.org/Organization">
+                                <div data-oe-model="res.company" data-oe-id="1" data-oe-field="partner_id" data-oe-type="contact" data-oe-expression="res_company.partner_id" data-oe-many2one-id="1" data-oe-many2one-model="res.partner" data-oe-contact-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;name&quot;, &quot;address&quot;, &quot;phone&quot;, &quot;mobile&quot;, &quot;email&quot;], &quot;tagName&quot;: &quot;div&quot;, &quot;expression&quot;: &quot;res_company.partner_id&quot;, &quot;type&quot;: &quot;contact&quot;, &quot;inherit_branding&quot;: true, &quot;translate&quot;: false}" data-oe-field-xpath="/t[1]/address[1]/div[1]">
+                                    <address class="mb-0" itemscope="itemscope" itemtype="http://schema.org/Organization">
+                                        <div></div>
+                                        <div itemprop="address" itemscope="itemscope" itemtype="http://schema.org/PostalAddress"></div>
+                                        <div></div>
+                                    </address>
+                                </div>
+                            </address>
+                        </div>
+                    </div>
+                </div>
+                <div class="oe_structure mt-2" data-oe-model="ir.ui.view" data-oe-id="2052" data-oe-field="arch" data-oe-xpath="/t[1]/t[1]/div[1]/div[3]"></div>
+            </div>
+        </t>
+    </template>
+    <template id="portal_create_stock_material_transfer" name="portal_stock_material_transfer">
+         <t t-set="foo" t-value="2 + 1"/>
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Material Requisition</t>
+            </t>
+            <h3><p style="color:blue;">Product Section</p></h3>
+                <t t-call="portal.portal_table"   id="productTable">
+
+                        <thead>
+
+                            <tr t-attf-class="{{'thead-light' if not groupby == 'none' else ''}}">
+                                <th class="text-left">Product</th>
+                                <th class="text-left">Description</th>
+                                <th class="text-left">Quantity</th>
+                                <th class="text-left">Project</th>
+                                <th class="text-left">Schedule Date</th>
+                                <th class="text-left">Supplier</th>
+                            </tr>
+
+                        </thead>
+                        <tbody>
+
+
+
+
+                            <t t-foreach="stock_transfer_list" t-as="material">
+                                <tr>
+
+                                    <td>
+                                        <t t-foreach="request.env['product.product'].sudo().search([('id','=', material['product_id'])])" t-as="line">
+                                        <span t-esc="line.name" />
+                                        </t>
+                                    </td>
+
+                                     <td class="text-left">
+                                      <span t-esc="material['name']" />
+                                    </td>
+
+                                    <td class="text-left">
+                                      <span t-esc="material['product_uom_qty']" />
+                                    </td>
+
+                                    <td class="text-left">
+                                        <t t-foreach="request.env['project.project'].sudo().search([('id','=', material['project_id'])])" t-as="projectline">
+                                        <span t-esc="projectline.name" />
+                                        </t>
+                                    </td>
+                                     <td class="text-left">
+                                      <span t-esc="material['date_scheduled']" />
+                                    </td>
+                                    <td class="text-left">
+                                        <t t-foreach="request.env['res.partner'].sudo().search([('id','=', material['supplier_id'])])" t-as="supline">
+                                        <span t-esc="supline.name" />
+                                        </t>
+                                    </td>
+
+
+
+                                 </tr>
+                            </t>
+
+
+                        <form id="portal_stock_material_form_line" data-toggle="validator" action="/stock/material/line/save">
+                                 <input type="hidden" class="form-control s_website_form_input" name="transfer_type_id_line" t-att-value="transfer_type"/>
+                                <input type="hidden" class="form-control s_website_form_input" name="transfer_category_id_line" t-att-value="transfer_category"/>
+                                <div class="form-group col-12 s_website_form_submit" data-name="Submit Button">
+                                <tr>
+
+                                     <td >
+                                      <select id="selectid" class="form-control  o_website_form_input" name="product_id" readonly="1" required="1">
+                                            <t t-foreach="product_lists" t-as="plist">
+                                                <option t-att-value="plist.id">
+                                                    <t t-esc="plist.product_tmpl_id.name"  />
+                                                </option>
+                                            </t>
+                                       </select>
+
+                                    </td>
+
+                                     <td class="text-left">
+                                        <input type="text" class="form-control s_website_form_input" name="name" id="name"   />
+                                    </td>
+                                    <td class="text-left">
+                                        <input type="float" class="form-control s_website_form_input" name="product_uom_qty" id="product_uom_qty"   />
+                                    </td>
+                                    <td class="text-left">
+                                        <select id="project" class="form-control  o_website_form_input" name="project_id" readonly="1" required="1">
+                                            <t t-foreach="project_lists" t-as="projlist">
+                                                <option t-att-value="projlist.id">
+                                                    <t t-esc="projlist.name"  />
+                                                </option>
+                                            </t>
+                                       </select>
+                                    </td>
+                                     <td class="text-left">
+                                        <input type="date" class="form-control s_website_form_input" name="date_scheduled" id="product_uom_qty"   />
+                                    </td>
+                                    <td class="text-left">
+                                        <select id="supplier" class="form-control  o_website_form_input" name="supplier_id" readonly="1" required="1">
+                                            <t t-foreach="supplier_lists" t-as="supplierlist">
+                                                <option t-att-value="supplierlist.id">
+                                                    <t t-esc="supplierlist.name"  />
+                                                </option>
+                                            </t>
+                                       </select>
+                                    </td>
+
+                                        <td id="submit_1"   class="new">
+                                         <div class="form-group col-12 s_website_form_submit" data-name="Submit Button Line">
+                                            <div style="width: 200px;" class="s_website_form_label"></div>
+                                            <button type="submit" class="btn btn-primary pull-left" id="submit_line">Add</button>
+                                            <span id="s_website_form_result"></span>
+                                         </div>
+                                         </td>
+
+                                </tr>
+                                </div>
+                                </form>
+
+
+                        </tbody>
+                </t>
+            <t t-if="returnable=='1'">
+                <h3><p style="color:blue;">Returnable Section</p></h3>
+                <t t-call="portal.portal_table"   id="returnTable">
+
+                        <thead>
+
+                            <tr t-attf-class="{{'thead-light' if not groupby == 'none' else ''}}">
+                                <th class="text-left">Product</th>
+                                <th class="text-left">Description</th>
+                                <th class="text-left">Quantity</th>
+                                <th class="text-left">Project</th>
+                                <th class="text-left">Schedule Date</th>
+                            </tr>
+
+                        </thead>
+                        <tbody>
+
+
+
+
+                            <t t-foreach="stock_transfer_return_list" t-as="material">
+                                <tr>
+
+                                    <td>
+                                        <t t-foreach="request.env['product.product'].sudo().search([('id','=', material['product_id'])])" t-as="line">
+                                        <span t-esc="line.name" />
+                                        </t>
+                                    </td>
+
+                                     <td class="text-left">
+                                      <span t-esc="material['name']" />
+                                    </td>
+
+                                    <td class="text-left">
+                                      <span t-esc="material['product_uom_qty']" />
+                                    </td>
+
+                                    <td class="text-left">
+                                        <t t-foreach="request.env['project.project'].sudo().search([('id','=', material['project_id'])])" t-as="projectline">
+                                        <span t-esc="projectline.name" />
+                                        </t>
+                                    </td>
+                                     <td class="text-left">
+                                      <span t-esc="material['date_scheduled']" />
+                                    </td>
+
+
+
+                                 </tr>
+                            </t>
+
+
+                        <form id="portal_stock_material_form_return_line" data-toggle="validator" action="/stock/material/return/line/save">
+                                 <input type="hidden" class="form-control s_website_form_input" name="transfer_type_id_line" t-att-value="transfer_type"/>
+                                <input type="hidden" class="form-control s_website_form_input" name="transfer_category_id_line" t-att-value="transfer_category"/>
+                                <div class="form-group col-12 s_website_form_submit" data-name="Submit Button">
+                                <tr>
+
+                                     <td >
+                                      <select id="selectid" class="form-control  o_website_form_input" name="product_id" readonly="1" required="1">
+                                            <t t-foreach="product_lists" t-as="plist">
+                                                <option t-att-value="plist.id">
+                                                    <t t-esc="plist.product_tmpl_id.name"  />
+                                                </option>
+                                            </t>
+                                       </select>
+
+                                    </td>
+
+                                     <td class="text-left">
+                                        <input type="text" class="form-control s_website_form_input" name="name" id="name"   />
+                                    </td>
+                                    <td class="text-left">
+                                        <input type="float" class="form-control s_website_form_input" name="product_uom_qty" id="product_uom_qty"   />
+                                    </td>
+                                    <td class="text-left">
+                                        <select id="project" class="form-control  o_website_form_input" name="project_id" readonly="1" required="1">
+                                            <t t-foreach="project_lists" t-as="projlist">
+                                                <option t-att-value="projlist.id">
+                                                    <t t-esc="projlist.name"  />
+                                                </option>
+                                            </t>
+                                       </select>
+                                    </td>
+                                     <td class="text-left">
+                                        <input type="date" class="form-control s_website_form_input" name="date_scheduled" id="product_uom_qty"   />
+                                    </td>
+
+
+                                        <td id="submit_1"   class="new">
+                                         <div class="form-group col-12 s_website_form_submit" data-name="Submit Button Line">
+                                            <div style="width: 200px;" class="s_website_form_label"></div>
+                                            <button type="submit" class="btn btn-primary pull-left" id="submit_line">Add</button>
+                                            <span id="s_website_form_result"></span>
+                                         </div>
+                                         </td>
+
+                                </tr>
+                                </div>
+                                </form>
+
+
+                        </tbody>
+                </t>
+           </t>
+                 <br/>
+                <form id="portal_stock_material_form" data-toggle="validator" action="/stock/material/save">
+
+                    <t t-call="portal.portal_table">
+                            <tr>
+                               <t t-if="has_purchase_order == '1'">
+                                <th>Purchase Order:</th>
+                                <td>
+                                <select id="purchase" class="form-control  o_website_form_input" name="purchase_id" >
+                                            <t t-foreach="purchase_lists" t-as="purchaselist">
+                                                <option t-att-value="purchaselist.id">
+                                                    <t t-esc="purchaselist.name"  />
+                                                </option>
+                                            </t>
+                                       </select>
+                                </td>
+                                </t>
+                                <t t-if="has_purchase_order == '2'">
+                                <th>Purchase Order:</th>
+                                <td>
+                                <select id="purchase" class="form-control  o_website_form_input" name="purchase_id" readonly="1" required="1">
+                                            <t t-foreach="purchase_lists" t-as="purchaselist">
+                                                <option t-att-value="purchaselist.id">
+                                                    <t t-esc="purchaselist.name"  />
+                                                </option>
+                                            </t>
+                                       </select>
+                                </td>
+                                </t>
+                                <t t-if="has_transfer_order == '1'">
+                                <th>Transfer Order:</th>
+                                <td>
+                                <select id="transfer" class="form-control  o_website_form_input" name="transfer_id" >
+                                            <t t-foreach="transfer_lists" t-as="tlist">
+                                                <option t-att-value="tlist.id">
+                                                    <t t-esc="tlist.name"  />
+                                                </option>
+                                            </t>
+                                       </select>
+                                </td>
+                                </t>
+                                <t t-if="has_transfer_order == '2'">
+                                <th>Transfer Order:</th>
+                                <td>
+                                <select id="transfer" class="form-control  o_website_form_input" name="transfer_id" readonly="1" required="1">
+                                            <t t-foreach="transfer_lists" t-as="tlist">
+                                                <option t-att-value="tlist.id">
+                                                    <t t-esc="tlist.name"  />
+                                                </option>
+                                            </t>
+                                       </select>
+                                </td>
+                                </t>
+                                <t t-if="has_transporter == '1'">
+                               <th>Transporter:</th>
+                                <td>
+                                <select id="transporter" class="form-control  o_website_form_input" name="transporter_id" >
+                                            <t t-foreach="transporter_lists" t-as="transporterlist">
+                                                <option t-att-value="transporterlist.id">
+                                                    <t t-esc="transporterlist.name"  />
+                                                </option>
+                                            </t>
+                                       </select>
+                                </td>
+                                </t>
+                                 <t t-if="has_transporter == '2'">
+                               <th>Transporter:</th>
+                                <td>
+                                <select id="transporter" class="form-control  o_website_form_input" name="transporter_id" readonly="1" required="1">
+                                            <t t-foreach="transporter_lists" t-as="transporterlist">
+                                                <option t-att-value="transporterlist.id">
+                                                    <t t-esc="transporterlist.name"  />
+                                                </option>
+                                            </t>
+                                       </select>
+                                </td>
+                                </t>
+                                <t t-if="has_reference == '1'">
+                                <th>Reference:</th>
+                                <td class="text-left">
+                                        <input type="text" class="form-control s_website_form_input" name="reference" id="ref"   />
+                                    </td>
+                                </t>
+                                <t t-if="has_reference == '2'">
+                                <th>Reference:</th>
+                                <td class="text-left">
+                                        <input type="text" class="form-control s_website_form_input" name="reference" id="ref"  required="1" />
+                                    </td>
+                                </t>
+                                <input type="hidden" class="form-control s_website_form_input" name="transfer_type_id" t-att-value="transfer_type"/>
+                                <input type="hidden" class="form-control s_website_form_input" name="transfer_category_id" t-att-value="transfer_category"/>
+
+                            </tr>
+                   </t>
+                    <br/>
+                    <div class="form-group col-12 s_website_form_submit" data-name="Submit Button">
+                            <div style="width: 200px;" class="s_website_form_label"></div>
+                            <button type="submit" class="btn btn-primary pull-left">Submit</button>
+                            <span id="s_website_form_result"></span>
+                        </div>
+
+                  </form>
+                    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+                    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+                    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+                    <script>
+
+                          $(function () {
+
+                            $("#selectid").change(function(){
+                            $("#submit_1").hide();
+                              });
+
+                            });
+
+                        $(document).ready(function(){
+
+                        $("#submit_1").click(function(){
+                            $("#submit_1").hide();
+                              });
+
+                        $("#selectid").click(function(){
+                            $("#submit_1").show();
+                              });
+
+                            });
+                        </script>
+
+
+
+
+
+
+            <br/>
+            <br/>
+
+
+
+        </t>
+    </template>
+
+
+</odoo>
