@@ -51,6 +51,29 @@ def stock_material_type_page_content(flag = 0):
         'transfer_type': transfer_type,
     }
 
+def stock_material_category_page_content(transfer_category, transfer_type):
+    transfer_types = request.env['stock.transfer.order.type'].sudo().search([('website_published','=',True),('id','=',transfer_type.id)])
+    transfer_type_list = []
+    for transfer in transfer_types:
+        for group in transfer.group_id.users:
+            if group.id == http.request.env.context.get('uid'):
+                transfer_type_list.append(transfer.id)
+
+    transfer_type = request.env['stock.transfer.order.type'].search([('id', 'in', transfer_type_list)])
+    transfer_categories = request.env['stock.transfer.order.category'].sudo().search([('website_published','=',True),('id','=',transfer_category.id)])
+    transfer_categ_list = []
+    for categ in transfer_categories:
+        for group in categ.group_id.users:
+            if group.id == http.request.env.context.get('uid'):
+                transfer_categ_list.append(categ.id)
+
+    transfer_category = request.env['stock.transfer.order.category'].search([('id', 'in', transfer_categ_list)])
+
+    return {
+        'transfer_category': transfer_category,
+        'transfer_type': transfer_type,
+    }
+
 def stock_material_type_categ_page_content(transfer_category, transfer_type):
     global stock_transfer_list
     global stock_transfer_return_list
@@ -125,7 +148,7 @@ class CreateStockMaterial(http.Controller):
         transfer_type = request.env['stock.transfer.order.type'].sudo().search([('id','=',id)])
         transfer_category = request.env['stock.transfer.order.category'].sudo().search([('transfer_order_type_id','=',id)])
         return request.render("de_portal_stock_material_transfer.stock_transfer_type_categ_Create",
-                              stock_material_type_categ_page_content(transfer_category, transfer_type))
+                              stock_material_category_page_content(transfer_category, transfer_type))
 
     @http.route('/stock/material/transfer/categ/', type="http", website=True, auth='user')
     def stock_material_transfer_categ_template(self, **kw):
