@@ -59,15 +59,6 @@ def stock_material_category_page_content(transfer_category, transfer_type):
             if group.id == http.request.env.context.get('uid'):
                 transfer_type_list.append(transfer.id)
 
-    transfer_type = request.env['stock.transfer.order.type'].search([('id', 'in', transfer_type_list)])
-    transfer_categories = request.env['stock.transfer.order.category'].sudo().search([('website_published','=',True),('id','=',transfer_category.ids)])
-    transfer_categ_list = []
-    for categ in transfer_categories:
-        for group in categ.group_id.users:
-            if group.id == http.request.env.context.get('uid'):
-                transfer_categ_list.append(categ.id)
-
-    transfer_category = request.env['stock.transfer.order.category'].search([('id', 'in', transfer_categ_list)])
 
     return {
         'transfer_category': transfer_category,
