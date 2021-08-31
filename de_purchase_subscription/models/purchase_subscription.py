@@ -258,12 +258,12 @@ class PurchaseSubscription(models.Model):
             
     @api.model
     def create(self, vals):
-        vals['code'] = (
-            vals.get('code') or
-            self.env.context.get('default_code') or
-            self.env['ir.sequence'].with_company(vals.get('company_id')).next_by_code('purchase.subscription') or
-            'New'
-        )
+        #vals['code'] = (
+        #    vals.get('code') or
+        #    self.env.context.get('default_code') or
+        #    self.env['ir.sequence'].with_company(vals.get('company_id')).next_by_code('purchase.subscription') or
+        #    'New'
+        #)
         #if vals.get('name', 'New') == 'New':
          #   vals['name'] = vals['code']
         if not vals.get('recurring_invoice_day'):
