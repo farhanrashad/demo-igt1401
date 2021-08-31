@@ -86,7 +86,7 @@
                                 <field name="recurring_monthly_total" sum="Recurring" attrs="{'readonly':[('invoice_id','!=',False)]}"/>
                                 <field name="recurring_sub_total" invisible="1" sum="Subtotal"/>
                                
-                                
+                                <field name="escalation_amount" invisible="1"/>
                                 <field name="accum_escalation" invisible="1"/>
                                 <field name="recurring_total" sum="Total"/>
                                  <field name="invoice_id" readonly="1"/>
