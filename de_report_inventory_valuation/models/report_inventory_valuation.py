@@ -19,10 +19,8 @@ class GenerateXLSXReport(models.Model):
         sheet = workbook.add_worksheet('Inventory Valuation')
         sheet.merge_range('C2:E2', 'Inventory Valuation', format1)
         sheet.write(1, 4, 'Inventory Valuation', format1)
-        sheet.write(3, 0, 'Date From', format1)
-        sheet.write(3, 1, start_date, format1)
-        sheet.write(4, 0, 'Date To', format1)
-        sheet.write(4, 1, end_date, format1)
+        sheet.write(3, 0, 'Incoming Data', format1)
+        sheet.write(3, 1, in_date, format1)
 
         sheet.write(6, 0, 'Product Reference', format1)
         sheet.write(6, 1, 'Product Name', format1)
@@ -49,17 +47,19 @@ class GenerateXLSXReport(models.Model):
         row2 = 7
         domain = ''
         if data['categ_ids']:
-            domain = [('account_id', '=', line.analytic_account_id.id),
-                      ('date', '>=', date_from),
-                      ('date', '<=', date_to),
+            domain = [('categ_id', 'in',data['categ_ids']),
+                      ('in_date', '<=', data['in_date'])
                      ]
         if data['location_ids']:
-            domain += [('general_account_id', 'in', acc_ids)]
+            domain = [('location_id', 'in', data['location_ids']),
+                      ('in_date', '<=', data['in_date'])
+                     ]
         if data['product_ids']:
-            domain += [('general_account_id', 'in', acc_ids)]
+            domain = [('product_id', 'in', data['product_ids']),
+                     ('in_date', '<=', data['in_date'])]
                     
         #quant_ids = self.env['stock.quant'].search([('date_order','>=',data['start_date']),('date_order','<=',data['end_date'])])
-        quant_ids = self.env['stock.quant'].search([])
+        quant_ids = self.env['stock.quant'].search(domain)
         for quant in quant_ids:
             sheet.write(row, 0, quant.product_id.default_code, format2)
             sheet.write(row, 1, quant.product_id.name, format2)

@@ -20,9 +20,9 @@ class ReportInventoryValuationWizard(models.TransientModel):
         #order_ids = self.env['stock.transfer.order'].browse(self._context.get('active_ids',[]))
         data = {
             'in_date': self.in_date, 
-            'product_ids': self.product_ids.id,
-            'categ_ids': self.categ_ids.id,
-            'location_ids': self.location_ids.id,
+            'product_ids': self.product_ids.ids,
+            'categ_ids': self.categ_ids.ids,
+            'location_ids': self.location_ids.ids,
         }
-        if self.src < self.dest:
+        if self.in_date:
             return self.env.ref('de_report_inventory_valuation.report_inventory_valuation_report').report_action(self, data=data)
