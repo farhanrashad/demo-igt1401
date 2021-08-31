@@ -1,5 +1,32 @@
 <odoo>
   <data>
+      <!-- Adjustment Views --> 
+    <record model="ir.actions.act_window" id="action_purchase_subscription_to_adjustment">
+        <field name="name">Lease Adjustment</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">purchase.subscription</field>
+        <field name="view_mode">form,tree</field>
+        <field name="domain">[('adj_purchase_subscription_id','=',active_id)]</field>
+        <field name="context">{
+            "default_adj_purchase_subscription_id":active_id,
+            "default_user_id": False,
+            }
+        </field>
+    </record>
+      
+    <record model="ir.actions.act_window" id="action_purchase_subscription_to_adjustment_list">
+        <field name="name">Lease Adjustment</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">purchase.subscription</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('adj_purchase_subscription_id','=',active_id)]</field>
+        <field name="context">{
+            "default_adj_purchase_subscription_id":active_id,
+            "default_user_id": False,
+            }
+        </field>
+    </record>
+
     <!-- Purchase Subscription Plan-->
         <record id="purchase_subcription_plan_form_view_inherit_limit" model="ir.ui.view">
             <field name="name">purchase.subscription.plan.form.view.inherit.limit</field>
@@ -35,9 +62,22 @@
             <field name="arch" type="xml">
                 <xpath expr="//header" position="inside">
                     <button string="Create Bill" name="create_bill" type="object" class="btn-primary" attrs="{'invisible':['|',('allow_payment_schedule','!=',True),('stage_category','!=','confirm')]}"/>
-                    <button name="action_revision" type="object" string="Revision"/>
+                    <button name="action_revision" type="object" string="Revision" invisible="1"/>
+                    <button name="%(action_purchase_subscription_to_adjustment)d" type="action"
+                    string="Adjustment"
+                    attrs="{'invisible':['|',('allow_payment_schedule','!=',True),('stage_category','!=','confirm')]}"/>
  <!--
                     <button name="%(action_purchase_subscription_plan_wizard)d" string="Populate" type="action" class="btn-primary"  />-->
+                </xpath>
+                <xpath expr="//div[@name='button_box']" position="inside">
+                    <button name="%(action_purchase_subscription_to_adjustment_list)d" type="action" class="oe_stat_button" icon="fa-list-alt">
+                        <field name="subscription_adjustment_count" widget="statinfo" string="Adjustments"/>
+                    </button>
+                    <!--
+                    <button class="oe_stat_button" icon="fa-book" name="action_subscription_adjustments" type="object">
+                        <field name="subscription_adjustment_count" widget="statinfo" string="Adjustments"/>
+                    </button>
+                    -->
                 </xpath>
                 <xpath expr="//field[@name='subscription_date']" position="before">
                     <field name="amount_lease_original" />
@@ -50,9 +90,10 @@
                 
                 <xpath expr="//field[@name='subscription_plan_id']" position="after">
                     <field name="allow_payment_schedule" invisible="1"/>
+                    <field name="adj_purchase_subscription_id" invisible="1"/>
                 </xpath>
                 <xpath expr="//notebook" position="inside">
-					<page string="Revisions" name="revisions" >
+					<page string="Revisions" name="revisions" invisible="1">
 						<field name="old_revision_ids">
 							<tree>
 								<field name='name'/>
