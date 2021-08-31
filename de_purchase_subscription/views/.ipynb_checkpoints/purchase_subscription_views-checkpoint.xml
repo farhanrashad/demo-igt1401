@@ -115,15 +115,15 @@
 
 
                         <button string="Create Bill" name="generate_recurring_invoice" type="object" attrs="{'invisible': ['|',('invoicing_mode', '!=', 'manual'),('stage_category', '!=', 'progress')]}" class="btn-primary"/>
-                        
+  <!--                       
                         <button string="Start" name="start_subscription" type="object" attrs="{'invisible': [('stage_category','!=', 'confirm')]}" class="btn-primary"/>
-                        <!--
+                       
 -->
 
 <!--
                         <field name="stage_id" widget="statusbar" />
 -->                        
-                        <field name="stage_id" widget="statusbar" options="{'clickable': '0', 'fold_field': 'fold'}" />
+                        <field name="stage_id" widget="statusbar"  />
 
                     </header>
                     <sheet string="Subscription">
