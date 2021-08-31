@@ -5,8 +5,8 @@ from datetime import datetime
 
 
 class GenerateXLSXReport(models.Model):
-    _name = 'report.de_report_inventory_valuation.report_inventory_valuation'
-    _description = 'Inventory Valuation Report Report'
+    _name = 'report.de_report_inventory_availability.xlsx'
+    _description = 'Inventory Availability Report Report'
     _inherit = 'report.report_xlsx.abstract'
 
     def generate_xlsx_report(self, workbook, data, lines):
@@ -16,13 +16,11 @@ class GenerateXLSXReport(models.Model):
         
         format1 = workbook.add_format({'font_size': '12', 'align': 'vcenter', 'bold': True})
         ###For SPMRF
-        sheet = workbook.add_worksheet('Inventory Valuation')
-        sheet.merge_range('C2:E2', 'Inventory Valuation', format1)
+        sheet = workbook.add_worksheet('Inventory Availability')
+        sheet.merge_range('C2:E2', 'Inventory Availability', format1)
         sheet.write(1, 4, 'Inventory Valuation', format1)
         sheet.write(3, 0, 'Date From', format1)
-        sheet.write(3, 1, start_date, format1)
-        sheet.write(4, 0, 'Date To', format1)
-        sheet.write(4, 1, end_date, format1)
+        sheet.write(3, 1, in_date, format1)
 
         sheet.write(6, 0, 'Product Reference', format1)
         sheet.write(6, 1, 'Product Name', format1)
@@ -49,14 +47,16 @@ class GenerateXLSXReport(models.Model):
         row2 = 7
         domain = ''
         if data['categ_ids']:
-            domain = [('account_id', '=', line.analytic_account_id.id),
-                      ('date', '>=', date_from),
-                      ('date', '<=', date_to),
+            domain = [('categ_id', 'in',data['categ_ids']),
+                      ('in_date', '<=', data['in_date'])
                      ]
         if data['location_ids']:
-            domain += [('general_account_id', 'in', acc_ids)]
-        if data['product_ids']:
-            domain += [('general_account_id', 'in', acc_ids)]
+            domain = [('location_id', 'in', data['location_ids']),
+                      ('in_date', '<=', data['in_date'])
+                     ]
+        if data['productids']:
+            domain = [('product_id', 'in', data['productids']),
+                     ('in_date', '<=', data['in_date'])]
                     
         #quant_ids = self.env['stock.quant'].search([('date_order','>=',data['start_date']),('date_order','<=',data['end_date'])])
         quant_ids = self.env['stock.quant'].search([])

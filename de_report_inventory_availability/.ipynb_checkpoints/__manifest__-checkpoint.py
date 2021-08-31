@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
 {
-    "name": "Inventory Valuation Report",
+    "name": "Inventory Availability Report",
     'version': '14.0.0.2',
     "category": 'Inventory',
-    "summary": ' Inventory Valuation Report',
+    "summary": ' Inventory Availability Report',
     'sequence': 1,
-    "description": """"Inventory Valuation Report """,
+    "description": """"Inventory Availability Report """,
     "author": "Dynexcel",
     "website": "https://www.dynexcel.com",
     'depends': ['stock_account','report_xlsx'],
     'data': [
         'security/ir.model.access.csv',
-        'reports/report_inventory_valuation.xml',
-        'wizards/report_inventory_valuation_wizard_views.xml',
+        'reports/report_inventory_availability.xml',
+        'wizards/report_inventory_availability_wizard_views.xml',
         #'views/view_stock_transfer_order.xml',
         
     ],

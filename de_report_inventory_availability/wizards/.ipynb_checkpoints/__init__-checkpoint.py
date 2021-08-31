@@ -1,1 +1,1 @@
-from . import report_inventory_valuation_wizard
+from . import report_inventory_availability_wizard

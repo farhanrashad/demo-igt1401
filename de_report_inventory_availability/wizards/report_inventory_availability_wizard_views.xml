@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 	<data>
-		<record id="report_inventory_valuation_wizard_form_view" model="ir.ui.view">
-			<field name="name">report.inventory.valuation.wizard.form.view</field>
-			<field name="model">report.inventory.valuation.wizard</field>
+		<record id="report_inventory_availability_wizard_form_view" model="ir.ui.view">
+			<field name="name">inventory.availability.wizard.form.view</field>
+			<field name="model">inventory.availability.wizard</field>
 			<field name="arch" type="xml">
-				<form string="Inventory Valuation">
+				<form string="Inventory Availability">
                     <group>
                         <group>
                             <field name="in_date" />
@@ -17,7 +17,7 @@
                     </group>
                     <notebook>
                         <page string="Products">
-                            <field name="product_ids">
+                            <field name="productids">
                                 <tree>
                                     <field name="name"/>
                                 </tree>
@@ -35,16 +35,16 @@
 			</field>
 		</record>
 
-		<record id="action_report_inventory_valuation_wizard" model="ir.actions.act_window">
-			<field name="name">Inventory Valuation Report</field>
+		<record id="action_report_inventory_availability_wizard" model="ir.actions.act_window">
+			<field name="name">Inventory Availability Report</field>
 			<field name="type">ir.actions.act_window</field>
-			<field name="res_model">report.inventory.valuation.wizard</field>
-			<field name="view_id" ref="report_inventory_valuation_wizard_form_view" />
+			<field name="res_model">inventory.availability.wizard</field>
+			<field name="view_id" ref="de_report_inventory_availability.report_inventory_availability_wizard_form_view" />
 			<field name="view_mode">form</field>
 			<field name="target">new</field>
 		</record>
         
-        <menuitem action="action_report_inventory_valuation_wizard" id="report_inventory_valuation_report_item" name="Inventory Valuation Report" parent="stock.menu_warehouse_report" sequence="100"/>
+        <menuitem action="de_report_inventory_availability.action_report_inventory_availability_wizard" id="report_inventory_availability_report_item" name="Inventory Availability Report" parent="stock.menu_warehouse_report" sequence="101"/>
 
 
     </data>

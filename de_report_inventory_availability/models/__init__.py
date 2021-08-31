@@ -1,1 +1,1 @@
-from . import report_inventory_valuation
+from . import report_inventory_availability
