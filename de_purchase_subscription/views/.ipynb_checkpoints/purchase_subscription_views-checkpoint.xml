@@ -240,7 +240,7 @@
                             <page string="Other Info" id="others">
                                 <group>
                                     <group>
-                                        <field name="code" attrs="{'required': [('id', '!=', False)]}"/>
+                                        <field name="code" />
                                         <field name="payment_term_id" />
                                     </group>
                                     <group>
