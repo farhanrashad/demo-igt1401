@@ -9,7 +9,7 @@ class GenerateXLSXReport(models.Model):
     _description = 'Stock Transfer Material Report'
     _inherit = 'report.report_xlsx.abstract'
 
-    def generate_xlsx_report(self, workbook, data, lines):
+    def generate_xlsx_report(self, workbook, data, lines,model="ir.actions.report",output_format="xlsx",report_name="de_requisition_line_report.mrf_spmrf_report_xlsx"):
         start_date = data['start_date']
         end_date = data['end_date']
         start_date = datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S')
@@ -194,6 +194,7 @@ class GenerateXLSXReport(models.Model):
                 if spmrf_order.date_delivered:
                     actual_date = spmrf_order.date_delivered
                     actual_date = actual_date.strftime("%Y/%m/%d %H:%M:%S")
+                    
                 else:
                     actual_date = None
                 if spmrf_order.date_returned:
@@ -365,6 +366,7 @@ class GenerateXLSXReport(models.Model):
                 if spmrf_order.date_delivered:
                     actual_date = spmrf_order.date_delivered
                     actual_date = actual_date.strftime("%Y/%m/%d %H:%M:%S")
+                    
                 else:
                     actual_date = None
                 if spmrf_order.date_returned:
