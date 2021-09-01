@@ -8,20 +8,7 @@ from datetime import date
 class PurchaseRequisition(models.Model):
     _inherit = 'purchase.requisition'
     
-    def button_submit1(self):
-        raise Warning(('The Product %s has already issued to Site days ago'))
-        #self.ensure_one()
-        old_requisition_lines = self.env['purchase.requisition.line']
-        for requisition in self.sudo():
-            for line in requisition.line_ids:
-                old_requisition_lines = self.env['purchase.requisition.line'].search([('product_id','=',line.product_id.id),('project_id','=',line.project_id.id)])
-                if len(old_requisition_lines):
-                    for oline in old_requisition_lines:
-                        if line.requisition_id.ordering_date and oline.requisition_id.ordering_date:
-                            days = (line.requisition_id.ordering_date - oline.requisition_id.ordering_date).days
-                        if abs(days) < 365:
-                            if not requisition.x_studio_allow_submission_with_exception:
-                                raise Warning(('The Product %s has already issued to Site (%s) %s days ago') % (line.product_id.name, line.project_id.name, str(abs(days)))) 
+    allow_submission_with_exception = fields.Boolean(string='Allow submission with exception')
            
         
     def button_submit(self):
@@ -53,7 +40,7 @@ class PurchaseRequisition(models.Model):
                         if line.requisition_id.ordering_date and oline.requisition_id.ordering_date:
                             days = (line.requisition_id.ordering_date - oline.requisition_id.ordering_date).days
                         if abs(days) < 365:
-                            if not requisition.x_studio_allow_submission_with_exception:
+                            if not requisition.allow_submission_with_exception:
                                 raise UserError(_('The Product %s has already issued to Site (%s) %s days ago') % (line.product_id.name, line.project_id.name, str(abs(days))))
 
             
