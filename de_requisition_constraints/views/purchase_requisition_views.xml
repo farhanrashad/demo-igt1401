@@ -1,13 +1,13 @@
 <odoo>
   <data>
-       <record id="view_purchase_requisition_form_inherit_workflow" model="ir.ui.view">
-            <field name="name">view.purchase.requisition.form.inherit.workflow</field>
+       <record id="view_purchase_requisition_form_inherit_constrains" model="ir.ui.view">
+            <field name="name">view.purchase.requisition.form.inherit.constrains</field>
             <field name="model">purchase.requisition</field>
             <field name="inherit_id" ref="purchase_requisition.view_purchase_requisition_form"/>
             <field name="priority">24</field>
             <field name="arch" type="xml">
-                <xpath expr="//button[@name='button_submit']" position="replace">
-                    <button name="button_submit" string="Submit for Approval" type="object" class="oe_highlight" attrs="{'invisible': [('stage_category', 'not in', ['draft'])]}"/>
+                <xpath expr="//group[1]/group[1]" position="inside">
+                    <field name="allow_submission_with_exception" attrs="{'readonly': [('stage_category', '!=', 'draft')]}" />
                 </xpath>
             </field>
         </record>
