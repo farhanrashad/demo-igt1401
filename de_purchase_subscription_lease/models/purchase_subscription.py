@@ -50,6 +50,39 @@ class PurchaseSubscription(models.Model):
     amount_lease_current = fields.Monetary(string='Current amount', compute='_compute_lease_current')
     amount_lease_total = fields.Monetary(string='Total Committment',  compute='_compute_lease_total')
     
+    adj_purchase_subscription_id = fields.Many2one('purchase.subscription','Adjusting Subscription',readonly=True,copy=True)
+    adj_no = fields.Integer(string='Adjustment No.')
+    subscription_adjustment_count = fields.Integer(compute='_compute_adjustment_count')
+    
+    @api.onchange('adj_purchase_subscription_id')
+    def _onchange_adj_purchase_subscription_id(self):
+        if not self.adj_purchase_subscription_id:
+            return
+
+        self = self.with_company(self.company_id)
+        subscription = self.adj_purchase_subscription_id
+        
+        self.company_id = subscription.company_id.id
+        self.currency_id = subscription.currency_id.id
+        self.partner_id = subscription.partner_id.id
+        self.subscription_plan_id = subscription.subscription_plan_id.id
+        self.subscription_type_id = subscription.subscription_type_id.id
+        self.project_id = subscription.project_id.id
+        self.name = subscription.name + '-' + str(subscription.adj_no + 1)
+        self.subscription_date = fields.Date.today()
+        self.user_id = self.env.user
+        subscription.update({
+            'adj_no': subscription.adj_no + 1
+        })
+        
+    
+    def _compute_adjustment_count(self):
+        Adjustment = self.env['purchase.subscription']
+        can_read = Adjustment.check_access_rights('read', raise_exception=False)
+        for subscription in self:
+            subscription.subscription_adjustment_count = can_read and Adjustment.search_count([('adj_purchase_subscription_id', '=', subscription.id)]) or 0
+            
+            
     def _compute_lease_current(self):
         amount = 0
         for subs in self:
@@ -105,25 +138,25 @@ class PurchaseSubscription(models.Model):
         invoice = self.env['account.move']
         lines_data = []
         if self.purchase_subscription_schedule_line:
-            for line in self.purchase_subscription_schedule_line:
-                if line.record_selection:
-                    lines_data.append([0,0,{
-                        'name': str(self.name) + ' ' + str(product_id.name),
-                        'purchase_subscription_id': self.id,
-                        'purchase_subscription_schedule_id': line.id,
-                        'price_unit': line.recurring_price or 0.0,
-                        #'discount': line.discount,
-                        'quantity': 1,
-                        'product_uom_id': product_id.uom_id.id,
-                        'product_id': product_id.id,
-                        'tax_ids': [(6, 0, product_id.supplier_taxes_id.ids)],
-                        #'analytic_account_id': line.analytic_account_id.id,
-                        #'analytic_tag_ids': [(6, 0, line.analytic_tag_ids.ids)],
-                        #'project_id': line.project_id.id,
-                    }])
-                    line.update({
-                        'state': 'invoice',
-                    })
+            for line in self.purchase_subscription_schedule_line.filtered(lambda r: r.record_selection == True and not r.invoice_id):
+                #if line.record_selection:
+                lines_data.append([0,0,{
+                    'name': str(self.name) + ' ' + str(product_id.name),
+                    'purchase_subscription_id': self.id,
+                    'purchase_subscription_schedule_id': line.id,
+                    'price_unit': line.recurring_monthly_total or 0.0,
+                    #'discount': line.discount,
+                    'quantity': line.recurring_intervals,
+                    'product_uom_id': product_id.uom_id.id,
+                    'product_id': product_id.id,
+                    'tax_ids': [(6, 0, product_id.supplier_taxes_id.ids)],
+                    #'analytic_account_id': line.analytic_account_id.id,
+                    #'analytic_tag_ids': [(6, 0, line.analytic_tag_ids.ids)],
+                    #'project_id': line.project_id.id,
+                }])
+                line.update({
+                    'state': 'invoice',
+                })
             invoice.create({
                 'move_type': 'in_invoice',
                 'purchase_subscription_id': self.id,
@@ -144,7 +177,7 @@ class PurchaseSubscription(models.Model):
         
     #revision methods
     @api.model
-    def create(self, vals):
+    def create1(self, vals):
         if 'unrevisioned_name' not in vals:
             if vals.get('name', 'New') == 'New':
                 seq = self.env['ir.sequence']
@@ -216,6 +249,7 @@ class PurchaseSubscriptionSchedule(models.Model):
     discount = fields.Float(string='Discount (%)', digits='Discount')
     escalation = fields.Float(string='Escalation (%)', digits='Discount')
     accum_escalation = fields.Float(string='Accum. Escalation (%)', digits='Discount')
+    escalation_amount = fields.Float(string="Escalation Amount")
     
     recurring_monthly_total = fields.Float(string="Monthly Price", compute='_compute_recurring_total_all')
     recurring_total = fields.Float(string="Total", compute='_compute_recurring_total_all')
@@ -243,6 +277,8 @@ class PurchaseSubscriptionSchedule(models.Model):
     def _compute_recurring_total_all(self):
         for line in self:
             line.recurring_sub_total = line.recurring_price * line.recurring_intervals
-            line.recurring_total = line.recurring_sub_total + (line.recurring_sub_total * (line.accum_escalation / 100)) - (line.recurring_sub_total * (line.discount / 100))
-            line.recurring_monthly_total = line.recurring_price + (line.recurring_price * (line.accum_escalation / 100))
+            #line.recurring_total = line.recurring_sub_total + (line.recurring_sub_total * (line.accum_escalation / 100)) - (line.recurring_sub_total * (line.discount / 100))
+            #line.recurring_monthly_total = line.recurring_price + (line.recurring_price * (line.accum_escalation / 100))
+            line.recurring_monthly_total = line.escalation_amount
+            line.recurring_total = line.escalation_amount * line.recurring_intervals
 

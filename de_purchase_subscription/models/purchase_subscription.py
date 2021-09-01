@@ -33,6 +33,7 @@ class PurchaseSubscription(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _check_company_auto = True
     _mail_post_access = 'read'
+    _order = 'subscription_date desc, id desc'
     
     
     def _get_default_pricelist(self):
@@ -49,7 +50,7 @@ class PurchaseSubscription(models.Model):
     
     
     name = fields.Char(tracking=True,)
-    code = fields.Char(string="Reference", required=True, tracking=True, index=True, copy=False)
+    code = fields.Char(string="Reference", )
     #stage_id = fields.Many2one('purchase.subscription.stage', string='Stage', index=True, default=lambda s: s._get_default_stage_id(), copy=False, tracking=True)
     stage_id = fields.Many2one('purchase.subscription.stage', string='Stage', compute='_compute_stage_id',
         store=True, readonly=False, ondelete='restrict', tracking=True, index=True,
@@ -258,12 +259,12 @@ class PurchaseSubscription(models.Model):
             
     @api.model
     def create(self, vals):
-        vals['code'] = (
-            vals.get('code') or
-            self.env.context.get('default_code') or
-            self.env['ir.sequence'].with_company(vals.get('company_id')).next_by_code('purchase.subscription') or
-            'New'
-        )
+        #vals['code'] = (
+        #    vals.get('code') or
+        #    self.env.context.get('default_code') or
+        #    self.env['ir.sequence'].with_company(vals.get('company_id')).next_by_code('purchase.subscription') or
+        #    'New'
+        #)
         #if vals.get('name', 'New') == 'New':
          #   vals['name'] = vals['code']
         if not vals.get('recurring_invoice_day'):

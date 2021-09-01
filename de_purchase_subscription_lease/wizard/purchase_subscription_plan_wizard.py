@@ -28,6 +28,7 @@ class PurchaseSubscriptionPlanWizard(models.Model):
         lines_data = {}
         esclation = a_esclation = 0
         interval = 0
+        escalation_amount = 0
         
         date_from = date_to = fields.Date.today()
         
@@ -36,12 +37,14 @@ class PurchaseSubscriptionPlanWizard(models.Model):
                 subscription.purchase_subscription_schedule_line.unlink()
             
             if self.recurring_interval_type == 'yearly':
-                for plan in subscription.subscription_plan_id.subscription_plan_schedule_ids:
-                    
+                escalation_amount = subscription.recurring_price
+                for plan in subscription.subscription_plan_id.subscription_plan_schedule_ids: 
                     if (interval % (self.recurring_interval*12)) == 0 and not interval == 0:
                         escalation = self.amount
+                        escalation_amount = escalation_amount + (escalation_amount * (escalation/100))
                     else:
                         escalation = 0
+                        
                     a_esclation += escalation
                     date_from = subscription.date_start + relativedelta(months=interval)#fields.Date.to_string(subscription.date_start + timedelta(interval))
                     date_to = date_from + relativedelta(months=plan.recurring_interval,days=-1)
@@ -54,6 +57,7 @@ class PurchaseSubscriptionPlanWizard(models.Model):
                         'discount': 0,
                         'escalation':  escalation,
                         'accum_escalation': a_esclation,
+                        'escalation_amount': escalation_amount,
                     }
                     interval += plan.recurring_interval
                     #subscription.purchase_subscription_schedule_line.sudo().create(lines_data)

@@ -47,7 +47,8 @@
         <field name="model">purchase.subscription</field>
         <field name="arch" type="xml">
             <tree string="Purchase Subscription">
-                <field name="code" readonly="1" decoration-bf="1"/>
+                <field name="name" readonly="1" decoration-bf="1" />
+                <field name="code" readonly="1" decoration-bf="1" optional="hide"/>
                 <field name="partner_id" readonly="1"/>
                 <field name="recurring_next_date" string="Next Invoice" widget="remaining_days" />
                 <field name="user_id" optional="show" widget="many2one_avatar_user"/>
@@ -115,15 +116,15 @@
 
 
                         <button string="Create Bill" name="generate_recurring_invoice" type="object" attrs="{'invisible': ['|',('invoicing_mode', '!=', 'manual'),('stage_category', '!=', 'progress')]}" class="btn-primary"/>
-                        
+  <!--                       
                         <button string="Start" name="start_subscription" type="object" attrs="{'invisible': [('stage_category','!=', 'confirm')]}" class="btn-primary"/>
-                        <!--
+                       
 -->
 
 <!--
                         <field name="stage_id" widget="statusbar" />
 -->                        
-                        <field name="stage_id" widget="statusbar" options="{'clickable': '0', 'fold_field': 'fold'}" />
+                        <field name="stage_id" widget="statusbar"  />
 
                     </header>
                     <sheet string="Subscription">
@@ -239,7 +240,7 @@
                             <page string="Other Info" id="others">
                                 <group>
                                     <group>
-                                        <field name="code" attrs="{'required': [('id', '!=', False)]}"/>
+                                        <field name="code" />
                                         <field name="payment_term_id" />
                                     </group>
                                     <group>

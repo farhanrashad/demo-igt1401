@@ -20,3 +20,4 @@ from . import monthly_models
 from . import account_move
 from . import project
 from . import account_asset
+from . import purchase_subscription

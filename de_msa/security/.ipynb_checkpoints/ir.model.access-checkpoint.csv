@@ -26,3 +26,4 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 25,access.msa.simulation.user,model_msa_simulation,de_msa.group_msa_user,1,1,1,1
 26,access.msa.power.product.line.user,model_project_power_product_line,de_msa.group_msa_user,1,1,1,1
 27,access.project.contractor.line.user,model_project_contractor_line,de_msa.group_msa_user,1,1,1,1
+28,access.purchase.subscription.msa.line.user,model_purchase_subscription_msa_line,de_msa.group_msa_user,1,1,1,1
