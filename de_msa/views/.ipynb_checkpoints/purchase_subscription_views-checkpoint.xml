@@ -8,7 +8,7 @@
                 <xpath expr="//notebook" position="inside">
 					<page string="Related MSA" name="related_msa" >
                         <field name="purchase_subscription_msa_line">
-							<tree>
+							<tree editable="bottom" >
 								<field name="msa_id"/>
 								<field name="active_billing" />
 							</tree>
