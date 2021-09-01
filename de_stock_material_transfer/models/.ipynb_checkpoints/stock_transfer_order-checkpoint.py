@@ -85,6 +85,7 @@ class StockTransferOrder(models.Model):
     exception_message = fields.Char(related='curr_txn_type_id.message', string='Exception')
 
     #closing reasons
+    disable_close = fields.Boolean(string='Close Disable')
     close_reason_id = fields.Many2one("stock.transfer.close.reason", string="Close Reason", copy=False, tracking=True, readonly=True)
     close_reason_message = fields.Char(string='Close Message', copy=False, readonly=True)
     date_closed = fields.Datetime(string='Closed Date', copy=False, readonly=True)
@@ -416,31 +417,32 @@ class StockTransferOrder(models.Model):
         #reason_id = self.env['stock.transfer.close.reason'].search([('reason_type','=',type)],limit=1)
         for order in self:
             #stage_id = self.env['stock.transfer.order.stage'].search([('transfer_order_type_ids','=',order.transfer_order_type_id.id),('stage_category','=','close'),('stage_code','=','CL')],limit=1)
-            if order.picking_state:
-                if order.transfer_order_type_id.auto_expiry and order.stage_id.id in (order.transfer_order_type_id.close_allow_on_stage_ids.mapped('id')):
-                    if order.order_deadline < fields.Datetime.now():
-                        vals = {
-                            'stage_id': order.transfer_order_type_id.expiry_stage_id.id, 
-                            'date_closed': today,
-                            'close_reason_id' : order.transfer_order_type_id.expiry_default_reason_id.id,
-                            'close_reason_message' : 'Auto Closed',
+            if not order.disable_close:
+                if order.picking_state:
+                    if order.transfer_order_type_id.auto_expiry and order.stage_id.id in (order.transfer_order_type_id.close_allow_on_stage_ids.mapped('id')):
+                        if order.order_deadline < fields.Datetime.now():
+                            vals = {
+                                'stage_id': order.transfer_order_type_id.expiry_stage_id.id, 
+                                'date_closed': today,
+                                'close_reason_id' : order.transfer_order_type_id.expiry_default_reason_id.id,
+                                'close_reason_message' : 'Auto Closed',
+                                }
+                elif order.picking_state == False or not order.picking_state:
+                    if order.transfer_order_type_id.auto_reject and order.stage_id.id in (order.transfer_order_type_id.rej_allow_on_stage_ids.mapped('id')):                     
+                        if order.delivery_deadline < fields.Datetime.now():
+                            vals = {
+                                'stage_id': order.transfer_order_type_id.reject_stage_id.id, 
+                                'date_closed': today,
+                                'close_reason_id' : order.transfer_order_type_id.reject_default_reason_id.id,
+                                'close_reason_message' : 'Auto Reject',
                             }
-            elif order.picking_state == False or not order.picking_state:
-                if order.transfer_order_type_id.auto_reject and order.stage_id.id in (order.transfer_order_type_id.rej_allow_on_stage_ids.mapped('id')):                     
-                    if order.delivery_deadline < fields.Datetime.now():
-                        vals = {
-                            'stage_id': order.transfer_order_type_id.reject_stage_id.id, 
-                            'date_closed': today,
-                            'close_reason_id' : order.transfer_order_type_id.reject_default_reason_id.id,
-                            'close_reason_message' : 'Auto Reject',
-                        }
-            picking_type_id = order.transfer_order_category_id.picking_type_id.id
-            picking_return_type_id = order.transfer_order_category_id.return_picking_type_id.id
+                picking_type_id = order.transfer_order_category_id.picking_type_id.id
+                picking_return_type_id = order.transfer_order_category_id.return_picking_type_id.id
 
-            order.sudo().write(vals)
-            #for picking in pickings.search([('stock_transfer_order_id','=',order.id),('state','!=','done')])
-            for picking in order.picking_ids.filtered(lambda p: p.picking_type_id.id in (picking_type_id, picking_return_type_id) and p.state not in ('done','cancel')):
-                picking.sudo().action_cancel()
+                order.sudo().write(vals)
+                #for picking in pickings.search([('stock_transfer_order_id','=',order.id),('state','!=','done')])
+                for picking in order.picking_ids.filtered(lambda p: p.picking_type_id.id in (picking_type_id, picking_return_type_id) and p.state not in ('done','cancel')):
+                    picking.sudo().action_cancel()
         return type
     
     
