@@ -43,6 +43,9 @@ class GenerateXLSXReport(models.Model):
                      ]
             
         account_ids = self.env['account.account'].search(domain)
+        debit_list = []
+        credit_list = []
+        balance_list = []
         #raise UserError(account_ids)
         for account in account_ids:
             account_name = account.code + " " + account.name
@@ -57,7 +60,10 @@ class GenerateXLSXReport(models.Model):
                 #raise UserError(line.debit)
                 debit += line.debit
                 credit += line.credit
+            debit_list.append(debit)
+            credit_list.append(credit)
             balance = debit - credit
+            balance_list.append(balance)
             sheet.write(row, 0, account_name, format2)
 #             sheet.write(row, 1, quant.product_id.name, format2)
 #             sheet.write(row, 2, quant.product_id.categ_id.name, format2)
@@ -67,4 +73,12 @@ class GenerateXLSXReport(models.Model):
             sheet.write(row, 6, credit, format2)
             sheet.write(row, 7, balance, format2)
             row = row + 1
+        deb = sum(debit_list)
+        cred = sum(credit_list)
+        bal = sum(balance_list)
+        sheet.write(row,0,'Total: ',format1)
+        sheet.write(row, 5, deb, format2)
+        sheet.write(row, 6, cred, format2)
+        sheet.write(row, 7, bal, format2)
+        
             
