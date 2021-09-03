@@ -518,7 +518,7 @@
                                 <input type="hidden" class="form-control s_website_form_input" name="transfer_type_id" t-att-value="transfer_type"/>
                                 <input type="hidden" class="form-control s_website_form_input" name="transfer_category_id" t-att-value="transfer_category"/>                            
                             </t>
-                           
+                           </tr>
                          <br/>
                   </form>
             <h3><p style="color:blue;">Product Section</p></h3>
@@ -566,6 +566,11 @@
                                     </td>
                                      <td class="text-left">
                                       <span t-esc="material['date_scheduled']" />
+                                    </td>
+                                    <td class="text-left">
+                                        <t t-foreach="request.env['stock.location'].sudo().search([('id','=', material['location_dest_id'])])" t-as="destlocline">
+                                        <span t-esc="destlocline.name" />
+                                        </t>
                                     </td>
                                     <td class="text-left">
                                         <t t-foreach="request.env['res.partner'].sudo().search([('id','=', material['supplier_id'])])" t-as="supline">
@@ -694,6 +699,11 @@
                                      <td class="text-left">
                                       <span t-esc="material['date_scheduled']" />
                                     </td>
+                                    <td class="text-left">
+                                        <t t-foreach="request.env['stock.location'].sudo().search([('id','=', material['location_src_id'])])" t-as="srclocline">
+                                        <span t-esc="srclocline.name" />
+                                        </t>
+                                    </td> 
 
 
 

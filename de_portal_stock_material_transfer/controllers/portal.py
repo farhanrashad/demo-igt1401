@@ -206,6 +206,7 @@ class CreateStockMaterial(http.Controller):
                 'project_id': stock['project_id'],
                 'date_scheduled': stock['date_scheduled'],
                 'supplier_id': stock['supplier_id'],
+                'location_dest_id': stock['location_dest_id'] if stock['location_dest_id'] else False, 
             }
             record_lines = request.env['stock.transfer.order.line'].sudo().create(line_vals)
         stock_transfer_list = []
@@ -217,6 +218,7 @@ class CreateStockMaterial(http.Controller):
                 'product_uom_qty': stockline['product_uom_qty'],
                 'project_id': stockline['project_id'],
                 'date_scheduled': stockline['date_scheduled'],
+                'location_src_id': stockline['location_src_id'] if stockline['location_src_id'] else False,
             }
             record_lines = request.env['stock.transfer.return.line'].sudo().create(line_vals)
         stock_transfer_return_list = []
@@ -233,6 +235,7 @@ class CreateStockMaterial(http.Controller):
             'project_id': int(kw.get('project_id')),
             'date_scheduled': kw.get('date_scheduled'),
             'supplier_id': int(kw.get('supplier_id')),
+            'location_dest_id': int(kw.get('location_dest_id')) if kw.get('location_dest_id') else False,
         }
         stock_transfer_list.append(line_vals)
         transfer_type = request.env['stock.transfer.order.type'].sudo().search([('id', '=', int(kw.get('transfer_type_id_line')))])
@@ -249,6 +252,7 @@ class CreateStockMaterial(http.Controller):
             'product_uom_qty': kw.get('product_uom_qty'),
             'project_id': int(kw.get('project_id')),
             'date_scheduled': kw.get('date_scheduled'),
+            'location_src_id': int(kw.get('location_src_id')) if kw.get('location_src_id') else False,
         }
         stock_transfer_return_list.append(line_vals)
         transfer_type = request.env['stock.transfer.order.type'].sudo().search([('id', '=', int(kw.get('transfer_type_id_line')))])
