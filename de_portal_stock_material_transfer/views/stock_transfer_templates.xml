@@ -621,7 +621,7 @@
                                     </td>
                                     <td class="text-left">
                                         <select id="destination_loc" class="form-control  o_website_form_input" name="location_dest_id" readonly="1" required="1">
-                                            <t t-foreach="desctination_lists" t-as="destlist">
+                                            <t t-foreach="destination_lists" t-as="destlist">
                                                 <option t-att-value="destlist.id">
                                                     <t t-esc="destlist.name"  />
                                                 </option>
