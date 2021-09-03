@@ -185,8 +185,10 @@ class CreateStockMaterial(http.Controller):
             has_transfer = int(kw.get('transfer_id'))
         if kw.get('transporter_id'):
             has_transporter = int(kw.get('transporter_id'))
-
+        transfer_categ = request.env['stock.transfer.order.category'].sudo().search('id','=',int(kw.get('transfer_category_id')))
+      
         material_val = {
+            'sequence_code': transfer_categ.code,
             'purchase_id': has_purchase,
             'stock_transfer_order_id': has_transfer,
             'transfer_order_type_id': int(kw.get('transfer_type_id')),
