@@ -416,6 +416,114 @@
             <t t-call="portal.portal_searchbar">
                 <t t-set="title">Material Requisition</t>
             </t>
+
+             <br/>
+              <form id="portal_stock_material_form" data-toggle="validator" action="/stock/material/save">
+                     <div class="form-group col-12 s_website_form_submit" data-name="Submit Button">
+                            <div style="width: 200px;" class="s_website_form_label"></div>
+                            <button type="submit" class="btn btn-primary pull-left">Submit</button>
+                            <span id="s_website_form_result"></span>
+                      </div>
+                    <t t-call="portal.portal_table">
+                            <tr>
+                               <t t-if="has_purchase_order == '1'">
+                                <th>Purchase Order:</th>
+                                <td>
+                                <select id="purchase" class="form-control  o_website_form_input" name="purchase_id" >
+                                            <t t-foreach="purchase_lists" t-as="purchaselist">
+                                                <option t-att-value="purchaselist.id">
+                                                    <t t-esc="purchaselist.name"  />
+                                                </option>
+                                            </t>
+                                       </select>
+                                </td>
+                                </t>
+                                <t t-if="has_purchase_order == '2'">
+                                <th>Purchase Order:</th>
+                                <td>
+                                <select id="purchase" class="form-control  o_website_form_input" name="purchase_id" readonly="1" required="1">
+                                            <t t-foreach="purchase_lists" t-as="purchaselist">
+                                                <option t-att-value="purchaselist.id">
+                                                    <t t-esc="purchaselist.name"  />
+                                                </option>
+                                            </t>
+                                       </select>
+                                </td>
+                                </t>
+                                <t t-if="has_transfer_order == '1'">
+                                <th>Transfer Order:</th>
+                                <td>
+                                <select id="transfer" class="form-control  o_website_form_input" name="transfer_id" >
+                                            <t t-foreach="transfer_lists" t-as="tlist">
+                                                <option t-att-value="tlist.id">
+                                                    <t t-esc="tlist.name"  />
+                                                </option>
+                                            </t>
+                                       </select>
+                                </td>
+                                </t>
+                                </tr>
+                                <tr>
+                                <t t-if="has_transfer_order == '2'">
+                                <th>Transfer Order:</th>
+                                <td>
+                                <select id="transfer" class="form-control  o_website_form_input" name="transfer_id" readonly="1" required="1">
+                                            <t t-foreach="transfer_lists" t-as="tlist">
+                                                <option t-att-value="tlist.id">
+                                                    <t t-esc="tlist.name"  />
+                                                </option>
+                                            </t>
+                                       </select>
+                                </td>
+                                </t>
+                                <t t-if="has_transporter == '1'">
+                               <th>Transporter:</th>
+                                <td>
+                                <select id="transporter" class="form-control  o_website_form_input" name="transporter_id" >
+                                            <t t-foreach="transporter_lists" t-as="transporterlist">
+                                                <option t-att-value="transporterlist.id">
+                                                    <t t-esc="transporterlist.name"  />
+                                                </option>
+                                            </t>
+                                       </select>
+                                </td>
+                                </t>
+                                 <t t-if="has_transporter == '2'">
+                               <th>Transporter:</th>
+                                <td>
+                                <select id="transporter" class="form-control  o_website_form_input" name="transporter_id" readonly="1" required="1">
+                                            <t t-foreach="transporter_lists" t-as="transporterlist">
+                                                <option t-att-value="transporterlist.id">
+                                                    <t t-esc="transporterlist.name"  />
+                                                </option>
+                                            </t>
+                                       </select>
+                                </td>
+                                </t>
+                                </tr>
+                                <tr>  
+                                <t t-if="has_reference == '1'">
+                                <th>Reference:</th>
+                                <td class="text-left">
+                                        <input type="text" class="form-control s_website_form_input" name="reference" id="ref"   />
+                                    </td>
+                                </t>
+                                <t t-if="has_reference == '2'">
+                                <th>Reference:</th>
+                                <td class="text-left">
+                                        <input type="text" class="form-control s_website_form_input" name="reference" id="ref"  required="1" />
+                                    </td>
+                                </t>
+                                 </tr>
+                                <input type="hidden" class="form-control s_website_form_input" name="transfer_type_id" t-att-value="transfer_type"/>
+                                <input type="hidden" class="form-control s_website_form_input" name="transfer_category_id" t-att-value="transfer_category"/>
+
+                            </tr>
+                   </t>
+                    <br/>
+                   
+
+                  </form>
             <h3><p style="color:blue;">Product Section</p></h3>
                 <t t-call="portal.portal_table"   id="productTable">
 
@@ -427,6 +535,7 @@
                                 <th class="text-left">Quantity</th>
                                 <th class="text-left">Project</th>
                                 <th class="text-left">Schedule Date</th>
+                                <th class="text-left">To</th>
                                 <th class="text-left">Supplier</th>
                             </tr>
 
@@ -509,6 +618,15 @@
                                         <input type="date" class="form-control s_website_form_input" name="date_scheduled" id="product_uom_qty"   />
                                     </td>
                                     <td class="text-left">
+                                        <select id="destination_loc" class="form-control  o_website_form_input" name="location_dest_id" readonly="1" required="1">
+                                            <t t-foreach="desctination_lists" t-as="destlist">
+                                                <option t-att-value="destlist.id">
+                                                    <t t-esc="destlist.name"  />
+                                                </option>
+                                            </t>
+                                       </select>
+                                    </td>
+                                    <td class="text-left">
                                         <select id="supplier" class="form-control  o_website_form_input" name="supplier_id" readonly="1" required="1">
                                             <t t-foreach="supplier_lists" t-as="supplierlist">
                                                 <option t-att-value="supplierlist.id">
@@ -545,6 +663,7 @@
                                 <th class="text-left">Quantity</th>
                                 <th class="text-left">Project</th>
                                 <th class="text-left">Schedule Date</th>
+                                <th class="text-left">From</th>
                             </tr>
 
                         </thead>
@@ -620,6 +739,15 @@
                                      <td class="text-left">
                                         <input type="date" class="form-control s_website_form_input" name="date_scheduled" id="product_uom_qty"   />
                                     </td>
+                                    <td class="text-left">
+                                        <select id="src_loc" class="form-control  o_website_form_input" name="location_src_id" readonly="1" required="1">
+                                            <t t-foreach="src_lists" t-as="srclist">
+                                                <option t-att-value="srclist.id">
+                                                    <t t-esc="srclist.name"  />
+                                                </option>
+                                            </t>
+                                       </select>
+                                    </td>
 
 
                                         <td id="submit_1"   class="new">
@@ -639,107 +767,7 @@
                 </t>
            </t>
                  <br/>
-                <form id="portal_stock_material_form" data-toggle="validator" action="/stock/material/save">
-
-                    <t t-call="portal.portal_table">
-                            <tr>
-                               <t t-if="has_purchase_order == '1'">
-                                <th>Purchase Order:</th>
-                                <td>
-                                <select id="purchase" class="form-control  o_website_form_input" name="purchase_id" >
-                                            <t t-foreach="purchase_lists" t-as="purchaselist">
-                                                <option t-att-value="purchaselist.id">
-                                                    <t t-esc="purchaselist.name"  />
-                                                </option>
-                                            </t>
-                                       </select>
-                                </td>
-                                </t>
-                                <t t-if="has_purchase_order == '2'">
-                                <th>Purchase Order:</th>
-                                <td>
-                                <select id="purchase" class="form-control  o_website_form_input" name="purchase_id" readonly="1" required="1">
-                                            <t t-foreach="purchase_lists" t-as="purchaselist">
-                                                <option t-att-value="purchaselist.id">
-                                                    <t t-esc="purchaselist.name"  />
-                                                </option>
-                                            </t>
-                                       </select>
-                                </td>
-                                </t>
-                                <t t-if="has_transfer_order == '1'">
-                                <th>Transfer Order:</th>
-                                <td>
-                                <select id="transfer" class="form-control  o_website_form_input" name="transfer_id" >
-                                            <t t-foreach="transfer_lists" t-as="tlist">
-                                                <option t-att-value="tlist.id">
-                                                    <t t-esc="tlist.name"  />
-                                                </option>
-                                            </t>
-                                       </select>
-                                </td>
-                                </t>
-                                <t t-if="has_transfer_order == '2'">
-                                <th>Transfer Order:</th>
-                                <td>
-                                <select id="transfer" class="form-control  o_website_form_input" name="transfer_id" readonly="1" required="1">
-                                            <t t-foreach="transfer_lists" t-as="tlist">
-                                                <option t-att-value="tlist.id">
-                                                    <t t-esc="tlist.name"  />
-                                                </option>
-                                            </t>
-                                       </select>
-                                </td>
-                                </t>
-                                <t t-if="has_transporter == '1'">
-                               <th>Transporter:</th>
-                                <td>
-                                <select id="transporter" class="form-control  o_website_form_input" name="transporter_id" >
-                                            <t t-foreach="transporter_lists" t-as="transporterlist">
-                                                <option t-att-value="transporterlist.id">
-                                                    <t t-esc="transporterlist.name"  />
-                                                </option>
-                                            </t>
-                                       </select>
-                                </td>
-                                </t>
-                                 <t t-if="has_transporter == '2'">
-                               <th>Transporter:</th>
-                                <td>
-                                <select id="transporter" class="form-control  o_website_form_input" name="transporter_id" readonly="1" required="1">
-                                            <t t-foreach="transporter_lists" t-as="transporterlist">
-                                                <option t-att-value="transporterlist.id">
-                                                    <t t-esc="transporterlist.name"  />
-                                                </option>
-                                            </t>
-                                       </select>
-                                </td>
-                                </t>
-                                <t t-if="has_reference == '1'">
-                                <th>Reference:</th>
-                                <td class="text-left">
-                                        <input type="text" class="form-control s_website_form_input" name="reference" id="ref"   />
-                                    </td>
-                                </t>
-                                <t t-if="has_reference == '2'">
-                                <th>Reference:</th>
-                                <td class="text-left">
-                                        <input type="text" class="form-control s_website_form_input" name="reference" id="ref"  required="1" />
-                                    </td>
-                                </t>
-                                <input type="hidden" class="form-control s_website_form_input" name="transfer_type_id" t-att-value="transfer_type"/>
-                                <input type="hidden" class="form-control s_website_form_input" name="transfer_category_id" t-att-value="transfer_category"/>
-
-                            </tr>
-                   </t>
-                    <br/>
-                    <div class="form-group col-12 s_website_form_submit" data-name="Submit Button">
-                            <div style="width: 200px;" class="s_website_form_label"></div>
-                            <button type="submit" class="btn btn-primary pull-left">Submit</button>
-                            <span id="s_website_form_result"></span>
-                        </div>
-
-                  </form>
+               
                     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
                     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
                     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>

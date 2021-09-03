@@ -59,16 +59,20 @@ def stock_material_category_page_content(transfer_category, transfer_type):
             if group.id == http.request.env.context.get('uid'):
                 transfer_type_list.append(transfer.id)
 
-    transfer_type = request.env['stock.transfer.order.type'].search([('id', 'in', transfer_type_list)])
+    transfer_type = request.env['stock.transfer.order.type'].sudo().search([('id', 'in', transfer_type_list)])
     transfer_categories = transfer_category
     transfer_category_list = []
     for categ in transfer_categories:
         for group in categ.group_id.users:
             if group.id == http.request.env.context.get('uid'):
                 transfer_category_list.append(categ.id)
-    transfer_category = request.env['stock.transfer.order.category'].search([('id', 'in', transfer_category_list)])
+    transfer_category = request.env['stock.transfer.order.category'].sudo().search([('id', 'in', transfer_category_list)])
+    src_lists = request.env['stock.location'].sudo().search([])
+    destination_lists = request.env['stock.location'].sudo().search([])
 
     return {
+        'src_lists': src_lists,
+        'destination_lists': destination_lists, 
         'transfer_category': transfer_category,
         'transfer_type': transfer_type.id,
     }
@@ -114,8 +118,11 @@ def stock_material_type_categ_page_content(transfer_category, transfer_type):
     returnable = '0'
     if transfer_category.action_type == 'returnable':
         returnable = '1'
-
+    src_lists = request.env['stock.location'].sudo().search([('id','=',transfer_category.location_src_id.id)])
+    destination_lists = request.env['stock.location'].sudo().search([('id','=',transfer_category.location_dest_id.id)])
     return {
+        'src_lists':  src_lists,
+        'destination_lists': destination_lists, 
         'product_lists': product_lists,
         'returnable': returnable,
         'has_transporter': has_transporter,
