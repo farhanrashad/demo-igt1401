@@ -516,13 +516,10 @@
                                 </t>
                                  </tr>
                                 <input type="hidden" class="form-control s_website_form_input" name="transfer_type_id" t-att-value="transfer_type"/>
-                                <input type="hidden" class="form-control s_website_form_input" name="transfer_category_id" t-att-value="transfer_category"/>
-
-                            </tr>
-                   </t>
-                    <br/>
-                   
-
+                                <input type="hidden" class="form-control s_website_form_input" name="transfer_category_id" t-att-value="transfer_category"/>                            
+                            </t>
+                           </tr>
+                         <br/>
                   </form>
             <h3><p style="color:blue;">Product Section</p></h3>
                 <t t-call="portal.portal_table"   id="productTable">
