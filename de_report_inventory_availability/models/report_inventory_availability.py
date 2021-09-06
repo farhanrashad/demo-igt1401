@@ -12,89 +12,94 @@ class GenerateXLSXReport(models.Model):
     def generate_xlsx_report(self, workbook, data, lines):
         in_date = data['in_date']
         in_date = datetime.strptime(in_date, '%Y-%m-%d %H:%M:%S')
-        in_date = in_date.strftime("%Y/%m/%d")
+        in_date = in_date.strftime("%d/%m/%Y")
         
-        format1 = workbook.add_format({'font_size': '12', 'align': 'vcenter', 'bold': True})
+        format0 = workbook.add_format({'font_size': '12', 'align': 'vcenter', 'bold': True,})
+        format1 = workbook.add_format({'font_size': '12', 'align': 'vcenter', 'bold': True, 'bg_color': 'yellow'})
         ###For SPMRF
-        sheet = workbook.add_worksheet('Inventory Availability')
-        sheet.merge_range('C2:E2', 'Inventory Availability', format1)
-        sheet.write(1, 4, 'Inventory Valuation', format1)
-        sheet.write(3, 0, 'Date From', format1)
-        sheet.write(3, 1, in_date, format1)
+        sheet = workbook.add_worksheet('Product Availability')
+        sheet.merge_range('C2:E2', 'Product Availability', format0)
+        sheet.write(1, 4, 'Product Availability', format0)
+        sheet.write(3, 0, 'Report On', format0)
+        sheet.write(3, 1, in_date, format0)
 
-        sheet.write(6, 0, 'Product Reference', format1)
-        sheet.write(6, 1, 'Product Name', format1)
-        sheet.write(6, 2, 'Category', format1)
-        sheet.write(6, 3, 'Product Type', format1)
-        sheet.write(6, 4, 'UOM', format1)
-        sheet.write(6, 5, 'Total Stock Quantity', format1)
-        sheet.write(6, 6, 'Total Stock Value', format1)
-        sheet.write(6, 7, 'Stock Location', format1)
-        sheet.write(6, 8, 'In Qunatity', format1)
-        sheet.write(6, 9, 'Out Quantity', format1)
-        sheet.write(6, 10, 'Quantity', format1)
-        sheet.write(6, 11, 'Value', format1)
-        sheet.write(6, 12, 'Landed Cost', format1)
-        sheet.write(6, 13, 'MAX Cost', format1)
-        sheet.write(6, 14, 'MIN Cost', format1)
-        sheet.write(6, 15, 'AVG. Cost', format1)
-        
-        
+        sheet.write(6, 0, 'Product Cateegory', format1)
+        sheet.write(6, 1, 'Product', format1)
+        sheet.write(6, 2, 'Product Code', format1)
+        sheet.write(6, 3, 'UOM', format1)
+        sheet.write(6, 4, 'Inhand Qty', format1)
+        sheet.write(6, 5, 'Reserved Qty', format1)
+        sheet.write(6, 6, 'MRF Reserved Qty', format1)
+        sheet.write(6, 7, 'SPMRF Reserved Qty', format1)
+        sheet.write(6, 8, 'Available Qty', format1)
         
         format2 = workbook.add_format({'font_size': '12', 'align': 'vcenter'})
         row = 7
         row1 = 7
         row2 = 7
-        domain = ''
+        domain = domain1 = domain_mrf = domain_spmrf = ''
+        
+        products_list = []
+        domain = [('in_date','<=',data['in_date'])]
+        if data['product_ids']:
+            domain += [('product_id','in',data['product_ids'])]
+        if data['location_ids']:            
+            domain += [('location_id','in',data['location_ids'])]
+            
         if data['categ_ids']:
-            domain = [('categ_id', 'in',data['categ_ids']),
-                      ('in_date', '<=', data['in_date'])
-                     ]
-        if data['location_ids']:
-            domain = [('location_id', 'in', data['location_ids']),
-                      ('in_date', '<=', data['in_date'])
-                     ]
-        if data['productids']:
-            domain = [('product_id', 'in', data['productids']),
-                     ('in_date', '<=', data['in_date'])]
+            categ_products_ids = self.env['product.product'].search([('categ_id', 'in', data['categ_ids'])])
+            product_ids = tuple([pro_id.id for pro_id in categ_products_ids])
+            domain += [('product_id','in',product_ids)]
+        
+        quant_product_ids = self.env['stock.quant'].search(domain)
+        for p in quant_product_ids.product_id:
+            if p not in products_list:
+                products_list.append(p)
+        
+        quantity = stock_value = avail_qty = reserved_qty = reserved_mrf = reserved_spmrf = 0
+        mrf_move_line_ids = spmrf_move_line_ids = self.env['stock.move.line']
+        pickings = self.env['stock.picking']
+        for product in products_list:
+            quantity = stock_value = avail_qty = reserved_qty = reserved_mrf = reserved_spmrf = 0
+            domain1 = domain + [('product_id','=',product.id)]
+            
+            
+
+            
+            quant_ids = self.env['stock.quant'].search(domain1)
+            for quant in quant_ids:
+                quantity += quant.quantity
+                stock_value += quant.value
+                avail_qty += quant.available_quantity
+                reserved_qty = quantity - avail_qty
+            
+            pickings = self.env['stock.picking'].search([('stock_transfer_order_id','!=',False),('state','=','assigned')])
+            for picking in pickings:
+                for line in picking.move_line_ids.filtered(lambda x: x.product_id.id == product.id):
+                    if picking.stock_transfer_order_id.transfer_order_type_id.code == 'MRF':
+                        reserved_mrf += line.product_uom_qty
+                    elif picking.stock_transfer_order_id.transfer_order_type_id.code == 'SPMRF':
+                        reserved_spmrf += line.product_uom_qty
                     
-        #quant_ids = self.env['stock.quant'].search([('date_order','>=',data['start_date']),('date_order','<=',data['end_date'])])
-        quant_ids = self.env['stock.quant'].search([])
-        for quant in quant_ids:
-            sheet.write(row, 0, quant.product_id.default_code, format2)
-            sheet.write(row, 1, quant.product_id.name, format2)
-            sheet.write(row, 2, quant.product_id.categ_id.name, format2)
-            sheet.write(row, 3, quant.product_id.type, format2)
-            sheet.write(row, 4, quant.product_id.uom_id.name, format2)
-            sheet.write(row, 5, quant.quantity, format2)
-            sheet.write(row, 6, quant.value, format2)
-            sheet.write(row, 7, quant.location_id.name, format2)
+                #domain_mrf = [('product_id','=',product.id),('transfer_order_type_code','=','MRF'),('state','in',['assigned','partially_available'])]
+                #domain_spmrf = [('product_id','=',product.id),('transfer_order_type_code','=','SPMRF'),('state','in',['assigned','partially_available'])]
+            
+                #mrf_move_line_ids = self.env['stock.move.line'].search(domain_mrf)
+                #for line in mrf_move_line_ids:
+                #    reserved_mrf += line.product_uom_qty
+            
+                #spmrf_move_line_ids = self.env['stock.move.line'].search(domain_spmrf)
+                #for line in spmrf_move_line_ids:
+                #    reserved_spmrf += line.product_uom_qty
+            
+            sheet.write(row, 0, product.categ_id.name, format2)
+            sheet.write(row, 1, product.name, format2)
+            sheet.write(row, 2, product.default_code, format2)
+            sheet.write(row, 3, product.uom_id.name, format2)
+            sheet.write(row, 4, quantity, format2)
+            sheet.write(row, 5, reserved_qty, format2)
+            sheet.write(row, 6, reserved_mrf, format2)
+            sheet.write(row, 7, reserved_spmrf, format2)
+            sheet.write(row, 8, avail_qty, format2)
             row = row + 1
-            
-            
-        #---------------------------below is the sample code for gorup by product data -----------------
-        """
-        p = self.env['model_of_product'].search([])
-
-
-_product=[]
-# collect all product id
-for product in p:
-    _product.append(product.id)
-
-box = []
-for _p in _product:
-    domain = [  ('date', '=', specific_date),
-                ('product_id', '=', _p)]
-    record = self.env['stock.move'].search(domain)
-    sum_of_stock = 0
-    sum_of_client = 0
-    # box will contain sets of [product_id, sum_of_stock, sum_of_client ]
-    for rec in record.search([('name', '=', 'Clients')]):
-        sum_of_client = sum_of_client + rec.product_uom_quantity
-    for rec in record.search([('name', '=', 'Stock')]):
-        sum_of_stock = sum_of_stock + rec.product_uom_quantity
-
-    box.append([_p, sum_of_stock, sum_of_client])
-return box
-        """
+        

@@ -12,5 +12,9 @@
     </record> -->
       
       <menuitem action="action_gtn_dgn_mrf_spmrf_wizard" id="mrf_spmrf_line_report" name="MRF/SPMRF Line Report" parent="de_stock_material_transfer.stock_requisition_main_menu" sequence="12"/>
+      
+      		<menuitem id="menu_report_stock_valuation_xlsx" action="action_report_stock_valuation_xlsx" parent="stock.menu_warehouse_report"/>
+
+      
   </data>
 </odoo>

@@ -2,14 +2,14 @@
 
 {
     "name": "Inventory Availability Report",
-    'version': '14.0.0.2',
+    'version': '14.0.0.3',
     "category": 'Inventory',
     "summary": ' Inventory Availability Report',
     'sequence': 1,
     "description": """"Inventory Availability Report """,
     "author": "Dynexcel",
     "website": "https://www.dynexcel.com",
-    'depends': ['stock_account','report_xlsx'],
+    'depends': ['stock_account','report_xlsx','de_stock_material_transfer'],
     'data': [
         'security/ir.model.access.csv',
         'reports/report_inventory_availability.xml',

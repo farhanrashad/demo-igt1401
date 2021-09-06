@@ -8,7 +8,7 @@ class InventoryAvailabilityWizard(models.TransientModel):
     
     in_date =  fields.Datetime(string='Inventory Date')
     
-    productids = fields.Many2many('product.product', 'report_inventory_availability_product_rel', 'report_inventory_availability_id',
+    product_ids = fields.Many2many('product.product', 'report_inventory_availability_product_rel', 'report_inventory_availability_id',
         'product_id', 'Products')
     categ_ids = fields.Many2many('product.category', 'report_inventory_availability_categ_rel', 'report_inventory_availability_id',
         'categ_id', 'Categories')
@@ -20,9 +20,9 @@ class InventoryAvailabilityWizard(models.TransientModel):
         #order_ids = self.env['stock.transfer.order'].browse(self._context.get('active_ids',[]))
         data = {
             'in_date': self.in_date, 
-            'productids': self.productids.id,
-            'categ_ids': self.categ_ids.id,
-            'location_ids': self.location_ids.id,
+            'product_ids': self.product_ids.ids,
+            'categ_ids': self.categ_ids.ids,
+            'location_ids': self.location_ids.ids,
         }
         if self.in_date:
             return self.env.ref('de_report_inventory_availability.report_inventory_availability_report').report_action(self, data=data)
