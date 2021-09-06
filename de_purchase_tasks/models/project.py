@@ -35,6 +35,7 @@ class ProjectTask(models.Model):
     task_sequence = fields.Integer(string='Task Sequence', readonly=True)
     date_estimated = fields.Datetime(string='Estimated Completion Date', compute="_compute_date_completion")
     date_to_approve = fields.Datetime(string='To Approve')
+    days_to_approve = fields.Integer(string='Approval Delay', compute="_compute_days_to_close")
     days_to_close = fields.Integer(string='Delay', compute="_compute_days_to_close")
     picking_id = fields.Many2one('stock.picking', string='Picking', compute="_compute_picking")
     
@@ -84,11 +85,15 @@ class ProjectTask(models.Model):
     def _compute_days_to_close(self):
         days = 0
         for task in self:
-            days = 0
+            days = adays  = 0
             if not task.stage_id.is_closed:
                 if task.purchase_id.date_approve:
                     days = (fields.Datetime.now() - task.purchase_id.date_approve).days
+                    
+                if task.date_to_approve:
+                    adays = (fields.Datetime.now() - task.date_to_approve).days
             task.days_to_close = days
+            task.days_to_approve = adays
     
     @api.depends('stage_id')
     def _compute_all_submission_date(self):

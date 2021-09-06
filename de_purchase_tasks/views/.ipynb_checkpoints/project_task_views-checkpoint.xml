@@ -102,6 +102,7 @@
                     <field name="completion_percent" optional="show" />
                     <field name="date_estimated" optional="show" />
                     <field name="date_to_approve"  widget="remaining_days" />
+                    <field name="days_to_approve" optional="show" />
                     <field name="days_to_close" optional="show" />
                     <field name="date_doc_submission" optional="show" />
                     <field name="date_inv_submission" optional="show" />
