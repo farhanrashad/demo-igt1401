@@ -35,6 +35,15 @@ class StockPicking(models.Model):
                 
     def button_validate(self):
         res = super(StockPicking, self).button_validate()
+        qty = 0
+        if self.purchase_id.task_ids:
+            if not self.task_id:
+                raise UserError(_('There is no milestone'))
+            for move in self.move_ids_without_package:
+                qty = (self.task_id.completion_percent / 100) * move.purchase_line_id.product_qty
+                if move.quantity_done != qty or move.quantity_done == 0:
+                    raise UserError(_('Milestone quantity is wrong'))
+                    
         task_id = self.env['project.task'].search([('id','=',self.task_id.id)])
         for task in task_id:
             task.update({
@@ -44,22 +53,46 @@ class StockPicking(models.Model):
     
     def action_assign_milestone(self):
         #task_id = self.env['project.task'].search([('id','=',self.task_id.id)])
-        tasks = task_id = self.env['project.task']
+        task = self.env['project.task']
+        qty = 0
+        #tasks = self.env['project.task'].search([('purchase_id', '=', picking.purchase_id.id),('allow_picking', '=', picking.allow_picking),('stage_id.stage_category','=','close'),('submission_type','=','0'),('delivery_assigned','!=',True)])
+        #for task in tasks.sorted(key=lambda r: r.sequence):
+            #task_id = task
+            #break
+            #if not task_id:
+                #raise UserError(_('There is no milestone for assignment'))
+        #self.task_id = task_id.id        
         for picking in self:
+            task = self.env['project.task'].search([('purchase_id', '=', picking.purchase_id.id),('allow_picking', '=', picking.allow_picking),('stage_id.stage_category','=','close'),('submission_type','=','0'),('delivery_assigned','!=',True)],limit=1)
+            picking.update({
+                'task_id': task.id
+            })
+            if not task:
+                raise UserError(_('There is no milestone for assignment'))
+            
             if picking.task_id.completion_percent > 0:
                 picking.sudo().action_assign()
-                for line in picking.move_ids_without_package:
-                    line.quantity_done = (picking.task_id.completion_percent / 100) * line.purchase_line_id.product_qty
-                    #line.create({
-                    #    'location_dest_id':picking.location_dest_id,
-                    #    'product_uom_id': line.product_uom,
-                    #    'product_id':line.product_id.id,
-                    #    'qty_done':line.quantity_done,
+                for move in picking.move_ids_without_package:
+                    qty = (picking.task_id.completion_percent / 100) * move.purchase_line_id.product_qty
+                    #move.update({
+                    #    'quantity_done': qty,
+                    #    'product_uom_qty': qty,
                     #})
-            tasks = self.env['project.task'].search([('purchase_id', '=', picking.purchase_id.id),('allow_picking', '=', picking.allow_picking),('stage_id.is_closed','=',True),('delivery_assigned','!=',True)])
-            for task in tasks.sorted(key=lambda r: r.sequence):
-                task_id = task
-                break
-            if not task_id:
-                raise UserError(_('There is no milestone for assignment'))
-        self.task_id = task_id.id
+                    if move.move_line_ids:
+                        move.move_line_ids.unlink()
+                    self.env['stock.move.line'].create({
+                        'qty_done': qty,
+                        'location_dest_id': picking.location_dest_id.id,
+                        'location_id': picking.location_id.id,
+                        'picking_id': picking.id,
+                        'move_id': move.id,
+                        'product_id': move.product_id.id,
+                        'product_uom_id': move.product_uom.id,
+                    })
+                    
+            
+            #for move in picking.move_ids_without_package:
+                
+        
+
+

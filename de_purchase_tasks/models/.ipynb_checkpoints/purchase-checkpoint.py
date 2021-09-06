@@ -12,6 +12,8 @@ class PurchaseOrder(models.Model):
     task_ids = fields.One2many('project.task', 'purchase_id', string='Tasks', copy=False)
     task_count = fields.Integer(string='Task counts', compute='_compute_task_ids')
 
+    purchase_task_workflow_line = fields.One2many('purchase.task.workflow.line', 'purchase_id', string='Task Workflow', copy=False)
+    
     def _get_targeted_project_ids(self):
         project_ids = []
         for project in self.order_line.project_id:
@@ -44,7 +46,7 @@ class PurchaseOrder(models.Model):
         templates = self.env['purchase.task.template'].search([('requisition_type_id','=',self.requisition_type_id.id)])
         #for stage in templates.stage_ids:
             #stage.update({'project_ids': [(4, project_id.id)]})
-            
+        stages_list = tasks_list = [] 
         stage_id = False
         projects = self._get_targeted_project_ids()
         for project in projects:
@@ -69,6 +71,7 @@ class PurchaseOrder(models.Model):
                     'allow_picking': template.allow_picking,
                     'allow_invoice': template.allow_invoice,
                     'completion_days': template.completion_days,
+                    'approval_days': template.approval_days,
                     'completion_percent': template.completion_percent,
                     'task_sequence': template.sequence,
                     'stage_id': stage_id,
@@ -112,15 +115,49 @@ class PurchaseOrder(models.Model):
                         'prv_stage_id': prv_stage,
                     })
                     prv_stage = stage.stage_id.id
+            
+        #create task workflow
+        tasks_list = []
+        next_task = prv_task = False
+        #if self.purchase_task_workflow_line:
+            #self.purchase_task_workflow_line.unlink()
+        #for project in projects:
+        for task in self.task_ids:#.filtered(lambda p: p.purchase_project_id.id == project.id):
+            tasks_list.append({
+                'purchase_id': self.id,
+                'project_id': task.purchase_project_id.id,
+                'task_id': task.id,
+                'sequence': task.task_sequence,
+            })
+        self.purchase_task_workflow_line.create(tasks_list)
+        #for project in projects:
+        next_task = prv_task = False
+        #++++++++Assign Next Stage++++++++++++++
+        for project in projects:
+            next_task = prv_task = False
+            tasks = self.env['purchase.task.workflow.line'].search([('purchase_id','=', self.id),('project_id','=', project.id)], order="sequence desc")
+            for ntask in tasks:
+                ntask.update({
+                    'next_task_id': next_task,
+                })
+                next_task = ntask.task_id.id
+        #+++++++++++Assign Previous Stage++++++++++
+            tasks = self.env['purchase.task.workflow.line'].search([('purchase_id','=', self.id),('project_id','=', project.id)], order="sequence asc")
+            for ptask in tasks:
+                ptask.update({
+                    'prv_task_id': prv_task,
+                })
+                prv_task = ptask.task_id.id
                 
         return res
 
     def button_cancel(self):
         res = super(PurchaseOrder, self).button_cancel()
         for order in self:
-            #for task in order.task_ids:
-             #   task.unlink()
+            for tline in order.purchase_task_workflow_line:
+                tline.unlink()
             order.project_id.task_ids.unlink()
+            order.purchase_task_workflow_line.unlink()
             order.project_id.unlink()
         return res
     
@@ -163,3 +200,17 @@ class PurchaseOrder(models.Model):
             'target': 'current',
             'view_mode': 'tree,form',
         }
+    
+class PurchaseTaskWorkflowLine(models.Model):
+    _name = 'purchase.task.workflow.line'
+    _description = 'Purchase task workflow line'
+    _order = 'project_id,sequence'
+    
+    purchase_id = fields.Many2one('purchase.order', string='Purchase', index=True, required=True, ondelete='cascade')
+
+    project_id = fields.Many2one('project.project', string='Project', readonly=False, ondelete='restrict', tracking=True, index=True, copy=False)
+
+    task_id = fields.Many2one('project.task', string='Task', readonly=False, ondelete='restrict', tracking=True, index=True, copy=False)
+    sequence = fields.Integer(string='Sequence')
+    next_task_id = fields.Many2one('project.task', string='Next Task', readonly=False, ondelete='restrict', tracking=True, index=True, copy=False)
+    prv_task_id = fields.Many2one('project.task', string='Previous Task', readonly=False, ondelete='restrict', tracking=True, index=True, copy=False)
