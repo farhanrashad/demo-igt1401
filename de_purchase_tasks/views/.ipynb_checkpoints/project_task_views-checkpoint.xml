@@ -54,11 +54,16 @@
                     <field name="allow_picking" invisible="1"/>
                     <field name="allow_invoice" invisible="1"/>
                     <field name="completion_days" />
+                    <field name="approval_days" />
                     <field name="completion_percent" />
                     <field name="delivery_assigned" readonly="1"/>
                     <field name="task_sequence" string="Sequence" readonly="1"/>
                     <field name="purchase_task_stage_ids" widget="many2many_tags" invisible="1"/>
                 </xpath>
+                <xpath expr="//field[@name='date_deadline']" position="after">
+                    <field name="date_to_approve"  widget="remaining_days" />
+                </xpath>
+               
                 <!--
                 <xpath expr="//field[@name='stage_id']" position="replace">
                     <field name="purchase_task_stage_ids" invisible="1"/>
@@ -96,6 +101,8 @@
                     <field name="picking_id" optional="show" string="GRN No."/>
                     <field name="completion_percent" optional="show" />
                     <field name="date_estimated" optional="show" />
+                    <field name="date_to_approve"  widget="remaining_days" />
+                    <field name="days_to_approve" optional="show" />
                     <field name="days_to_close" optional="show" />
                     <field name="date_doc_submission" optional="show" />
                     <field name="date_inv_submission" optional="show" />

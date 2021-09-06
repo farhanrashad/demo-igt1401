@@ -24,6 +24,7 @@ class PurchaseTaskTemplate(models.Model):
     sequence = fields.Integer(string='Sequence', default=1)
     requisition_type_id = fields.Many2one('purchase.requisition.type', string="Requisition Type", required=True, )
     completion_days = fields.Integer(string='Completion Days')
+    approval_days = fields.Integer(string='Approval Days')
     completion_percent = fields.Float(string='Completion Percentage')
     stage_ids = fields.Many2many('project.task.type', string='Stages')
     allow_picking = fields.Boolean(string='Allow on Picking', help='User will provide the milestone on picking with purchase order reference')
