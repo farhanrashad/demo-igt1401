@@ -12,17 +12,16 @@ class GenerateXLSXReport(models.Model):
     def generate_xlsx_report(self, workbook, data, lines):
         in_date = data['in_date']
         in_date = datetime.strptime(in_date, '%Y-%m-%d %H:%M:%S')
-        in_date = in_date.strftime("%Y/%m/%d")
+        in_date = in_date.strftime("%d/%m/%Y")
         
-        format1 = workbook.add_format({'font_size': '12', 'align': 'vcenter', 'bold': True})
+        format0 = workbook.add_format({'font_size': '12', 'align': 'vcenter', 'bold': True,})
+        format1 = workbook.add_format({'font_size': '12', 'align': 'vcenter', 'bold': True, 'bg_color': 'yellow'})
         ###For SPMRF
         sheet = workbook.add_worksheet('Inventory Valuation')
-        sheet.merge_range('C2:E2', 'Inventory Valuation', format1)
-        sheet.write(1, 4, 'Inventory Valuation', format1)
-        sheet.write(3, 0, 'Date From', format1)
-        sheet.write(3, 1, start_date, format1)
-        sheet.write(4, 0, 'Date To', format1)
-        sheet.write(4, 1, end_date, format1)
+        sheet.merge_range('C2:E2', 'Inventory Valuation', format0)
+        sheet.write(1, 4, 'Inventory Valuation', format0)
+        sheet.write(3, 0, 'Report On', format0)
+        sheet.write(3, 1, in_date, format0)
 
         sheet.write(6, 0, 'Product Reference', format1)
         sheet.write(6, 1, 'Product Name', format1)
@@ -41,60 +40,76 @@ class GenerateXLSXReport(models.Model):
         sheet.write(6, 14, 'MIN Cost', format1)
         sheet.write(6, 15, 'AVG. Cost', format1)
         
-        
-        
         format2 = workbook.add_format({'font_size': '12', 'align': 'vcenter'})
         row = 7
-        row1 = 7
-        row2 = 7
-        domain = ''
-        if data['categ_ids']:
-            domain = [('account_id', '=', line.analytic_account_id.id),
-                      ('date', '>=', date_from),
-                      ('date', '<=', date_to),
-                     ]
-        if data['location_ids']:
-            domain += [('general_account_id', 'in', acc_ids)]
+       
+        domain = domain1 = domain_mrf = domain_spmrf = ''
+        
+        products_list = []
+        domain = [('in_date','<=',data['in_date'])]
         if data['product_ids']:
-            domain += [('general_account_id', 'in', acc_ids)]
+            domain += [('product_id','in',data['product_ids'])]
+        if data['location_ids']:            
+            domain += [('location_id','in',data['location_ids'])]
+            
+        if data['categ_ids']:
+            categ_products_ids = self.env['product.product'].search([('categ_id', 'in', data['categ_ids'])])
+            product_ids = tuple([pro_id.id for pro_id in categ_products_ids])
+            domain += [('product_id','in',product_ids)]
+        
+        quant_product_ids = self.env['stock.quant'].search(domain)
+        for p in quant_product_ids.product_id:
+            if p not in products_list:
+                products_list.append(p)
+        
+        quantity = stock_value = avail_qty = reserved_qty = in_qty = out_qty = min_price = max_price = landed_cost = 0
+        
+        move_line_ids = self.env['stock.move.line']
+        purchase_order_line = self.env['purchase.order.line']
+        pickings = self.env['stock.picking']
+        stock_valuation_lines = self.env['stock.valuation.adjustment.lines']
+        for product in products_list:
+            quantity = stock_value = avail_qty = reserved_qty = in_qty = out_qty = min_price = max_price = landed_cost = 0
+            domain1 = domain + [('product_id','=',product.id)]
+            
+            quant_ids = self.env['stock.quant'].search(domain1)
+            for quant in quant_ids:
+                quantity += quant.quantity
+                stock_value += quant.value
+                avail_qty += quant.available_quantity
+                reserved_qty = quantity - avail_qty
+            
+            pickings = self.env['stock.picking'].search([('scheduled_date','<=',data['in_date']),('state','=','done')])
+            for picking in pickings:
+                for line in picking.move_line_ids.filtered(lambda x: x.product_id.id == product.id and x.picking_id.id == picking.id and x.location_id.id in data['location_ids']):
+                    out_qty += line.qty_done
+                for line in picking.move_line_ids.filtered(lambda x: x.product_id.id == product.id and x.picking_id.id == picking.id and x.location_dest_id.id in data['location_ids']):
+                    in_qty += line.qty_done
                     
-        #quant_ids = self.env['stock.quant'].search([('date_order','>=',data['start_date']),('date_order','<=',data['end_date'])])
-        quant_ids = self.env['stock.quant'].search([])
-        for quant in quant_ids:
-            sheet.write(row, 0, quant.product_id.default_code, format2)
-            sheet.write(row, 1, quant.product_id.name, format2)
-            sheet.write(row, 2, quant.product_id.categ_id.name, format2)
-            sheet.write(row, 3, quant.product_id.type, format2)
-            sheet.write(row, 4, quant.product_id.uom_id.name, format2)
-            sheet.write(row, 5, quant.quantity, format2)
-            sheet.write(row, 6, quant.value, format2)
-            sheet.write(row, 7, quant.location_id.name, format2)
+            stock_valuation_lines = self.env['stock.valuation.adjustment.lines'].search([('product_id','=',product.id)])
+            for val in stock_valuation_lines:
+                landed_cost += val.additional_landed_cost
+                
+            purchase_order_line = self.env['purchase.order.line'].search([('product_id','=',product.id),('date_order','<=',data['in_date']),('state','in',['purchase','done'])],order='price_unit',limit=1)
+            min_price = purchase_order_line.price_unit
+            purchase_order_line = self.env['purchase.order.line'].search([('product_id','=',product.id),('date_order','<=',data['in_date']),('state','in',['purchase','done'])],order='price_unit desc',limit=1)
+            max_price = purchase_order_line.price_unit
+                
+            sheet.write(row, 0, product.default_code, format2)
+            sheet.write(row, 1, product.name, format2)
+            sheet.write(row, 2, product.categ_id.name, format2)
+            sheet.write(row, 3, product.type, format2)
+            sheet.write(row, 4, product.uom_id.name, format2)
+            sheet.write(row, 5, quantity, format2)
+            sheet.write(row, 6, stock_value, format2)
+            sheet.write(row, 7, in_qty, format2)
+            sheet.write(row, 8, in_qty, format2)
+            sheet.write(row, 9, out_qty, format2)
+            sheet.write(row, 10, quantity, format2)
+            sheet.write(row, 11, stock_value, format2)
+            sheet.write(row, 12, landed_cost, format2)
+            sheet.write(row, 13, max_price, format2)
+            sheet.write(row, 14, min_price, format2)
+            sheet.write(row, 15, product.standard_price, format2)
             row = row + 1
-            
-            
-        #---------------------------below is the sample code for gorup by product data -----------------
-        """
-        p = self.env['model_of_product'].search([])
-
-
-_product=[]
-# collect all product id
-for product in p:
-    _product.append(product.id)
-
-box = []
-for _p in _product:
-    domain = [  ('date', '=', specific_date),
-                ('product_id', '=', _p)]
-    record = self.env['stock.move'].search(domain)
-    sum_of_stock = 0
-    sum_of_client = 0
-    # box will contain sets of [product_id, sum_of_stock, sum_of_client ]
-    for rec in record.search([('name', '=', 'Clients')]):
-        sum_of_client = sum_of_client + rec.product_uom_quantity
-    for rec in record.search([('name', '=', 'Stock')]):
-        sum_of_stock = sum_of_stock + rec.product_uom_quantity
-
-    box.append([_p, sum_of_stock, sum_of_client])
-return box
-        """
+        

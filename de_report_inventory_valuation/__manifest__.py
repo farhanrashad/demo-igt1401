@@ -2,14 +2,14 @@
 
 {
     "name": "Inventory Valuation Report",
-    'version': '14.0.0.2',
+    'version': '14.0.0.3',
     "category": 'Inventory',
     "summary": ' Inventory Valuation Report',
     'sequence': 1,
     "description": """"Inventory Valuation Report """,
     "author": "Dynexcel",
     "website": "https://www.dynexcel.com",
-    'depends': ['stock_account','report_xlsx'],
+    'depends': ['stock','report_xlsx'],
     'data': [
         'security/ir.model.access.csv',
         'reports/report_inventory_valuation.xml',
