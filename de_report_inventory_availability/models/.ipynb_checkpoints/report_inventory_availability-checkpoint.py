@@ -35,8 +35,7 @@ class GenerateXLSXReport(models.Model):
         
         format2 = workbook.add_format({'font_size': '12', 'align': 'vcenter'})
         row = 7
-        row1 = 7
-        row2 = 7
+       
         domain = domain1 = domain_mrf = domain_spmrf = ''
         
         products_list = []
@@ -63,9 +62,6 @@ class GenerateXLSXReport(models.Model):
             quantity = stock_value = avail_qty = reserved_qty = reserved_mrf = reserved_spmrf = 0
             domain1 = domain + [('product_id','=',product.id)]
             
-            
-
-            
             quant_ids = self.env['stock.quant'].search(domain1)
             for quant in quant_ids:
                 quantity += quant.quantity
@@ -73,7 +69,7 @@ class GenerateXLSXReport(models.Model):
                 avail_qty += quant.available_quantity
                 reserved_qty = quantity - avail_qty
             
-            pickings = self.env['stock.picking'].search([('stock_transfer_order_id','!=',False),('state','=','assigned')])
+            pickings = self.env['stock.picking'].search([('stock_transfer_order_id','!=',False),('state','=','assigned'),('scheduled_date','<=',data['in_date'])])
             for picking in pickings:
                 for line in picking.move_line_ids.filtered(lambda x: x.product_id.id == product.id):
                     if picking.stock_transfer_order_id.transfer_order_type_id.code == 'MRF':
