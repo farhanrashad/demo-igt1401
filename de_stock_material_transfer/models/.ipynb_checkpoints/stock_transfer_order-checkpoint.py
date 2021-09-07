@@ -159,8 +159,8 @@ class StockTransferOrder(models.Model):
     partner_category_ids = fields.Many2many('res.partner.category', related='transfer_order_category_id.partner_category_ids')
     transporter_category_ids = fields.Many2many('res.partner.category', related='transfer_order_category_id.transporter_category_ids')
 
-    allow_special_edit = fields.Boolean(string='Special Edit')
-    
+    allow_special_edit = fields.Boolean(related='stage_id.allow_special_edit')
+    special_edit_mode = fields.Boolean(string='Special Edit Mode')
     @api.depends('transfer_order_category_id','stock_transfer_txn_line')
     def _compute_all_picking(self):
         for order in self:
@@ -704,11 +704,11 @@ class StockTransferOrder(models.Model):
     def action_special_edit(self):
         if self.stage_id.stage_category in ('close','cancel'):
             self.update({
-                'allow_special_edit': False
+                'special_edit_mode': False
             })
         else:
             self.update({
-                'allow_special_edit': True
+                'special_edit_mode': True
             })
         
     def action_cancel(self):
@@ -1170,6 +1170,8 @@ class StockTransferReturnLine(models.Model):
         ('partially_available', 'Partially Available'),
         ('assigned', 'Available'),
         ('done', 'Done')],string="Status", compute="_get_delivery_status")
+    igt_barcode = fields.Char(string='IGT Barcode')
+    oem_barcode = fields.Char(string='OEM Barcode')
     
     def unlink(self):
         if self.stock_transfer_order_id.stage_category != 'draft':

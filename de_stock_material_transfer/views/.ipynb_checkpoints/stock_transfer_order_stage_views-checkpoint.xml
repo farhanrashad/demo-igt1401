@@ -38,6 +38,7 @@
                             <field name="stage_category" widget="radio"/>
                             <field name="allow_transactions"/>
                             <field name="group_id" options="{'no_create':True}"/>
+                            <field name="allow_special_edit" />
                         </group>
                     </group>
                     <separator string="Requirements"/>

@@ -42,6 +42,7 @@ class StockTransferOrderStage(models.Model):
     prv_stage_id = fields.Many2one('stock.transfer.order.stage', string='Previous Stage')
 
     group_id = fields.Many2one('res.groups', string='Security Group')
+    allow_special_edit = fields.Boolean(string='Allow Special Edit')
 
     _sql_constraints = [
         ('code_uniq', 'unique (stage_code)', "Code already exists!"),
