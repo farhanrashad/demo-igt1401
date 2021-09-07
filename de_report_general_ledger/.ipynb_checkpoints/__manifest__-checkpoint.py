@@ -2,14 +2,14 @@
 
 {
     "name": "General Ledger Report",
-    'version': '14.0.0.2',
+    'version': '14.0.0.3',
     "category": 'Accounting',
     "summary": 'General Ledger Report',
     'sequence': 1,
     "description": """"General Ledger Report """,
     "author": "Dynexcel",
     "website": "https://www.dynexcel.com",
-    'depends': ['stock_account','report_xlsx'],
+    'depends': ['account','report_xlsx','de_account_fin_period','de_account_analytic_default'],
     'data': [
         'security/ir.model.access.csv',
         'reports/report_general_ledger.xml',
