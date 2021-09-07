@@ -103,7 +103,7 @@ class StockTransferOrder(models.Model):
     
     stock_transfer_order_line = fields.One2many('stock.transfer.order.line', 'stock_transfer_order_id', string='Transfer Line', copy=True, auto_join=True,readonly=True, )
     
-    stock_transfer_return_line = fields.One2many('stock.transfer.return.line', 'stock_transfer_order_id', string='Return Transfer Line', copy=True, auto_join=True,readonly=True, )
+    stock_transfer_return_line = fields.One2many('stock.transfer.return.line', 'stock_transfer_order_id', string='Return Transfer Line', copy=True, auto_join=True, )
 
         
     company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company, readonly=True, )
@@ -159,6 +159,7 @@ class StockTransferOrder(models.Model):
     partner_category_ids = fields.Many2many('res.partner.category', related='transfer_order_category_id.partner_category_ids')
     transporter_category_ids = fields.Many2many('res.partner.category', related='transfer_order_category_id.transporter_category_ids')
 
+    allow_special_edit = fields.Boolean(string='Special Edit')
     
     @api.depends('transfer_order_category_id','stock_transfer_txn_line')
     def _compute_all_picking(self):
@@ -700,6 +701,16 @@ class StockTransferOrder(models.Model):
                 'date_order': fields.Datetime.now(),
             })
     
+    def action_special_edit(self):
+        if self.stage_id.stage_category in ('close','cancel'):
+            self.update({
+                'allow_special_edit': False
+            })
+        else:
+            self.update({
+                'allow_special_edit': True
+            })
+        
     def action_cancel(self):
         for order in self.sudo():
             group_id = order.stage_id.group_id
@@ -1016,6 +1027,12 @@ class StockTransferOrderLine(models.Model):
         ('assigned', 'Available'),
         ('done', 'Done')],string="Status", compute="_get_delivery_status")
     
+    def unlink(self):
+        if self.stock_transfer_order_id.stage_category != 'draft':
+            raise UserError(_('You can only delete draft entries.'))
+        else:
+            res = super(StockTransferOrderLine, self).unlink()
+        return res
     
     @api.onchange('project_id')
     def onchange_project_id(self):
@@ -1153,6 +1170,13 @@ class StockTransferReturnLine(models.Model):
         ('partially_available', 'Partially Available'),
         ('assigned', 'Available'),
         ('done', 'Done')],string="Status", compute="_get_delivery_status")
+    
+    def unlink(self):
+        if self.stock_transfer_order_id.stage_category != 'draft':
+            raise UserError(_('You can only delete draft entries.'))
+        else:
+            res = super(StockTransferReturnLine, self).unlink()
+        return res
     
     def _compute_received_qty(self):
         for line in self:

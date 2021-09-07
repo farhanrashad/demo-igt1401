@@ -49,6 +49,8 @@
                     <button name="action_confirm" string="Confirm" type="object" class="oe_highlight"
                         attrs="{'invisible': [('stage_category', 'not in', ['progress'])]}"/>
                     
+                    <button name="action_special_edit" string="Special Edit" type="object" class="oe_highlight" groups="de_stock_material_transfer.group_stock_requisition_special_edit"/>
+                    
                     <button name="action_refuse" string="Refuse" type="object" 
                         attrs="{'invisible': [('stage_category', 'not in', ['progress'])]}"/>
                     <button name="action_cancel" string="Cancel" type="object" 
@@ -111,6 +113,8 @@
                     <field name="has_analytic_account" invisible="1"/>
                     <field name="has_analytic_tags" invisible="1"/>
                     <field name="has_tower_info" invisible="1"/>
+                    
+                    <field name="allow_special_edit" invisible="1"/>
                     
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_delivery" type="object" class="oe_stat_button" icon="fa-truck" attrs="{'invisible': [('delivery_count', '=', 0)]}">
@@ -224,7 +228,7 @@
                                     <field name="product_uom_category_id" invisible="1"/>
                                     <field name="location_src_id" required="1" optional="hide" domain="[('id', 'child_of', parent.location_src_id)]" />
                                     <field name="location_dest_id" required="1" optional="show" />
-                                    <field name="delivery_status" optional="show"/>
+                                    <field name="delivery_status" optional="hide" invisible="1"/>
                                 </tree>
                             </field>
                         <separator string="Terms and Conditions"/>
@@ -232,28 +236,28 @@
 
                         </page>
                         <page string="Return Products" name="transfer_order_return_line" attrs="{'invisible': [('action_type', '=', 'normal')]}">
-                            <field name="stock_transfer_return_line" widget="one2many_list" attrs="{'readonly': [('stage_category', '!=', 'draft')]}">
+                            <field name="stock_transfer_return_line" widget="one2many_list" >
                                 <tree string="Transfer Return lines" editable="bottom">
-                                    <field name="product_id" id="product_filtered" domain="[('categ_id', 'in', categ_control_ids)]" options="{'no_create':True}" required="1"/>
+                                    <field name="product_id" id="product_filtered" domain="[('categ_id', 'in', categ_control_ids)]" options="{'no_create':True}" required="1" attrs="{'readonly': [('parent.stage_category', '!=', 'draft'),('parent.allow_special_edit', '!=', True)]}"/>
                                     
 
                                     <field name="categ_control_ids" invisible="1"/>
-                                    <field name="name"/>
-                                    <field name="project_id" optional="show" />
+                                    <field name="name" attrs="{'readonly': [('parent.stage_category', '!=', 'draft')]}"/>
+                                    <field name="project_id" optional="show" attrs="{'readonly': [('parent.stage_category', '!=', 'draft')]}"/>
 
-                                    <field name="product_uom_qty"/>
+                                    <field name="product_uom_qty" attrs="{'readonly': [('parent.stage_category', '!=', 'draft')]}"/>
                                     <field name="received_qty" attrs="{'column_invisible':[('parent.action_type','=','normal')]}"/>
-                                    <field name="product_uom"/>
-                                    <field name="date_scheduled" />
-                                    <field name="supplier_id" optional="hide" attrs="{'invisible':[('parent.has_supplier','==','no')], 'required': [('parent.has_supplier','==','required')]}"/>
+                                    <field name="product_uom" attrs="{'readonly': [('parent.stage_category', '!=', 'draft')]}"/>
+                                    <field name="date_scheduled" attrs="{'readonly': [('parent.stage_category', '!=', 'draft')]}"/>
+                                    <field name="supplier_id" optional="hide" attrs="{'invisible':[('parent.has_supplier','==','no')], 'required': [('parent.has_supplier','==','required')],'readonly': [('parent.stage_category', '!=', 'draft')],}"/>
 
-                                    <field name="analytic_account_id" optional="hide" attrs="{'invisible':[('parent.has_analytic_account','==','no')], 'required': [('parent.has_analytic_account','==','required')]}" groups="analytic.group_analytic_accounting"/>
-                                    <field name="analytic_tag_ids" widget="many2many_tags" optional="hide" attrs="{'invisible':[('parent.has_analytic_tags','==','no')], 'required': [('parent.has_analytic_tags','==','required')]}" groups="analytic.group_analytic_accounting,analytic.group_analytic_tags"/>
+                                    <field name="analytic_account_id" optional="hide" attrs="{'invisible':[('parent.has_analytic_account','==','no')], 'required': [('parent.has_analytic_account','==','required')], 'readonly': [('parent.stage_category', '!=', 'draft')]}" groups="analytic.group_analytic_accounting"/>
+                                    <field name="analytic_tag_ids" widget="many2many_tags" optional="hide" attrs="{'invisible':[('parent.has_analytic_tags','==','no')], 'required': [('parent.has_analytic_tags','==','required')], 'readonly': [('parent.stage_category', '!=', 'draft')]}" groups="analytic.group_analytic_accounting,analytic.group_analytic_tags"/>
 
                                     <field name="product_uom_category_id" invisible="1"/>
-                                    <field name="location_src_id" required="1" optional="show" />
-                                    <field name="location_dest_id" required="1" optional="hide" />
-                                    <field name="return_status" optional="show"/>
+                                    <field name="location_src_id" required="1" optional="show" attrs="{'readonly': [('parent.stage_category', '!=', 'draft')]}"/>
+                                    <field name="location_dest_id" required="1" optional="hide" attrs="{'readonly': [('parent.stage_category', '!=', 'draft')]}"/>
+                                    <field name="return_status" invisible="1" optional="hide"/>
                                 </tree>
                             </field>
                         <separator string="Terms and Conditions"/>
